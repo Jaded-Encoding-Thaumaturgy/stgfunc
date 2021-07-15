@@ -1,11 +1,11 @@
-from os import PathLike
+from os import PathLike, path
 import lvsfunc as lvf
 import vapoursynth as vs
 from nnedi3_rpow2 import nnedi3_rpow2
 
 core = vs.core
 
-_SHADERS = r".\.shaders\FSRCNNX_x2_56-16-4-1.glsl"
+_SHADERS = path.join(path.dirname(__file__), r".\.shaders\FSRCNNX_x2_56-16-4-1.glsl")
 
 
 @lvf.misc.chroma_injector
