@@ -307,6 +307,7 @@ def Super(src: vs.VideoNode, pel=4):
 
 
 def Basic(src, super=None, radius=6, pel=4, sad=2000.0, short_time=False):
+  # sourcery no-metrics
   if not isinstance(src, vs.VideoNode):
     raise TypeError("Oyster.Basic: src has to be a video clip!")
   elif src.format.sample_type != vs.FLOAT or src.format.bits_per_sample < 32:
@@ -354,7 +355,7 @@ def Deringing(
     mse: tuple[float, float] = [None, None], hard_thr: float = 3.2, block_size: int = 8,
     block_step: int = 1, group_size: int = 32, bm_range: int = 24, bm_step: int = 1,
     ps_num: int = 2, ps_range: int = 8, ps_step: int = 1, lowpass: list[float] = None
-):
+):  # sourcery no-metrics
   if not isinstance(src, vs.VideoNode):
     raise TypeError("Oyster.Deringing: src has to be a video clip!")
   elif src.format.sample_type != vs.FLOAT or src.format.bits_per_sample < 32:
@@ -415,7 +416,7 @@ def Destaircase(
     block_step: int = 1, group_size: int = 32, bm_range: int = 24, bm_step: int = 1,
     ps_num: int = 2, ps_range: int = 8, ps_step: int = 1,
     thr: float = 0.03125, elast: float = 0.015625, lowpass: list[float] = None
-):
+):  # sourcery no-metrics
   if not isinstance(src, vs.VideoNode):
     raise TypeError("Oyster.Destaircase: src has to be a video clip!")
   elif src.format.sample_type != vs.FLOAT or src.format.bits_per_sample < 32:
@@ -477,7 +478,7 @@ def Deblocking(
     block_step: int = 1, group_size: int = 32, bm_range: int = 24, bm_step: int = 1,
     ps_num: int = 2, ps_range: int = 8, ps_step: int = 1,
     lowpass: list[float] = [0.0, 0.0, 0.12, 1024.0, 1.0, 1024.0]
-):
+):  # sourcery no-metrics
   if not isinstance(src, vs.VideoNode):
     raise TypeError("Oyster.Deblocking: src has to be a video clip!")
   elif src.format.sample_type != vs.FLOAT or src.format.bits_per_sample < 32:
