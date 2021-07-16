@@ -35,7 +35,7 @@ def to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
   return core.resize.Point(clip, format=vs.GRAY16, matrix_s=mvf.GetMatrix(ref))
 
 
-def manual_masking(clip: vs.VideoNode, src: vs.VideoNode, path: str, mapfunc):
+def manual_masking(clip: vs.VideoNode, src: vs.VideoNode, path: str, mapfunc=None):
   manual_masks = perform_masks_credit(Path(path))
 
   for mask in manual_masks:
