@@ -1,13 +1,12 @@
 import mvsfunc as mvf
 import lvsfunc as lvf
-import havsfunc as haf
 import kagefunc as kgf
 import vapoursynth as vs
 from pathlib import Path
 from typing import NamedTuple, List
 from .misc import source as stgsource
-from typing import List, Optional, Tuple
-from vsutil import (depth, get_depth, get_y, iterate, plane, iterate)
+from typing import List
+from vsutil import (iterate, iterate)
 
 core = vs.core
 
