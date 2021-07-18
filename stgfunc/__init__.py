@@ -1,5 +1,5 @@
-from . import (mask, encode, upscale, misc, oyster, avghist)
+from . import (mask, encode, upscale, misc, other, oyster, avghist)
 
 src = misc.source
 output = misc.set_output
-Maximum = misc.Maximum
+Maximum = other.Maximum
