@@ -106,7 +106,6 @@ def source(file: str, depth: Optional[int] = None, ref: Optional[vs.VideoNode] =
 
   if ref:
     clip = core.std.AssumeFPS(clip, fpsnum=ref.fps.numerator, fpsden=ref.fps.denominator)
-
     clip = core.resize.Bicubic(clip, width=ref.width, height=ref.height, format=ref.format.id, matrix=str(lvf.misc.get_matrix(ref)))
 
   if (depth is not None):
