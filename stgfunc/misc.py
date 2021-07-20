@@ -18,9 +18,11 @@ file_headers_filename = path.join(path.dirname(path.abspath(__file__)), "__file_
 
 
 def set_output(clip: vs.VideoNode, text: bool = True):
+  index = len(vs.get_outputs()) + 1
+
   if text:
     ref_id = str(id(clip))
-    ref_name = "Clip A"
+    ref_name = f"Clip {index}"
     for x in inspect.currentframe().f_back.f_locals.items():
       if (str(id(x[1])) == ref_id):
         ref_name = x[0]
@@ -28,7 +30,6 @@ def set_output(clip: vs.VideoNode, text: bool = True):
 
     clip = clip.text.Text(ref_name.title(), 7, 2)
 
-  index = len(vs.get_outputs()) + 1
   clip.set_output(index)
 
 
