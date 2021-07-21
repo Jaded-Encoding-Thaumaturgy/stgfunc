@@ -47,7 +47,9 @@ def KNLMeansCL(
         device_id=device_id, **kwargs
     )
 
-    return eoe.misc.ContraSharpening(knl, ref_clip_planes[index] or clip, 2) if contraSharpening else knl
+    ref_clip_plane = (ref_clip_planes[index] if planes == "Y" else ref_clip) if ref_clip is not None else clip
+
+    return eoe.misc.ContraSharpening(knl, ref_clip_plane, 2) if contraSharpening else knl
 
   if ref_clip:
     ref_clip = depth(ref_clip, 16)
