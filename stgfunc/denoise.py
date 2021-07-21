@@ -19,7 +19,7 @@ def KNLMeansCL(
   :param trange: Temporal range, (2 * d + 1) frames; before, after and current. [d](Defaults to 2)
   :param search_radius: Radius of the search window, (2 * a + 1)^2 pixels of radius. [a](Defaults to 2)
   :param similarity_radius: Radius of the similarity neighbourhood window, (2 * s + 1)^2. [s](Defaults to 4)
-  :param sigma: Strength of filtering, the larger the more noise (and potentially details) you *steamroll*. [h](Defaults to 1)
+  :param sigma: Strength of filtering, the higher, the more noise (and potentially details) you *steamroll*. [h](Defaults to 1)
   :param ref_clip: Reference clip to do contrasharpening with. (Defaults to None)
   :param device_id: The 'device_id' + 1º device of type 'device_type' in the system. (Defaults to 0)
 
