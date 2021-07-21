@@ -8,6 +8,7 @@ from shutil import which
 from os import access, path, R_OK
 from subprocess import check_output
 from typing import Tuple, Any, Optional, Union
+from .helpers import checkValue
 
 core = vs.core
 
@@ -133,11 +134,6 @@ def getMimeType(filename: str, /):
     info = tuple([info[0], info[1].split(".")[-1].rstrip("video")])
 
   return tuple(x.lower() if x else x for x in info)
-
-
-def checkValue(condition: bool, error_message: str):
-  if condition:
-    raise ValueError(error_message)
 
 
 def getInfoFFProbe(filename: str, audio: bool = False, /):
