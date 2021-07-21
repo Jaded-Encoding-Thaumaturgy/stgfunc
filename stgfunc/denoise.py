@@ -31,8 +31,9 @@ def KNLMeansCL(
   sigma = getThreeChannelsTuple(sigma)
 
   checkValue(not isinstance(clip, vs.VideoNode), "stg.KNLMeansCL: 'clip' must be a VideoNode")
-  checkValue(ref_clip is not None and not isinstance(clip, vs.VideoNode), "stg.KNLMeansCL: 'refclip' must be a VideoNode")
-  checkValue(checkSimilarClips(clip, ref_clip), "stg.KNLMeansCL: 'clip' and 'refclip' must have the same dimensions, color family and subsampling")
+  if contraSharpening or ref_clip:
+    checkValue(ref_clip is None or not isinstance(clip, vs.VideoNode), "stg.KNLMeansCL: 'refclip' must be a VideoNode")
+    checkValue(not checkSimilarClips(clip, ref_clip), "stg.KNLMeansCL: 'clip' and 'refclip' must have the same dimensions, color family and subsampling")
   checkValue(any(tr < 0 for tr in trange), "stg.KNLMeansCL: 'range' must be int > 0")
   checkValue(any(sr < 0 for sr in search_radius), "stg.KNLMeansCL: 'search_radius' must be int > 0")
   checkValue(any(sr < 0 for sr in similarity_radius), "stg.KNLMeansCL: 'similarity_radius' must be int > 0")
