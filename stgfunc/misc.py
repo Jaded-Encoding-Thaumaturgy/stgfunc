@@ -34,8 +34,8 @@ def set_output(clip: vs.VideoNode, text: bool = True):
   clip.set_output(index)
 
 
-def source(file: str, depth: Optional[int] = None, ref: Optional[vs.VideoNode] = None, force_lsmas: bool = False,  # pylint: disable=unsubscriptable-object
-           mpls: bool = False, mpls_playlist: int = 0, mpls_angle: int = 0, **index_args: Any) -> vs.VideoNode:
+def source(file: str, depth: Optional[int] = None, ref: Optional[vs.VideoNode] = None, force_lsmas: bool = False,
+           mpls: bool = False, mpls_playlist: int = 0, mpls_angle: int = 0, matrix_prop: Union[bool, int] = None, **index_args: Any) -> vs.VideoNode:
   """
   Generic clip import function.
   Automatically determines if ffms2 or L-SMASH should be used to import a clip, but L-SMASH can be forced.
@@ -62,6 +62,7 @@ def source(file: str, depth: Optional[int] = None, ref: Optional[vs.VideoNode] =
   :param mpls_playlist:     Playlist number, which is the number in mpls file name (Default: 0)
   :param mpls_angle:        Angle number to select in the mpls playlist (Default: 0)
   :param kwargs:            Arguments passed to the indexing filter
+  :param matrix_prop:       Can either be bool or int, True to automatically detect it.
 
   :return:                  Vapoursynth clip representing input file
   """
@@ -77,7 +78,7 @@ def source(file: str, depth: Optional[int] = None, ref: Optional[vs.VideoNode] =
 
   checkValue(mimeType is None, "source: 'The source file format is not supported'")
   checkValue(mimeType == "audio", "source: 'Audio files are not supported'")
-  checkValue(isMPLS(file) and mpls == False, "source: 'Please set \"mpls = True\" and give a path to the base Blu-ray directory when trying to load in mpls files'")
+  checkValue(isMPLS(file) and not mpls, "source: 'Please set \"mpls = True\" and give a path to the base Blu-ray directory when trying to load in mpls files'")
   checkValue(extention in annoying_formats_exts, "source: 'Please use an external indexer like d2vwitch or DGIndexNV for this file and import that'")
   checkValue(ref and ref.format is None, "source: 'Variable-format clips not supported.'")
 
@@ -112,6 +113,9 @@ def source(file: str, depth: Optional[int] = None, ref: Optional[vs.VideoNode] =
 
   if (depth is not None):
     clip = vsutil.depth(clip, depth)
+
+  if isinstance(matrix_prop, int) or matrix_prop is True:
+    clip = clip.std.SetFrameProp('_Matrix', intval=lvf.misc.get_matrix(clip) if matrix_prop is True else matrix_prop)
 
   return clip
 
