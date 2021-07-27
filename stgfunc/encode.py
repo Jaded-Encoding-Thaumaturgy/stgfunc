@@ -1,3 +1,4 @@
+import os
 import sys
 import string
 import random
@@ -6,6 +7,8 @@ import shutil
 import pathlib
 import __main__
 import subprocess
+from os import path
+import lvsfunc as lvf
 from tqdm import tqdm
 from typing import List
 import vapoursynth as vs
@@ -35,7 +38,7 @@ class GetTokens():
     self.subsampling = self.clip.format.name
 
 
-def encode(clip: vs.VideoNode, output_file: str, x265: bool, cmd_args: List[str] = [], _binary: str = None, **args) -> None:
+def encode(clip: vs.VideoNode, output_file: str, x265: bool, cmd_args: List[str] = [], binary: str = None, **args) -> None:
   """Stolen from varde who stole from lyfunc
   Args:
       clip (vs.VideoNode): Source filtered clip
@@ -50,20 +53,18 @@ def encode(clip: vs.VideoNode, output_file: str, x265: bool, cmd_args: List[str]
 
   """
 
-  binary = "x265" if x265 else "x264"
-
-  if _binary is not None:
-    binary = _binary
+  if binary is None:
+    binary = "x265" if x265 else "x264"
 
   if x265:
     cmd = [binary, "--y4m", "--log-level", "-1", "--no-progress"]
   else:
-    cmd = [binary, "--y4m"]
+    cmd = [binary, "--demuxer", "y4m"]
 
   for i, v in args.items():
     i = "--" + i if i[:2] != "--" else i
     i = i.replace("_", "-")
-    if type(v) is type(True):
+    if isinstance(v, bool):
       v = "true" if v else "false"
     if i in cmd:
       cmd[cmd.index(i) + 1] = str(v)
@@ -127,4 +128,14 @@ def output_name(clip: vs.VideoNode, name: str, x265: bool):
       fps=t.fps, f=t.frames_num,
       sd=t.script_dir, sn=t.script_name,
       bits=t.bitdepth, ss=t.subsampling
-  ) + "_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=7)) + ".265" if x265 else ".264"
+  ) + "_" + ''.join(random.choices(string.ascii_uppercase + string.digits, k=7)) + (".265" if x265 else ".264")
+
+
+def create_qpfile(clip: vs.VideoNode, filename: vs.VideoNode, force: bool = False):
+  if force and path.isfile(filename):
+    os.remove(filename)
+
+  if not path.isfile(filename):
+    with open(filename, 'w') as o:
+      for f in lvf.render.find_scene_changes(clip, lvf.render.SceneChangeMode.WWXD_SCXVID_UNION):
+        o.write(f"{f} I -1\n")
