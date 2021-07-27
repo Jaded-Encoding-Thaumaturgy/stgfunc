@@ -19,7 +19,7 @@ def KNLMeansCL(
   :param trange: Temporal range, (2 * d + 1) frames; before, after and current. [d](Defaults to 2)
   :param search_radius: Radius of the search window, (2 * a + 1)^2 pixels of radius. [a](Defaults to 2)
   :param similarity_radius: Radius of the similarity neighbourhood window, (2 * s + 1)^2. [s](Defaults to 4)
-  :param sigma: Strength of filtering, the higher, the more noise (and potentially details) you *steamroll*. [h](Defaults to 1)
+  :param sigma: Strength of filtering, the higher, the more noise (and potentially details) you *steamroll*. Putting "None" ignores the plane. [h](Defaults to 1)
   :param ref_clip: Reference clip to do contrasharpening with. (Defaults to None)
   :param device_id: The 'device_id' + 1º device of type 'device_type' in the system. (Defaults to 0)
 
@@ -37,11 +37,13 @@ def KNLMeansCL(
   checkValue(any(tr < 0 for tr in trange), "stg.KNLMeansCL: 'range' must be int > 0")
   checkValue(any(sr < 0 for sr in search_radius), "stg.KNLMeansCL: 'search_radius' must be int > 0")
   checkValue(any(sr < 0 for sr in similarity_radius), "stg.KNLMeansCL: 'similarity_radius' must be int > 0")
-  checkValue(any(s < 0 for s in sigma), "stg.KNLMeansCL: 'similarity_radius' must be int > 0")
+  checkValue(any(s is not None and s < 0 for s in sigma), "stg.KNLMeansCL: 'similarity_radius' must be int > 0")
 
   src = depth(clip, 16)
 
   def knlCall(clip: vs.VideoNode, index: int, planes: Literal["Y", "UV"]):  # pylint: disable=unsubscriptable-object
+    if sigma[index] is None:
+      return clip
     knl = clip.knlm.KNLMeansCL(
         d=trange[index], a=search_radius[index], s=similarity_radius[index],
         h=sigma[index], channels=planes, device_type=device_type,
