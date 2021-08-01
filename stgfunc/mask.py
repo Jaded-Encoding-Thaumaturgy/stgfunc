@@ -1,12 +1,12 @@
+import os
 import mvsfunc as mvf
 import lvsfunc as lvf
 import kagefunc as kgf
 import vapoursynth as vs
 from pathlib import Path
+from vsutil import iterate
 from typing import NamedTuple, List
 from .misc import source as stgsource
-from typing import List
-from vsutil import (iterate, iterate)
 
 core = vs.core
 
@@ -18,6 +18,9 @@ class MaskCredit(NamedTuple):  # pylint: disable=inherit-non-class
 
 
 def perform_masks_credit(path: Path) -> List:
+  if not os.path.isdir(path):
+    raise "stgfunc.mask.perform_mask_credit: 'path' must be an existing path!"
+
   masks = []
 
   for mask in path.glob('*'):
