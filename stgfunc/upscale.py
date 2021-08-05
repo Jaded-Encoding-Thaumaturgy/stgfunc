@@ -1,12 +1,19 @@
 import lvsfunc as lvf
 import muvsfunc as mvf
 import vapoursynth as vs
+from functools import cache
 from os import PathLike, path
 from nnedi3_rpow2 import nnedi3_rpow2
 
 core = vs.core
 
-_SHADERS = path.join(path.dirname(__file__), r".\.shaders\FSRCNNX_x2_56-16-4-1.glsl")
+
+@cache
+def _get_shader(name: str):
+  return path.join(path.dirname(__file__), rf".\.shaders\{name}")
+
+
+_SHADERS = _get_shader('FSRCNNX_x2_56-16-4-1.glsl')
 
 
 @lvf.misc.chroma_injector
