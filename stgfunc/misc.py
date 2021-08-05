@@ -4,11 +4,12 @@ import inspect
 import mimetypes
 import lvsfunc as lvf
 import vapoursynth as vs
+from enum import IntEnum
 from shutil import which
+from .helpers import checkValue
 from os import access, path, R_OK
 from subprocess import check_output
 from typing import Tuple, Any, Optional, Union
-from .helpers import checkValue
 
 core = vs.core
 
