@@ -4,7 +4,6 @@ import inspect
 import mimetypes
 import lvsfunc as lvf
 import vapoursynth as vs
-from enum import IntEnum
 from shutil import which
 from .helpers import checkValue
 from os import access, path, R_OK
@@ -15,7 +14,7 @@ core = vs.core
 
 file_headers_data = None
 annoying_formats_exts = ['iso', 'vob']
-index_formats_mimes = ['video/d2v']
+index_formats_mimes = ['video/d2v', 'video/dgi']
 file_headers_filename = path.join(path.dirname(path.abspath(__file__)), "__file_headers.json")
 
 
