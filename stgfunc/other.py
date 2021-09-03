@@ -2,18 +2,17 @@ import numpy as np
 from cv2 import cv2
 import EoEfunc as eoe
 import vapoursynth as vs
-from vsutil import iterate
 from typing import Sequence
+from vsutil import iterate, fallback
 
 core = vs.core
 
-#################################################################
-### Code I haven't written or modified in any significant way ###
-#################################################################
+#############################################################
+# Code I haven't written or modified in any significant way #
+#############################################################
+
 
 # from here https://forum.doom9.org/showthread.php?p=1801023
-
-
 def tonemapping_table(clip: vs.VideoNode, source_peak: int = 1000):
   c = clip
 
@@ -27,14 +26,40 @@ def tonemapping_table(clip: vs.VideoNode, source_peak: int = 1000):
   b = core.std.ShufflePlanes(c, planes=[2], colorfamily=vs.GRAY)
   lum = limitRGB(r, g, b)
 
-  rr = "x {exposure_bias} * 0.15 x {exposure_bias} * * 0.05 + * 0.004 + x {exposure_bias} * 0.15 x {exposure_bias} * * 0.50 + * 0.06 + / 0.02 0.30 / - 1 {exposure_bias} 0.15 {exposure_bias} * 0.05 + * 0.004 + {exposure_bias} 0.15 {exposure_bias} * 0.50 + * 0.06 + / 0.02 0.30 / - / * ".format(exposure_bias=exposure_bias)
-  gg = "y {exposure_bias} * 0.15 y {exposure_bias} * * 0.05 + * 0.004 + y {exposure_bias} * 0.15 y {exposure_bias} * * 0.50 + * 0.06 + / 0.02 0.30 / - 1 {exposure_bias} 0.15 {exposure_bias} * 0.05 + * 0.004 + {exposure_bias} 0.15 {exposure_bias} * 0.50 + * 0.06 + / 0.02 0.30 / - / * ".format(exposure_bias=exposure_bias)
-  bb = "z {exposure_bias} * 0.15 z {exposure_bias} * * 0.05 + * 0.004 + z {exposure_bias} * 0.15 z {exposure_bias} * * 0.50 + * 0.06 + / 0.02 0.30 / - 1 {exposure_bias} 0.15 {exposure_bias} * 0.05 + * 0.004 + {exposure_bias} 0.15 {exposure_bias} * 0.50 + * 0.06 + / 0.02 0.30 / - / * ".format(exposure_bias=exposure_bias)
+  rr = "x {exposure_bias} * 0.15 x {exposure_bias} * * 0.05 + * 0.004 + x {exposure_bias} * 0.15 x {exposure_bias} * * 0.50 + * 0.06 + / 0.02 0.30 / - 1 {exposure_bias} 0.15 {exposure_bias} * 0.05 + * 0.004 + {exposure_bias} 0.15 {exposure_bias} * 0.50 + * 0.06 + / 0.02 0.30 / - / * ".format(
+      exposure_bias=exposure_bias)
+  gg = "y {exposure_bias} * 0.15 y {exposure_bias} * * 0.05 + * 0.004 + y {exposure_bias} * 0.15 y {exposure_bias} * * 0.50 + * 0.06 + / 0.02 0.30 / - 1 {exposure_bias} 0.15 {exposure_bias} * 0.05 + * 0.004 + {exposure_bias} 0.15 {exposure_bias} * 0.50 + * 0.06 + / 0.02 0.30 / - / * ".format(
+      exposure_bias=exposure_bias)
+  bb = "z {exposure_bias} * 0.15 z {exposure_bias} * * 0.05 + * 0.004 + z {exposure_bias} * 0.15 z {exposure_bias} * * 0.50 + * 0.06 + / 0.02 0.30 / - 1 {exposure_bias} 0.15 {exposure_bias} * 0.05 + * 0.004 + {exposure_bias} 0.15 {exposure_bias} * 0.50 + * 0.06 + / 0.02 0.30 / - / * ".format(
+      exposure_bias=exposure_bias)
 
-  r1 = core.std.Expr(clips=[r,g,b],expr="x y >= y z > {rr} z x > x y - z y - / {bb} {gg} - * {gg} + z y > {rr} {rr} ? ? ? x z >= x z - y z - / {gg} {bb} - * {bb} + z y > {rr} {rr} ? ? ?".format(exposure_bias=exposure_bias,rr=rr,gg=gg,bb=bb))
-  g1 = core.std.Expr(clips=[r, g, b],expr="x y >= y z > y z - x z - / {rr} {bb} - * {bb} + z x > {gg} z y > {gg} {gg} ? ? ? x z >= {gg} z y > y x - z x - / {bb} {rr} - * {rr} + {gg} ? ? ? ".format(exposure_bias=exposure_bias, rr=rr, gg=gg, bb=bb))
-  b1 = core.std.Expr(clips=[r,g,b], expr="x y >= y z > {bb} z x > {bb} z y > z y - x y - / {rr} {gg} - * {gg} + {bb} ? ? ? x z >= {bb} z y > {bb} z x - y x - / {gg} {rr} - * {rr} + ? ? ? ".format(exposure_bias=exposure_bias,rr=rr,gg=gg, bb=bb))
-
+  r1 = core.std.Expr(
+      clips=[
+          r,
+          g,
+          b],
+      expr="x y >= y z > {rr} z x > x y - z y - / {bb} {gg} - * {gg} + z y > {rr} {rr} ? ? ? x z >= x z - y z - / {gg} {bb} - * {bb} + z y > {rr} {rr} ? ? ?".format(
+          rr=rr,
+          gg=gg,
+          bb=bb))
+  g1 = core.std.Expr(
+      clips=[
+          r,
+          g,
+          b],
+      expr="x y >= y z > y z - x z - / {rr} {bb} - * {bb} + z x > {gg} z y > {gg} {gg} ? ? ? x z >= {gg} z y > y x - z x - / {bb} {rr} - * {rr} + {gg} ? ? ? ".format(
+          rr=rr,
+          gg=gg,
+          bb=bb))
+  b1 = core.std.Expr(
+      clips=[
+          r,
+          g,
+          b],
+      expr="x y >= y z > {bb} z x > {bb} z y > z y - x y - / {rr} {gg} - * {gg} + {bb} ? ? ? x z >= {bb} z y > {bb} z x - y x - / {gg} {rr} - * {rr} + ? ? ? ".format(
+          rr=rr,
+          gg=gg,
+          bb=bb))
 
   crgb = core.std.ShufflePlanes(clips=[r1, g1, b1], planes=[0, 0, 0], colorfamily=vs.RGB)
 
@@ -93,7 +118,6 @@ def do_general_tonemapping(src: vs.VideoNode, source_peak=1000, matrix_in_s="202
 
 # By End-Of-Eternity
 # https://discord.com/channels/856381934052704266/856383287672438824/859069185929248778
-
 def Maximum(clip: vs.VideoNode, iterations: int = 1, coordinates: Sequence[int] = [1, 1, 1, 1, 1, 1, 1, 1]) -> vs.VideoNode:
   if clip.format.color_family != vs.GRAY:
     raise ValueError("This proof of concept isn't cool enough to handle multiple planes")
@@ -117,3 +141,31 @@ def Maximum(clip: vs.VideoNode, iterations: int = 1, coordinates: Sequence[int] 
   element = np.array(coordinates[:4] + [1] + coordinates[4:], dtype=np.uint8).reshape(3, 3)
 
   return eoe.vsnp.array_eval(clip, lambda n, array: cv2.dilate(array[:, :, 0], element, iterations=iterations)[:, :, np.newaxis])
+
+
+# Zastin
+def mt_xxpand_multi(clip, sw=1, sh=None, mode='square', planes=None, start=0, M__imum=core.std.Maximum, **params):
+  sh = fallback(sh, sw)
+  planes = list(range(clip.format.num_planes)) if planes is None else [planes] if isinstance(planes, int) else planes
+
+  if mode == 'ellipse':
+    coordinates = [[1] * 8, [0, 1, 0, 1, 1, 0, 1, 0], [0, 1, 0, 1, 1, 0, 1, 0]]
+  elif mode == 'losange':
+    coordinates = [[0, 1, 0, 1, 1, 0, 1, 0]] * 3
+  else:
+    coordinates = [[1] * 8] * 3
+
+  clips = [clip]
+
+  end = min(sw, sh) + start
+
+  for x in range(start, end):
+    clips += [M__imum(clips[-1], coordinates=coordinates[x % 3], planes=planes, **params)]
+
+  for x in range(end, end + sw - sh):
+    clips += [M__imum(clips[-1], coordinates=[0, 0, 0, 1, 1, 0, 0, 0], planes=planes, **params)]
+
+  for x in range(end, end + sh - sw):
+    clips += [M__imum(clips[-1], coordinates=[0, 1, 0, 0, 0, 0, 1, 0], planes=planes, **params)]
+
+  return clips
