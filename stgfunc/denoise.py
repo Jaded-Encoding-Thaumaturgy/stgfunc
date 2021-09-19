@@ -1,4 +1,3 @@
-import EoEfunc as eoe
 import vapoursynth as vs
 from typing import Literal
 from vsutil import split, join, depth
@@ -29,6 +28,9 @@ def KNLMeansCL(
   search_radius = getThreeChannelsTuple(search_radius)
   similarity_radius = getThreeChannelsTuple(similarity_radius)
   sigma = getThreeChannelsTuple(sigma)
+
+  if contraSharpening:
+    import EoEfunc as eoe
 
   checkValue(not isinstance(clip, vs.VideoNode), "stg.KNLMeansCL: 'clip' must be a VideoNode")
   if contraSharpening or ref_clip:

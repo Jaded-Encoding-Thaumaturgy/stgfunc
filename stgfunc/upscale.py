@@ -1,9 +1,7 @@
 import lvsfunc as lvf
-import muvsfunc as mvf
 import vapoursynth as vs
 from functools import cache
 from os import PathLike, path
-from nnedi3_rpow2 import nnedi3_rpow2
 
 core = vs.core
 
@@ -23,6 +21,9 @@ def upscale_rescale(clip: vs.VideoNode, width: int = 1920, height: int = 1080) -
 
 
 def upscale(clip: vs.VideoNode, width: int = 1920, height: int = 1080, SSIM: bool = False, weight: float = 1 / 2, SHADERS: PathLike = _SHADERS) -> vs.VideoNode:
+  import muvsfunc as mvf
+  from nnedi3_rpow2 import nnedi3_rpow2
+
   nnedi3 = nnedi3_rpow2(clip, rfactor=2, kernel="spline64", nns=3, nsize=4, qual=2)
   nnedi3 = core.resize.Bicubic(nnedi3, clip.width * 2, clip.height * 2)
 

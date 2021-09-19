@@ -8,11 +8,8 @@ import pathlib
 import __main__
 import subprocess
 from os import path
-import lvsfunc as lvf
-from tqdm import tqdm
 from typing import List
 import vapoursynth as vs
-from simple_chalk import chalk
 
 core = vs.core
 
@@ -52,6 +49,8 @@ def encode(clip: vs.VideoNode, output_file: str, x265: bool, cmd_args: List[str]
       binary (str): Path to x264/x265 binary.
 
   """
+  from tqdm import tqdm
+  from simple_chalk import chalk
 
   if binary is None:
     binary = "x265" if x265 else "x264"
@@ -132,6 +131,8 @@ def output_name(clip: vs.VideoNode, name: str, x265: bool):
 
 
 def create_qpfile(clip: vs.VideoNode, filename: vs.VideoNode, force: bool = False):
+  import lvsfunc as lvf
+
   if force and path.isfile(filename):
     os.remove(filename)
 

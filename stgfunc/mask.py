@@ -1,7 +1,4 @@
 import os
-import mvsfunc as mvf
-import lvsfunc as lvf
-import kagefunc as kgf
 import vapoursynth as vs
 from pathlib import Path
 from vsutil import iterate
@@ -33,11 +30,15 @@ def perform_masks_credit(path: Path) -> List:
 
 
 def to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
+  import mvsfunc as mvf
+
   clip = core.std.AssumeFPS(clip, ref)
   return core.resize.Point(clip, format=vs.GRAY16, matrix_s=mvf.GetMatrix(ref))
 
 
 def manual_masking(clip: vs.VideoNode, src: vs.VideoNode, path: str, mapfunc=None):
+  import lvsfunc as lvf
+
   manual_masks = perform_masks_credit(Path(path))
 
   for mask in manual_masks:
@@ -48,7 +49,17 @@ def manual_masking(clip: vs.VideoNode, src: vs.VideoNode, path: str, mapfunc=Non
   return clip
 
 
+def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc=None):
+  mask = MaskCredit(stgsource(str(Path(path))))
+
+  maskclip = to_gray(mask.mask, clip)
+
+  return mapfunc(maskclip) if mapfunc else maskclip.std.Binarize()
+
+
 def generate_detail_mask(clip: vs.VideoNode, thr: float = 0.015) -> vs.VideoNode:
+  import lvsfunc as lvf
+
   general_mask = lvf.mask.detail_mask(clip, rad=1, radc=1, brz_a=1, brz_b=24.3 * thr)
 
   return core.std.Expr([
@@ -66,6 +77,8 @@ def tcanny(clip: vs.VideoNode, thr: float):
 
 
 def linemask(clip_y: vs.VideoNode):
+  import kagefunc as kgf
+
   return core.std.Expr([
       kgf.kirsch(clip_y),
       tcanny(clip_y, 0.000125),

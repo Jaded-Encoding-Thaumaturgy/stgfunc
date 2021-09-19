@@ -1,6 +1,3 @@
-import numpy as np
-from cv2 import cv2
-import EoEfunc as eoe
 import vapoursynth as vs
 from typing import Sequence
 from vsutil import iterate, fallback
@@ -119,6 +116,10 @@ def do_general_tonemapping(src: vs.VideoNode, source_peak=1000, matrix_in_s="202
 # By End-Of-Eternity
 # https://discord.com/channels/856381934052704266/856383287672438824/859069185929248778
 def Maximum(clip: vs.VideoNode, iterations: int = 1, coordinates: Sequence[int] = [1, 1, 1, 1, 1, 1, 1, 1]) -> vs.VideoNode:
+  import numpy as np
+  from cv2 import cv2
+  import EoEfunc as eoe
+
   if clip.format.color_family != vs.GRAY:
     raise ValueError("This proof of concept isn't cool enough to handle multiple planes")
 
