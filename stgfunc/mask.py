@@ -60,7 +60,7 @@ def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc=None):
 def generate_detail_mask(clip: vs.VideoNode, thr: float = 0.015) -> vs.VideoNode:
   import lvsfunc as lvf
 
-  general_mask = lvf.mask.detail_mask(clip, rad=1, radc=1, brz_a=1, brz_b=24.3 * thr)
+  general_mask = lvf.mask.detail_mask(clip, rad=1, brz_a=1, brz_b=24.3 * thr)
 
   return core.std.Expr([
       core.std.Expr([
@@ -70,10 +70,15 @@ def generate_detail_mask(clip: vs.VideoNode, thr: float = 0.015) -> vs.VideoNode
   ], "x y -")
 
 
-def tcanny(clip: vs.VideoNode, thr: float):
+def tcanny(clip: vs.VideoNode, thr: float, openCL=False):
   gaussian = clip.bilateral.Gaussian(1)
   msrcp = core.retinex.MSRCP(gaussian, sigma=[50, 200, 350], upper_thr=thr)
-  return msrcp.tcanny.TCanny(mode=1, sigma=1).std.Minimum(coordinates=[1, 0, 1, 0, 0, 1, 0, 1])
+
+  params = dict(mode=1, sigma=1)
+
+  tcunnied = msrcp.tcanny.TCannyCL(**params) if openCL else msrcp.tcanny.TCanny(**params)
+
+  return tcunnied.std.Minimum(coordinates=[1, 0, 1, 0, 0, 1, 0, 1])
 
 
 def linemask(clip_y: vs.VideoNode):
