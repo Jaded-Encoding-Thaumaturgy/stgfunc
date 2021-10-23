@@ -1,4 +1,4 @@
-from . import (avghist, denoise, encode, helpers, mask, misc, other, oyster, upscale, utils)  # noqa
+from . import (avghist, denoise, encode, helpers, iso, mask, misc, other, oyster, upscale, utils)  # noqa
 
 src = misc.source
 depth = utils.depth
