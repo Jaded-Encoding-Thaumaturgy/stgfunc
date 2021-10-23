@@ -8,11 +8,14 @@ from typing import Tuple, Union, List, Sequence, Optional
 def replace_squaremask(
     clipa: vs.VideoNode, clipb: vs.VideoNode, mask_params: Tuple[int, int, int, int],
     ranges: Union[Range, List[Range], None],
-    blur_sigma: Optional[int] = None
+    blur_sigma: Optional[int] = None, invert: bool = False
 ) -> vs.VideoNode:
   import kagefunc as kgf
 
   mask = kgf.squaremask(clipb, *mask_params)
+
+  if invert:
+    mask = mask.std.InvertMask()
 
   if blur_sigma is not None:
     mask = mask.bilateral.Gaussian(blur_sigma)
