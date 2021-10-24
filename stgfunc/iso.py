@@ -262,16 +262,17 @@ class __IsoFile:
         end = ranges[chapters + 1]
 
       return clip[start:end]
-    elif not isinstance(chapters, tuple):
-      raise ValueError("IsoFile: chapters must either be an int or tuple of Optional[int] (Range).")
-
-    if isinstance(chapters, tuple):
+    elif isinstance(chapters, tuple):
       start, end = chapters
 
       if start is None:
         start = 0
       if end is None:
         end = rlength - 1
+    elif isinstance(chapters, list):
+      return [self.get_title(clip_index, rchap) for rchap in chapters]
+    elif not isinstance(chapters, tuple):
+      raise ValueError("IsoFile: chapters must either be an int or tuple of Optional[int] (Range).")
 
     if start < 0:
       start = rlength - 1 + start
