@@ -196,8 +196,6 @@ class __IsoFile:
 
     chapters_frames: List[List[int]] = []
 
-    print(program_chains)
-
     for prog in program_chains:
       dvd_fps_s = [pb_time.fps for pb_time in prog.playback_times]
       if all(dvd_fps_s[0] == dvd_fps for dvd_fps in dvd_fps_s):
@@ -222,8 +220,6 @@ class __IsoFile:
 
     # Remove splash screen and DVD Menu
     clip = self.clip[-durations[-1]:]
-
-    print(chapters_frames)
 
     # Trim per title
     clips = [clip[s:e] for s, e in zip(durations[:-1], durations[1:])]
@@ -274,8 +270,6 @@ class __IsoFile:
       start = rlength - 1 + start
     if end < 0:
       end = rlength - 1 + end
-
-    print(start, end, rlength, ranges)
 
     return clip[ranges[start]:ranges[end]]
 
