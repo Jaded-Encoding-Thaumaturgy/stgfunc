@@ -255,7 +255,6 @@ class __IsoFile:
 
     return self.cut_clips, self.chapters_frames
 
-  def get_title(self, clip_index: int, chapters: Optional[Union[Range, List[Range]]] = None) -> vs.VideoNode:
   def get_title(self, clip_index: Optional[int] = None, chapters: Optional[Union[Range, List[Range]]] = None) -> vs.VideoNode:
     if not self.clip:
       self.source()
@@ -275,13 +274,13 @@ class __IsoFile:
     if isinstance(chapters, int):
       start, end = ranges[0], ranges[-1]
 
-      if chapters == rlength:
+      if chapters == rlength - 1:
         start = ranges[-2]
       elif chapters == 0:
         end = ranges[1]
       elif chapters < 0:
-          end = rlength - 1 + end
-          start = end - 1
+        start = ranges[rlength - 1 + chapters]
+        end = ranges[rlength + chapters]
       else:
         start = ranges[chapters]
         end = ranges[chapters + 1]
@@ -292,19 +291,21 @@ class __IsoFile:
 
       if start is None:
         start = 0
+      elif start < 0:
+        start = rlength - 1 + start
+
       if end is None:
         end = rlength - 1
+      elif end < 0:
+        end = rlength - 1 + end
+      else:
+        end += 1
+
+      return clip[ranges[start]:ranges[end]]
     elif isinstance(chapters, list):
       return [self.get_title(clip_index, rchap) for rchap in chapters]
-    else:
-      return clip
 
-    if start < 0:
-      start = rlength - 1 + start
-    if end < 0:
-      end = rlength - 1 + end
-
-    return clip[ranges[start]:ranges[end]]
+    return clip
 
   @abstractmethod
   def _get_mount_path(self) -> Path:
