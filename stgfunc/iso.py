@@ -27,7 +27,7 @@ class DVDIndexer(ABC):
 
   def __init__(self, path: Union[Path, str], vps_indexer: Callable[..., vs.VideoNode], ext: str) -> None:
     self.path = path
-    self.vps_indexer = vps_indexer  # type: ignore
+    self.vps_indexer = vps_indexer
     self.ext = ext
     super().__init__()
 
@@ -184,7 +184,6 @@ class __IsoFile:
     return self.clip
 
   def split_titles(self) -> Tuple[List[vs.VideoNode], List[List[int]]]:
-    # Parse IFO info
 
     ifo_files = [
         tfile for tfile in sorted(self.mount_path.glob('*.ifo'))
@@ -212,7 +211,6 @@ class __IsoFile:
 
       raw_fps = 30 if fps.numerator == 30000 else 25
 
-      # Convert in frames
       chapters_frames.append([0] + [
           pb_time.frames + (pb_time.hours * 3600 + pb_time.minutes * 60 + pb_time.seconds) * raw_fps
           for pb_time in prog.playback_times
