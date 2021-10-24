@@ -188,11 +188,13 @@ class __IsoFile:
 
     program_chains = []
 
+    m_ifos = len(ifo_files) > 1
+
     for ifo_file in ifo_files:
       with open(ifo_file, 'rb') as file:
         curr_pgci = vts_ifo.load_vts_pgci(cast(BufferedReader, file))
 
-      program_chains += curr_pgci.program_chains
+      program_chains += curr_pgci.program_chains[int(m_ifos):]
 
     chapters_frames: List[List[int]] = []
 
