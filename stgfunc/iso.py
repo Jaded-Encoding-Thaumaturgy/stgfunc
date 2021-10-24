@@ -183,7 +183,7 @@ class __IsoFile:
 
     return self.clip
 
-  def get_titles(self) -> Tuple[List[vs.VideoNode], List[List[int]]]:
+  def split_titles(self) -> Tuple[List[vs.VideoNode], List[List[int]]]:
     # Parse IFO info
 
     ifo_files = [
@@ -238,12 +238,12 @@ class __IsoFile:
 
     return clips, chapters_frames
 
-  def get_title(self, clip_index: int, chapters: Range) -> vs.VideoNode:
+  def get_title(self, clip_index: int, chapters: Union[Range, List[Range]]) -> vs.VideoNode:
     if not self.clip:
       self.source()
 
     if not self.cut_clips or not self.chapters_frames:
-      self.get_titles()
+      self.split_titles()
 
     ranges = self.chapters_frames[clip_index]
     clip = self.cut_clips[clip_index]
