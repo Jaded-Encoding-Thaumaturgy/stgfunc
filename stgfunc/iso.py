@@ -211,7 +211,7 @@ class __IsoFile:
       if all(dvd_fps_s[0] == dvd_fps for dvd_fps in dvd_fps_s):
         fps = vts_ifo.FRAMERATE[dvd_fps_s[0]]
       else:
-        raise ValueError('IsoFile: No VFR allowed! (Yet)')
+        raise ValueError('IsoFile: No VFR allowed!')
 
       raw_fps = 30 if fps.numerator == 30000 else 25
 
@@ -249,8 +249,8 @@ class __IsoFile:
     if len(self.chapters_frames) > 1:
       for rrange in self.chapters_frames[1:]:
         self.joined_chapters += [
-          r + self.joined_chapters[-1]
-          for r in rrange if r != 0
+            r + self.joined_chapters[-1]
+            for r in rrange if r != 0
         ]
 
     return self.cut_clips, self.chapters_frames
