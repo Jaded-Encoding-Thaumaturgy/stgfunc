@@ -238,7 +238,7 @@ class __IsoFile:
 
     return clips, chapters_frames
 
-  def get_title(self, clip_index: int, chapters: Union[Range, List[Range]]) -> vs.VideoNode:
+  def get_title(self, clip_index: int, chapters: Optional[Union[Range, List[Range]]] = None) -> vs.VideoNode:
     if not self.clip:
       self.source()
 
@@ -274,8 +274,8 @@ class __IsoFile:
         end = rlength - 1
     elif isinstance(chapters, list):
       return [self.get_title(clip_index, rchap) for rchap in chapters]
-    elif not isinstance(chapters, tuple):
-      raise ValueError("IsoFile: chapters must either be an int or tuple of Optional[int] (Range).")
+    else:
+      return clip
 
     if start < 0:
       start = rlength - 1 + start
