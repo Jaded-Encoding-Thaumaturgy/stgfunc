@@ -184,6 +184,8 @@ class __IsoFile:
     return self.clip
 
   def split_titles(self) -> Tuple[List[vs.VideoNode], List[List[int]]]:
+    if not self.clip:
+      self.source()
 
     ifo_files = [
         tfile for tfile in sorted(self.mount_path.glob('*.ifo'))
@@ -240,7 +242,7 @@ class __IsoFile:
     if not self.clip:
       self.source()
 
-    if not self.cut_clips or not self.chapters_frames:
+    if not self.cut_clips:
       self.split_titles()
 
     ranges = self.chapters_frames[clip_index]
