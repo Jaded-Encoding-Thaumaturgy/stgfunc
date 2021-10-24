@@ -41,7 +41,11 @@ class DVDIndexer(ABC):
       raise FileNotFoundError(f'DVDIndexer: `{self.path}` was not found!')
 
   def index(self, files: List[Path], output: Path) -> None:
-    return subprocess.run(self.get_cmd(files, output), check=True, text=True, encoding='utf-8', stdout=subprocess.PIPE)
+    return subprocess.run(
+        self.get_cmd(files, output),
+        check=True, text=True, encoding='utf-8',
+        stdout=subprocess.PIPE, cwd=files[0].parent
+    )
 
   def get_idx_file_path(self, path: Path, index: Optional[int] = None) -> Path:
     return path.with_suffix(self.ext)
@@ -143,6 +147,29 @@ class DGIndexNV(DVDIndexer):
 
     with open(index_path, 'w') as file:
       file.write(content)
+
+
+class DGIndex(DGIndexNV):
+  def __init__(
+      self, path: Union[Path, str] = 'dgindex',
+      vps_indexer: Callable[..., vs.VideoNode] = core.d2v.Source, ext: str = '.d2v'
+  ) -> None:
+    super().__init__(path, vps_indexer, ext)
+    print(RuntimeWarning("\n\tDGIndex is bugged, it will probably not work on your system/version.\n"))
+
+  def get_cmd(
+      self, files: List[Path], output: Path,
+      idct_algo: int = 5, field_op: int = 2, yuv_to_rgb: int = 1
+  ) -> List[Any]:
+    self._check_path()
+
+    filepaths = '[' + ','.join([f'"{str(path)}"' for path in files]) + ']'
+
+    return [
+        self.path, "-AIF", filepaths,
+        "-IA", str(idct_algo), "-FO", str(field_op), "-YR", str(yuv_to_rgb),
+        "-OM", "0", "-HIDE", "-EXIT", "-O", str(output)
+    ]
 
 
 class __IsoFile:
