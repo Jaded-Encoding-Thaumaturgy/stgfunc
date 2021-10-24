@@ -257,6 +257,9 @@ class __IsoFile:
         start = ranges[-2]
       elif chapters == 0:
         end = ranges[1]
+      elif chapters < 0:
+          end = rlength - 1 + end
+          start = end - 1
       else:
         start = ranges[chapters]
         end = ranges[chapters + 1]
