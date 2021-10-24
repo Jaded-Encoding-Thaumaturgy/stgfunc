@@ -152,7 +152,9 @@ class __IsoFile:
   mount_path: Path
   clip: vs.VideoNode = None
   cut_clips: List[vs.VideoNode] = None
+  joined_clip: vs.VideoNode = None
   chapters_frames: List[List[int]] = None
+  joined_chapters: List[int] = None
 
   def __init__(self, path: Path, indexer: DVDIndexer = D2VWitch()):
     self.path = Path(path)
@@ -232,11 +234,26 @@ class __IsoFile:
     clips = [clip[s:e] for s, e in zip(durations[:-1], durations[1:])]
 
     clips.append(self.clip[:-durations[-1]])
+    chapters_frames.append([clips[-1].num_frames])
 
     self.cut_clips = clips
     self.chapters_frames = chapters_frames
 
-    return clips, chapters_frames
+    self.joined_clip = self.cut_clips[0]
+    self.joined_chapters = self.chapters_frames[0]
+
+    if len(self.cut_clips) > 1:
+      for cclip in self.cut_clips[1:]:
+        self.joined_clip += cclip
+
+    if len(self.chapters_frames) > 1:
+      for rrange in self.chapters_frames[1:]:
+        self.joined_chapters += [
+          r + self.joined_chapters[-1]
+          for r in rrange if r != 0
+        ]
+
+    return self.cut_clips, self.chapters_frames
 
   def get_title(self, clip_index: int, chapters: Optional[Union[Range, List[Range]]] = None) -> vs.VideoNode:
     if not self.clip:
