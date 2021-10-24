@@ -70,7 +70,12 @@ class D2VWitch(DVDIndexer):
 
     str_filepaths = [str(path) for path in filepaths]
 
-    maxsplits = content[:content.index('\n\n')].count('\n') + 1
+    firstsplit_idx = content.index('\n\n')
+
+    if "DGIndex" not in content[:firstsplit_idx]:
+      raise RuntimeError("IsoFile: Index file corrupted! Delete it and retry.")
+
+    maxsplits = content[:firstsplit_idx].count('\n') + 1
 
     content = content.split('\n', maxsplits)
 
