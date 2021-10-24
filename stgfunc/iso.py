@@ -248,13 +248,17 @@ class __IsoFile:
     rlength = len(ranges)
 
     if isinstance(chapters, int):
+      start, end = ranges[0], ranges[-1]
+
       if chapters == rlength:
-        return ranges[-2], ranges[-1]
+        start = ranges[-2]
+      elif chapters == 0:
+        end = ranges[1]
+      else:
+        start = ranges[chapters]
+        end = ranges[chapters + 1]
 
-      if chapters == 0:
-        return ranges[0], ranges[1]
-
-      return clip[ranges[chapters]:ranges[chapters + 1]]
+      return clip[start:end]
     elif not isinstance(chapters, tuple):
       raise ValueError("IsoFile: chapters must either be an int or tuple of Optional[int] (Range).")
 
