@@ -256,14 +256,19 @@ class __IsoFile:
     return self.cut_clips, self.chapters_frames
 
   def get_title(self, clip_index: int, chapters: Optional[Union[Range, List[Range]]] = None) -> vs.VideoNode:
+  def get_title(self, clip_index: Optional[int] = None, chapters: Optional[Union[Range, List[Range]]] = None) -> vs.VideoNode:
     if not self.clip:
       self.source()
 
     if not self.cut_clips:
       self.split_titles()
 
-    ranges = self.chapters_frames[clip_index]
-    clip = self.cut_clips[clip_index]
+    if clip_index is not None:
+      ranges = self.chapters_frames[clip_index]
+      clip = self.cut_clips[clip_index]
+    else:
+      ranges = self.joined_chapters
+      clip = self.joined_clip
 
     rlength = len(ranges)
 
