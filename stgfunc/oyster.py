@@ -54,7 +54,7 @@ class Core(vs.Core):
   def delete(self):
     del self
 
-  def FreqMerge(self, low: vs.VideoNode, hi: vs.VideoNode, sbsize: int, slocation: float) -> vs.VideoNode:
+  def FreqMerge(self, low: vs.VideoNode, hi: vs.VideoNode, sbsize: int = 9, slocation: float = [0.0, 0.0, 0.12, 1024.0, 1.0, 1024.0]) -> vs.VideoNode:
     hif = self.MakeDiff(hi, self.DFTTest(hi, sbsize=sbsize, slocation=slocation, **dfttest_args))
     return self.MergeDiff(self.DFTTest(low, sbsize=sbsize, slocation=slocation, **dfttest_args), hif)
 
