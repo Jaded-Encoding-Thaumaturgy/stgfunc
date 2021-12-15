@@ -7,7 +7,7 @@ from typing import Tuple, Union, List, Sequence, Optional
 
 def replace_squaremask(
     clipa: vs.VideoNode, clipb: vs.VideoNode, mask_params: Tuple[int, int, int, int],
-    ranges: Union[Range, List[Range], None],
+    ranges: Union[Range, List[Range], None] = None,
     blur_sigma: Optional[int] = None, invert: bool = False
 ) -> vs.VideoNode:
   import kagefunc as kgf
@@ -18,13 +18,11 @@ def replace_squaremask(
     mask = mask.std.InvertMask()
 
   if blur_sigma is not None:
-    mask = mask.bilateral.Gaussian(blur_sigma)
+    mask = mask.bilateralgpu.Bilateral(blur_sigma) if clipa.format.bits_per_sample == 32 else mask.bilateral.Gaussian(blur_sigma)
 
-  return lvf.rfs(
-      clipa, clipa.std.MaskedMerge(
-          clipb, mask
-      ), ranges
-  )
+  merge = clipa.std.MaskedMerge(clipb, mask)
+
+  return lvf.rfs(clipa, merge, ranges) if ranges else merge
 
 
 def depth(*clips_depth: vs.VideoNode) -> Sequence[vs.VideoNode]:
