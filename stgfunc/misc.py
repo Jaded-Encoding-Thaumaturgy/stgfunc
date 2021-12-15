@@ -5,6 +5,7 @@ import mimetypes
 import lvsfunc as lvf
 import vapoursynth as vs
 from shutil import which
+from pathlib import Path
 from .helpers import checkValue
 from os import access, path, R_OK
 from subprocess import check_output
@@ -34,7 +35,7 @@ def set_output(clip: vs.VideoNode, text: bool = True):
   clip.set_output(index)
 
 
-def source(file: str, depth: Optional[int] = None, ref: Optional[vs.VideoNode] = None, force_lsmas: bool = False,
+def source(file: Union[str, Path], depth: Optional[int] = None, ref: Optional[vs.VideoNode] = None, force_lsmas: bool = False,
            matrix_prop: Union[bool, int] = None, **index_args: Any) -> vs.VideoNode:
   """
   Generic clip import function.
@@ -62,6 +63,7 @@ def source(file: str, depth: Optional[int] = None, ref: Optional[vs.VideoNode] =
 
   :return:                  Vapoursynth clip representing input file
   """
+  file = str(file)
 
   if file.startswith('file:///'):
     file = file[8::]
