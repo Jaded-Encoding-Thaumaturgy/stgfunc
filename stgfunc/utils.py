@@ -2,7 +2,7 @@ import lvsfunc as lvf
 import vapoursynth as vs
 from lvsfunc.types import Range
 from vsutil import depth as vdepth
-from typing import Tuple, Union, List, Sequence, Optional
+from typing import Tuple, Union, List, Sequence, Optional, Dict, Any
 
 
 def replace_squaremask(
@@ -25,9 +25,9 @@ def replace_squaremask(
   return lvf.rfs(clipa, merge, ranges) if ranges else merge
 
 
-def depth(*clips_depth: vs.VideoNode) -> Sequence[vs.VideoNode]:
+def depth(*clips_depth: vs.VideoNode, **kwargs: Dict[str, Any]) -> Sequence[vs.VideoNode]:
   assert isinstance(clips_depth[-1], int)
 
-  clips = [vdepth(clip, clips_depth[-1]) for clip in clips_depth[:-1]]
+  clips = [vdepth(clip, clips_depth[-1], **kwargs) for clip in clips_depth[:-1]]
 
   return clips[0] if len(clips) == 1 else clips
