@@ -19,7 +19,7 @@ index_formats_mimes = ['video/d2v', 'video/dgi']
 file_headers_filename = path.join(path.dirname(path.abspath(__file__)), "__file_headers.json")
 
 
-def set_output(clip: vs.VideoNode, text: bool = True):
+def set_output(clip: vs.VideoNode, text: Union[bool, int, Tuple[int, int]] = True):
   index = len(vs.get_outputs()) + 1
 
   if text:
@@ -30,7 +30,9 @@ def set_output(clip: vs.VideoNode, text: bool = True):
         ref_name = x[0]
         break
 
-    clip = clip.text.Text(ref_name.title(), 7, 2)
+    pos, scale = text if isinstance(text, tuple) else (text, 2) if isinstance(text, int) else (7, 2)
+
+    clip = clip.text.Text(ref_name.title(), pos, scale)
 
   clip.set_output(index)
 
