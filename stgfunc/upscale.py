@@ -1,4 +1,5 @@
 import lvsfunc as lvf
+from typing import Dict
 import vapoursynth as vs
 from functools import cache
 from os import PathLike, path
@@ -20,7 +21,10 @@ def upscale_rescale(clip: vs.VideoNode, width: int = 1920, height: int = 1080) -
   return upscale(clip, width, height)
 
 
-def upscale(clip: vs.VideoNode, width: int = 1920, height: int = 1080, SSIM: bool = False, weight: float = 1 / 2, SHADERS: PathLike = _SHADERS) -> vs.VideoNode:
+def upscale(
+    clip: vs.VideoNode, width: int = 1920, height: int = 1080, SSIM: bool = False,
+    weight: float = 1 / 2, SHADERS: PathLike = _SHADERS, ssim_kwargs: Dict[str, any] = {}
+) -> vs.VideoNode:
   import muvsfunc as mvf
   from nnedi3_rpow2 import nnedi3_rpow2
 
@@ -34,9 +38,10 @@ def upscale(clip: vs.VideoNode, width: int = 1920, height: int = 1080, SSIM: boo
   if not SSIM:
     return merge.resize.Bicubic(width, height, format=clip.format)
 
-  ssim_down_args = dict(format=clip.format)
+  ssim_down_args = dict(smooth=0, format=clip.format)
+  ssim_down_args |= ssim_kwargs
 
-  return mvf.SSIM_downsample(merge, width, height, 0, **ssim_down_args)
+  return mvf.SSIM_downsample(merge, width, height, **ssim_down_args)
 
 
 def fsrcnnx_upscale(clip: vs.VideoNode, ref: vs.VideoNode = None, width: int = 1920, height: int = 1080, SHADERS: PathLike = _SHADERS) -> vs.VideoNode:
