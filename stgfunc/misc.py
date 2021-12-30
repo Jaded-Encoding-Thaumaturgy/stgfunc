@@ -30,7 +30,7 @@ def set_output(clip: vs.VideoNode, text: Union[bool, int, Tuple[int, int]] = Tru
         ref_name = x[0]
         break
 
-    pos, scale = text if isinstance(text, tuple) else (text, 2) if isinstance(text, int) else (7, 2)
+    pos, scale = text if isinstance(text, tuple) else (text, 2) if isinstance(text, int) and text != True else (7, 2)  # noqa
 
     clip = clip.text.Text(ref_name.title(), pos, scale)
 
