@@ -24,13 +24,11 @@ def KNLMeansCL(
 
   :returns: Denoised clip.
   """
+  from fine_dehalo import contrasharpening 
   trange = getThreeChannelsTuple(trange)
   search_radius = getThreeChannelsTuple(search_radius)
   similarity_radius = getThreeChannelsTuple(similarity_radius)
   sigma = getThreeChannelsTuple(sigma)
-
-  if contraSharpening:
-    import EoEfunc as eoe
 
   checkValue(not isinstance(clip, vs.VideoNode), "stg.KNLMeansCL: 'clip' must be a VideoNode")
   if contraSharpening or ref_clip:
@@ -54,7 +52,7 @@ def KNLMeansCL(
 
     ref_clip_plane = (ref_clip_planes[index] if planes == "Y" else ref_clip) if ref_clip is not None else clip
 
-    return eoe.misc.ContraSharpening(knl, ref_clip_plane) if contraSharpening else knl
+    return contrasharpening(knl, ref_clip_plane) if contraSharpening else knl
 
   if ref_clip:
     ref_clip = depth(ref_clip, 16)

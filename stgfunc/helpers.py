@@ -28,5 +28,4 @@ def checkLastTwo(param: Union[IntUnionChannelsType, FloatUnionChannelsType]):  #
 
 
 def checkSimilarClips(clipa: vs.VideoNode, clipb: vs.VideoNode):
-  import EoEfunc as eoe
-  return isinstance(clipa, vs.VideoNode) and isinstance(clipb, vs.VideoNode) and clipa.height == clipb.height and clipa.width == clipb.width and eoe.format.get_format(clipa, "8") == eoe.format.get_format(clipb, "8")
+  return isinstance(clipa, vs.VideoNode) and isinstance(clipb, vs.VideoNode) and clipa.height == clipb.height and clipa.width == clipb.width and clipa.format.id == clipb.format.id
