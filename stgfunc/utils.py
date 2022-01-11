@@ -1,9 +1,32 @@
 import lvsfunc as lvf
-import kagefunc as kgf
 import vapoursynth as vs
 from lvsfunc.types import Range
 from typing import Tuple, Union, List, Sequence, Optional, Dict, Any
 from vsutil import depth as vdepth, get_depth, disallow_variable_format
+
+
+core = vs.core
+
+
+@disallow_variable_format
+def squaremask(clip: vs.VideoNode, width: int, height: int, offset_x: int, offset_y: int) -> vs.VideoNode:
+    assert clip.format
+
+    bits = get_depth(clip)
+    src_w, src_h = clip.width, clip.height
+
+    mask_format = clip.format.replace(color_family=vs.GRAY, subsampling_w=0, subsampling_h=0)
+
+    white = 1 if mask_format.sample_type == vs.FLOAT else (1 << bits) - 1
+
+    white_clip = core.std.BlankClip(clip, width, height, mask_format.id, 1, color=white, keep=True)
+
+    padded = white_clip.std.AddBorders(
+        offset_x, src_w - width - offset_x,
+        offset_y, src_h - height - offset_y
+    )
+
+    return padded * clip.num_frames
 
 
 @disallow_variable_format
@@ -15,7 +38,7 @@ def replace_squaremask(
     assert clipa.format
     assert clipb.format
 
-    mask = kgf.squaremask(clipb, *mask_params)
+    mask = squaremask(clipb, *mask_params)
 
     if invert:
         mask = mask.std.InvertMask()
@@ -63,7 +86,6 @@ def checkValue(condition: bool, error_message: str):
 
 @disallow_variable_format
 def checkSimilarClips(clipa: vs.VideoNode, clipb: vs.VideoNode):
-    assert clipa.format
-    assert clipb.format
-    return isinstance(clipa, vs.VideoNode) and isinstance(
-        clipb, vs.VideoNode) and clipa.height == clipb.height and clipa.width == clipb.width and clipa.format.id == clipb.format.id
+    assert isinstance(clipa, vs.VideoNode) and clipa.format
+    assert isinstance(clipb, vs.VideoNode) and clipb.format
+    return clipa.height == clipb.height and clipa.width == clipb.width and clipa.format.id == clipb.format.id
