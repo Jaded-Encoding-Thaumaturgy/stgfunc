@@ -65,7 +65,7 @@
     { "type": "video", "extension": "ogv", "mime": "video/ogg", "offset": 0, "signature": ["4F 67 67 53 00 02 00 00"] },
     { "type": "video", "extension": "webm", "mime": "video/webm", "offset": 0, "signature": ["1A 45 DF A3"] },
     { "type": "video", "extension": "d2v", "mime": "video/d2v", "offset": 0, "signature": ["44 47 49 6E 64 65 78 50 72 6F 6A 65 63 74 46 69 6C 65"] },
-    { "type": "video", "extension": "dgi", "mime": "video/dgi", "offset": 0, "signature": ["44 47 4D 50 47 49 6E 64 65 78 46 69 6C 65 4E 56"] },
+    { "type": "video", "extension": "dgi", "mime": "video/dgi", "offset": 0, "signature": ["44 47 4D 50 47 49 6E 64 65 78 46 69 6C 65 4E 56", "44 47 48 45 56 43 49 6E 64 65 78 46 69 6C 65", "44 47 41 56 43 49 6E 64 65 78 46 69 6C 65"] },
     { "type": "document", "extension": "odt", "mime": "application/vnd.oasis.opendocument.text", "offset": 73, "signature": ["74 65 78 74"] },
     { "type": "document", "extension": "odp", "mime": "application/vnd.oasis.opendocument.presentation", "offset": 73, "signature": ["70 72 65 73 65 6E 74 61 74 69 6F 6E"] },
     { "type": "document", "extension": "ods", "mime": "application/vnd.oasis.opendocument.spreadsheet", "offset": 73, "signature": ["73 70 72 65 61 64 73 68 65 65 74"] },
