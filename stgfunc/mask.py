@@ -1,8 +1,10 @@
 import os
+import lvsfunc as lvf
 import vapoursynth as vs
 from pathlib import Path
 from vsutil import iterate
 from typing import NamedTuple, List
+
 from .misc import source as stgsource
 
 core = vs.core
@@ -16,29 +18,26 @@ class MaskCredit(NamedTuple):
 
 def perform_masks_credit(path: Path) -> List:
   if not os.path.isdir(path):
-    raise "stgfunc.mask.perform_mask_credit: 'path' must be an existing path!"
+    raise ValueError("stgfunc.mask.perform_mask_credit: 'path' must be an existing path!")
 
-  masks = []
+  files = [file.stem for file in path.glob('*')]
 
-  for mask in path.glob('*'):
-    ranges = str(mask.stem).split('_')
-    end = int(ranges[-1])
-    start = int(ranges[-2]) if len(ranges) > 2 else end
+  clips = [stgsource(file) for file in files]
+  files_ranges = [list(map(int, name.split('_'))) for name in files]
 
-    masks.append(MaskCredit(stgsource(str(mask)), start, end))
-  return masks
+  return [
+      MaskCredit(
+          clip,
+          ranges[-2] if len(ranges) > 2 else (end := ranges[-1]), end
+      ) for clip, ranges in zip(clips, files_ranges)
+  ]
 
 
 def to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
-  import mvsfunc as mvf
-
-  clip = core.std.AssumeFPS(clip, ref)
-  return core.resize.Point(clip, format=vs.GRAY16, matrix_s=mvf.GetMatrix(ref))
+  return core.std.AssumeFPS(clip, ref).resize.Point(format=vs.GRAY16)
 
 
 def manual_masking(clip: vs.VideoNode, src: vs.VideoNode, path: str, mapfunc=None):
-  import lvsfunc as lvf
-
   manual_masks = perform_masks_credit(Path(path))
 
   for mask in manual_masks:
@@ -50,7 +49,7 @@ def manual_masking(clip: vs.VideoNode, src: vs.VideoNode, path: str, mapfunc=Non
 
 
 def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc=None):
-  mask = MaskCredit(stgsource(str(Path(path))))
+  mask = MaskCredit(stgsource(path), 0, 0)
 
   maskclip = to_gray(mask.mask, clip)
 

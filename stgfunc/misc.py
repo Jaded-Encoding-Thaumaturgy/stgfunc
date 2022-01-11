@@ -2,7 +2,6 @@ import json
 import vsutil
 import inspect
 import mimetypes
-import lvsfunc as lvf
 import vapoursynth as vs
 from shutil import which
 from pathlib import Path
@@ -25,7 +24,7 @@ def set_output(clip: vs.VideoNode, text: Union[bool, int, Tuple[int, int]] = Tru
   if text:
     ref_id = str(id(clip))
     ref_name = f"Clip {index}"
-    for x in inspect.currentframe().f_back.f_locals.items():
+    for x in inspect.currentframe().f_back.f_locals.items():  # type: ignore
       if (str(id(x[1])) == ref_id):
         ref_name = x[0]
         break
@@ -79,7 +78,7 @@ def source(file: Union[str, Path], depth: Optional[int] = None, ref: Optional[vs
   checkValue(mimeType is None, "source: 'The source file format is not supported'")
   checkValue(mimeType == "audio", "source: 'Audio files are not supported'")
   checkValue(extention in annoying_formats_exts, "source: 'Please use an external indexer like d2vwitch or DGIndexNV for this file and import that'")
-  checkValue(ref and ref.format is None, "source: 'Variable-format clips not supported.'")
+  checkValue(not not ref and ref.format is None, "source: 'Variable-format clips not supported.'")
 
   if mimeType == "video":
     if force_lsmas:
@@ -104,14 +103,15 @@ def source(file: Union[str, Path], depth: Optional[int] = None, ref: Optional[vs
       clip = clip * (ref.num_frames - 1)
 
   if ref:
+    assert ref.format
     clip = core.std.AssumeFPS(clip, fpsnum=ref.fps.numerator, fpsden=ref.fps.denominator)
-    clip = core.resize.Bicubic(clip, width=ref.width, height=ref.height, format=ref.format.id, matrix=str(lvf.misc.get_matrix(ref)))
+    clip = core.resize.Bicubic(clip, width=ref.width, height=ref.height, format=ref.format.id, matrix=matrix_prop)
 
-  if (depth is not None):
+  if depth:
     clip = vsutil.depth(clip, depth)
 
-  if isinstance(matrix_prop, int) or matrix_prop is True:
-    clip = clip.std.SetFrameProp('_Matrix', intval=lvf.misc.get_matrix(clip) if matrix_prop is True else matrix_prop)
+  if isinstance(matrix_prop, int):
+    clip = clip.std.SetFrameProp('_Matrix', intval=matrix_prop)
 
   return clip
 
@@ -153,7 +153,7 @@ def getInfoFromFileHeaders(filename: str, /):
     if not ftype or (fmime not in index_formats_mimes and ftype == "video"):
       return None
 
-    return tuple(fmime.split("/"))
+    return tuple(fmime.split("/")) if fmime else None
   except Exception:
     return None
 

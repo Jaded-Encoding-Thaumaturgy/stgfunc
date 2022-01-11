@@ -4,6 +4,8 @@ from vsutil import insert_clip
 from easing_functions import *  # noqa: F401, F403
 from easing_functions.easing import EasingBase, LinearInOut
 
+from .utils import checkSimilarClips
+
 core = vs.core
 
 
@@ -11,7 +13,10 @@ def fade(clipa: vs.VideoNode, clipb: vs.VideoNode, invert: bool, start: int, end
   clipa_cut = clipa[start:end]
   clipb_cut = clipb[start:end]
 
-  fade = crossfade(*([clipa_cut, clipb_cut] if invert else [clipb_cut, clipa_cut]), function)
+  if invert:
+    fade = crossfade(clipa_cut, clipb_cut, function)
+  else:
+    fade = crossfade(clipa_cut, clipb_cut, function)
 
   return insert_clip(clipa, fade, start)
 
@@ -41,7 +46,7 @@ def fade_out_freeze(clip: vs.VideoNode, start: int, end: int, function: EasingBa
 
 
 def crossfade(clipa: vs.VideoNode, clipb: vs.VideoNode, function: EasingBase, debug: bool = False):
-  if clipa.num_frames != clipb.num_frames or clipa.format.id != clipb.format.id or clipa.height != clipb.height or clipa.width != clipb.width:
+  if not checkSimilarClips(clipa, clipb):
     raise ValueError('crossfade: Both clips must have the same length, dimensions and format.')
 
   ease_function = function(0, 1, clipa.num_frames)

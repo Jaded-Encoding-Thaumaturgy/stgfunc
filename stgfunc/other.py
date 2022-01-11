@@ -1,6 +1,6 @@
 import vapoursynth as vs
+from vsutil import fallback
 from lvsfunc.util import get_prop
-from vsutil import iterate, fallback, frame2clip
 from typing import List, Callable, Iterable, Protocol, Sequence, TypeVar, Union, Tuple
 
 core = vs.core
@@ -38,7 +38,7 @@ T = TypeVar('T')
 
 
 class _CompFunction(Protocol):
-  def __call__(self, indices: Iterable[T], *, key: Callable[[T], float]) -> T:
+  def __call__(self, __iterable: Iterable[T], *, key: Callable[[T], float]) -> T:
     ...
 
 
@@ -70,12 +70,12 @@ def bestframeselect(
     best = comp_func(indices, key=lambda i: scores[i])
 
     if do_debug:
-      return frame2clip(clips[best]).text.Text(
-        "\n".join([
-          f"Prop: {prop}",
-          *[f"{i}: {s}"for i, s in enumerate(scores)],
-          f"Best: {best}"
-        ]), alignment).get_frame(0)
+      return clips[best].text.Text(
+          "\n".join([
+              f"Prop: {prop}",
+              *[f"{i}: {s}"for i, s in enumerate(scores)],
+              f"Best: {best}"
+          ]), alignment)
 
     return clips[best]
 
