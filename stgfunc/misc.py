@@ -5,6 +5,7 @@ import mimetypes
 import vapoursynth as vs
 from shutil import which
 from pathlib import Path
+from functools import cache
 from .utils import checkValue
 from os import access, path, R_OK
 from subprocess import check_output
@@ -211,3 +212,11 @@ def isMPLS(filename: str, /):
       return "MPLS" in head
   except Exception:
     return False
+
+
+@cache
+def _get_shader(name: str):
+  return path.join(path.dirname(__file__), rf".\.shaders\{name}")
+
+
+x56_SHADERS = _get_shader('FSRCNNX_x2_56-16-4-1.glsl')
