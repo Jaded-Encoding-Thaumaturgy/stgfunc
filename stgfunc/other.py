@@ -1,14 +1,18 @@
 import vapoursynth as vs
 from vsutil import fallback
 from lvsfunc.util import get_prop
-from typing import List, Callable, Iterable, Protocol, Sequence, TypeVar, Union, Tuple
+from typing import List, Callable, Iterable, Protocol, Sequence, TypeVar, Union, Tuple, Literal, Optional
 
 core = vs.core
 
 
 # Zastin
-def mt_xxpand_multi(clip, sw=1, sh=None, mode='square', planes=None, start=0, M__imum=core.std.Maximum, **params):
+def mt_xxpand_multi(
+  clip: vs.VideoNode, sw: int = 1, sh: Optional[int] = None, mode: Literal['ellipse', 'losange', 'square'] = 'square',
+  planes: Union[int, Sequence[int]] = None, start: int = 0, M__imum=core.std.Maximum, **params
+) -> List[vs.VideoNode]:
   sh = fallback(sh, sw)
+  assert clip.format
   planes = list(range(clip.format.num_planes)) if planes is None else [planes] if isinstance(planes, int) else planes
 
   if mode == 'ellipse':

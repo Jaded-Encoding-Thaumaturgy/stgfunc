@@ -3,7 +3,8 @@ import lvsfunc as lvf
 import vapoursynth as vs
 from pathlib import Path
 from vsutil import iterate
-from typing import NamedTuple, List
+from lvsfunc.types import VSFunction
+from typing import NamedTuple, List, Optional
 
 from .misc import source as stgsource
 
@@ -16,7 +17,7 @@ class MaskCredit(NamedTuple):
   end_frame: int
 
 
-def perform_masks_credit(path: Path) -> List:
+def perform_masks_credit(path: Path) -> List[MaskCredit]:
   if not os.path.isdir(path):
     raise ValueError("stgfunc.mask.perform_mask_credit: 'path' must be an existing path!")
 
@@ -37,7 +38,7 @@ def to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
   return core.std.AssumeFPS(clip, ref).resize.Point(format=vs.GRAY16)
 
 
-def manual_masking(clip: vs.VideoNode, src: vs.VideoNode, path: str, mapfunc=None):
+def manual_masking(clip: vs.VideoNode, src: vs.VideoNode, path: str, mapfunc: Optional[VSFunction] = None) -> vs.VideoNode:
   manual_masks = perform_masks_credit(Path(path))
 
   for mask in manual_masks:
@@ -48,7 +49,7 @@ def manual_masking(clip: vs.VideoNode, src: vs.VideoNode, path: str, mapfunc=Non
   return clip
 
 
-def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc=None):
+def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[VSFunction] = None) -> vs.VideoNode:
   mask = MaskCredit(stgsource(path), 0, 0)
 
   maskclip = to_gray(mask.mask, clip)
@@ -69,7 +70,7 @@ def generate_detail_mask(clip: vs.VideoNode, thr: float = 0.015) -> vs.VideoNode
   ], "x y -")
 
 
-def tcanny(clip: vs.VideoNode, thr: float, openCL=False):
+def tcanny(clip: vs.VideoNode, thr: float, openCL: bool = False) -> vs.VideoNode:
   gaussian = clip.bilateral.Gaussian(1)
   msrcp = core.retinex.MSRCP(gaussian, sigma=[50, 200, 350], upper_thr=thr)
 
@@ -80,7 +81,7 @@ def tcanny(clip: vs.VideoNode, thr: float, openCL=False):
   return tcunnied.std.Minimum(coordinates=[1, 0, 1, 0, 0, 1, 0, 1])
 
 
-def linemask(clip_y: vs.VideoNode):
+def linemask(clip_y: vs.VideoNode) -> vs.VideoNode:
   import kagefunc as kgf
 
   return core.std.Expr([

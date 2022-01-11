@@ -18,7 +18,7 @@ index_formats_mimes = ['video/d2v', 'video/dgi']
 file_headers_filename = path.join(path.dirname(path.abspath(__file__)), "__file_headers.json")
 
 
-def set_output(clip: vs.VideoNode, text: Union[bool, int, Tuple[int, int]] = True):
+def set_output(clip: vs.VideoNode, text: Union[bool, int, Tuple[int, int]] = True) -> None:
   index = len(vs.get_outputs()) + 1
 
   if text:
@@ -116,7 +116,7 @@ def source(file: Union[str, Path], depth: Optional[int] = None, ref: Optional[vs
   return clip
 
 
-def getMimeType(filename: str, /):
+def getMimeType(filename: str, /) -> Tuple[Optional[str], ...]:
   info = getInfoFromFileHeaders(filename)
 
   if info is None:
@@ -133,7 +133,7 @@ def getMimeType(filename: str, /):
   if info and info[1] is not None:
     info = tuple([info[0], info[1].split(".")[-1].rstrip("video")])
 
-  return tuple(x.lower() if x else x for x in info)
+  return tuple(x.lower() if x else x for x in info if isinstance(x, str) or x is None)
 
 
 def getInfoFFProbe(filename: str, audio: bool = False, /):
