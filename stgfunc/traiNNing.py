@@ -37,13 +37,11 @@ class ResType(enum.Enum):
   HR = 'HR'
 
 
-@dataclass
 class DatasetClip(NamedTuple):
   clip: vs.VideoNode
   res_type: ResType
 
 
-@dataclass
 class Datasets(NamedTuple):
   hr: DatasetClip
   lr: DatasetClip
