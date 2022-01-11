@@ -43,3 +43,16 @@ def depth(*clips_depth: vs.VideoNode, **kwargs: Dict[str, Any]) -> Sequence[vs.V
 
 def get_bits(clip: vs.VideoNode, expected_depth: int = 16) -> Tuple[int, vs.VideoNode]:
   return (bits := get_depth(clip)), vdepth(clip, expected_depth) if bits != expected_depth else clip
+
+
+def isGray(clip: vs.VideoNode) -> bool:
+  return clip.format.color_family == vs.GRAY
+
+
+def checkValue(condition: bool, error_message: str):
+  if condition:
+    raise ValueError(error_message)
+
+
+def checkSimilarClips(clipa: vs.VideoNode, clipb: vs.VideoNode):
+  return isinstance(clipa, vs.VideoNode) and isinstance(clipb, vs.VideoNode) and clipa.height == clipb.height and clipa.width == clipb.width and clipa.format.id == clipb.format.id

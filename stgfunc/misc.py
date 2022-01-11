@@ -6,7 +6,7 @@ import lvsfunc as lvf
 import vapoursynth as vs
 from shutil import which
 from pathlib import Path
-from .helpers import checkValue
+from .utils import checkValue
 from os import access, path, R_OK
 from subprocess import check_output
 from typing import Tuple, Any, Optional, Union
