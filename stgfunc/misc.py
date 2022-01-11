@@ -89,9 +89,9 @@ def source(file: Union[str, Path], depth: Optional[int] = None, ref: Optional[vs
     elif extention == 'dgi':
       clip = core.dgdecodenv.DGSource(file, **index_args)
     else:
-      if (extention == 'm2ts') or (mimeName in ['mpeg-tts', 'mpeg2', 'vc1']) or checkMimeExt('hevc', 'mp4'):
+      if (extention == 'm2ts') or (mimeName in ['mpeg-tts', 'hevc', 'mpeg2', 'vc1']):
         clip = core.lsmas.LWLibavSource(file, **index_args)
-      elif mimeName in ['h264', 'h263', 'hevc', 'vp8', 'mpeg1', 'mpeg4', 'ffv1'] or checkMimeExt('av1', 'ivf') or checkMimeExt('vp9', 'mkv'):
+      elif mimeName in ['h264', 'h263', 'vp8', 'mpeg1', 'mpeg4', 'ffv1'] or checkMimeExt('av1', 'ivf') or checkMimeExt('vp9', 'mkv'):
         clip = core.ffms2.Source(file, **index_args)
       elif mimeName == 'mpeg1':
         clip = core.ffms2.Source(file, seekmode=0, **index_args)
