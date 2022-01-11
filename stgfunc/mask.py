@@ -1,9 +1,9 @@
 import os
 import lvsfunc as lvf
-import kagefunc as kgf
 import vapoursynth as vs
 from pathlib import Path
 from vsutil import iterate
+from vsmask.edge import Kirsch
 from lvsfunc.types import VSFunction
 from typing import NamedTuple, List, Optional
 
@@ -85,7 +85,7 @@ def tcanny(clip: vs.VideoNode, thr: float, openCL: bool = False) -> vs.VideoNode
 
 def linemask(clip_y: vs.VideoNode) -> vs.VideoNode:
     return core.std.Expr([
-        kgf.kirsch(clip_y),
+        Kirsch().get_mask(clip_y),
         tcanny(clip_y, 0.000125),
         tcanny(clip_y, 0.0025),
         tcanny(clip_y, 0.0055),
