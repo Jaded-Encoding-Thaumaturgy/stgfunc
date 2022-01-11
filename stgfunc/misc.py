@@ -158,7 +158,7 @@ def getInfoFromFileHeaders(filename: str, /):
     return None
 
 
-def get_mime_from_file_header(fbytes) -> Tuple[Union[str, None], Union[str, None]]:  # pylint: disable=unsubscriptable-object
+def get_mime_from_file_header(fbytes) -> Tuple[Union[str, None], Union[str, None]]:
   global file_headers_data
 
   if file_headers_data is None:

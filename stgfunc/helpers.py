@@ -1,8 +1,8 @@
 import vapoursynth as vs
 from typing import Union, Tuple
 
-IntUnionChannelsType = Union[int, Tuple[int, int], Tuple[int, int, int]]  # pylint: disable=unsubscriptable-object
-FloatUnionChannelsType = Union[float, Tuple[float, float], Tuple[float, float, float]]  # pylint: disable=unsubscriptable-object
+IntUnionChannelsType = Union[int, Tuple[int, int], Tuple[int, int, int]]
+FloatUnionChannelsType = Union[float, Tuple[float, float], Tuple[float, float, float]]
 
 
 def isGray(clip: vs.VideoNode) -> bool:
@@ -23,7 +23,7 @@ def getThreeChannelsTuple(param):
   return param
 
 
-def checkLastTwo(param: Union[IntUnionChannelsType, FloatUnionChannelsType]):  # pylint: disable=unsubscriptable-object
+def checkLastTwo(param: Union[IntUnionChannelsType, FloatUnionChannelsType]):
   return param[-2] == param[-1]
 
 

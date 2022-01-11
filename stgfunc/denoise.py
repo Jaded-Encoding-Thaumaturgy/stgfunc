@@ -8,9 +8,9 @@ core = vs.core
 
 def KNLMeansCL(
     clip: vs.VideoNode, trange: IntUnionChannelsType = 2, search_radius: IntUnionChannelsType = 2,
-    similarity_radius: IntUnionChannelsType = 4, sigma: FloatUnionChannelsType = 1,  # pylint: disable=unsubscriptable-object
-    contraSharpening: bool = False, ref_clip: vs.VideoNode = None,  # pylint: disable=unsubscriptable-object
-    device_type: Literal["cpu", "gpu", "accelerator"] = "gpu", device_id: int = 0, **kwargs  # pylint: disable=unsubscriptable-object
+    similarity_radius: IntUnionChannelsType = 4, sigma: FloatUnionChannelsType = 1,
+    contraSharpening: bool = False, ref_clip: vs.VideoNode = None,
+    device_type: Literal["cpu", "gpu", "accelerator"] = "gpu", device_id: int = 0, **kwargs
 ) -> vs.VideoNode:
   """KNLMeansCL Wrapper
 
@@ -41,7 +41,7 @@ def KNLMeansCL(
 
   src = depth(clip, 16)
 
-  def knlCall(clip: vs.VideoNode, index: int, planes: Literal["Y", "UV"]):  # pylint: disable=unsubscriptable-object
+  def knlCall(clip: vs.VideoNode, index: int, planes: Literal["Y", "UV"]):
     if sigma[index] is None:
       return clip
     knl = clip.knlm.KNLMeansCL(

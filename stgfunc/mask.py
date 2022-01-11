@@ -8,7 +8,7 @@ from .misc import source as stgsource
 core = vs.core
 
 
-class MaskCredit(NamedTuple):  # pylint: disable=inherit-non-class
+class MaskCredit(NamedTuple):
   mask: vs.VideoNode
   start_frame: int
   end_frame: int

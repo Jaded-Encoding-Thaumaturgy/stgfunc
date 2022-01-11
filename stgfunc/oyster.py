@@ -128,7 +128,7 @@ class Core(vs.Core):
 
 class internal:
   @staticmethod
-  def super(core: Core, src: vs.VideoNode, pel: Union[Literal[2], Literal[4]]):  # pylint: disable=unsubscriptable-object
+  def super(core: Core, src: vs.VideoNode, pel: Union[Literal[2], Literal[4]]):
     src = core.Pad(src, 128, 128, 128, 128)
     clip = core.Transpose(core.NNEDI(core.Transpose(core.NNEDI(src, **nnedi_args)), **nnedi_args))
     if pel == 4:
@@ -139,7 +139,7 @@ class internal:
   def basic(
       core: Core, src: vs.VideoNode, super: SuperClip, radius: int,
       pel: Union[Literal[2], Literal[4]], sad: int, short_time: bool, color: bool
-  ):  # pylint: disable=unsubscriptable-object
+  ):
     plane = 4 if color else 0
     src = core.Pad(src, 128, 128, 128, 128)
     supersoft = core.MSuper(src, pelclip=super, rfilter=4, pel=pel, chroma=color, **msuper_args)
@@ -188,7 +188,7 @@ class internal:
     strength += [h * math.pow(c1 * h, c2) * math.log(1.0 + 1.0 / math.pow(c1 * h, c2))]
     strength += [None]
 
-    def loop(flt: Optional[vs.VideoNode], init: vs.VideoNode, src: vs.VideoNode, n: int) -> vs.VideoNode:  # pylint: disable=unsubscriptable-object
+    def loop(flt: Optional[vs.VideoNode], init: vs.VideoNode, src: vs.VideoNode, n: int) -> vs.VideoNode:
       strength[2] = n * strength[0] / 4 + strength[1] * (1 - n / 4)
       window = int(32 / math.pow(2, n))
       flt = init if n == 4 else flt
@@ -307,7 +307,6 @@ def Super(src: vs.VideoNode, pel=4):
 
 
 def Basic(src, super=None, radius=6, pel=4, sad=2000.0, short_time=False):
-  # sourcery no-metrics
   if not isinstance(src, vs.VideoNode):
     raise TypeError("Oyster.Basic: src has to be a video clip!")
   elif src.format.sample_type != vs.FLOAT or src.format.bits_per_sample < 32:
@@ -355,7 +354,7 @@ def Deringing(
     mse: tuple[float, float] = [None, None], hard_thr: float = 3.2, block_size: int = 8,
     block_step: int = 1, group_size: int = 32, bm_range: int = 24, bm_step: int = 1,
     ps_num: int = 2, ps_range: int = 8, ps_step: int = 1, lowpass: list[float] = None
-):  # sourcery no-metrics
+):
   if not isinstance(src, vs.VideoNode):
     raise TypeError("Oyster.Deringing: src has to be a video clip!")
   elif src.format.sample_type != vs.FLOAT or src.format.bits_per_sample < 32:
@@ -416,7 +415,7 @@ def Destaircase(
     block_step: int = 1, group_size: int = 32, bm_range: int = 24, bm_step: int = 1,
     ps_num: int = 2, ps_range: int = 8, ps_step: int = 1,
     thr: float = 0.03125, elast: float = 0.015625, lowpass: list[float] = None
-):  # sourcery no-metrics
+):
   if not isinstance(src, vs.VideoNode):
     raise TypeError("Oyster.Destaircase: src has to be a video clip!")
   elif src.format.sample_type != vs.FLOAT or src.format.bits_per_sample < 32:
@@ -478,7 +477,7 @@ def Deblocking(
     block_step: int = 1, group_size: int = 32, bm_range: int = 24, bm_step: int = 1,
     ps_num: int = 2, ps_range: int = 8, ps_step: int = 1,
     lowpass: list[float] = [0.0, 0.0, 0.12, 1024.0, 1.0, 1024.0]
-):  # sourcery no-metrics
+):
   if not isinstance(src, vs.VideoNode):
     raise TypeError("Oyster.Deblocking: src has to be a video clip!")
   elif src.format.sample_type != vs.FLOAT or src.format.bits_per_sample < 32:
