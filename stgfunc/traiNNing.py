@@ -123,7 +123,7 @@ class TraiNNing:
         raise IndexError("LR and HR aren't the same length!")
 
       print('Creating folders...')
-      for path in [self.PATH_DATASET_TRAIN, self.PATH_DATASET_VAL]:
+      for path in [self.trainer.PATH_DATASET_TRAIN, self.trainer.PATH_DATASET_VAL]:
         if not path.exists():
           path.mkdir(parents=True, exist_ok=True)
 
@@ -159,7 +159,7 @@ class TraiNNing:
         self._output_images(dataset.hr)
 
     def _output_images(self, clip_dts: DatasetClip) -> None:
-      if not (path := self.PATH_DATASET_TRAIN.joinpath(clip_dts.res_type)).exists():
+      if not (path := self.trainer.PATH_DATASET_TRAIN.joinpath(clip_dts.res_type.value)).exists():
         path.mkdir(parents=True)
 
       progress = Progress(
@@ -190,7 +190,7 @@ class TraiNNing:
       self._encode_and_extract(dataset.hr)
 
     def _encode_and_extract(self, clip_dts: DatasetClip) -> None:
-      if not (path := self.trainer.PATH_DATASET_TRAIN.joinpath(clip_dts.res_type)).exists():
+      if not (path := self.trainer.PATH_DATASET_TRAIN.joinpath(clip_dts.res_type.value)).exists():
         path.mkdir(parents=True)
 
       params = [
@@ -198,7 +198,7 @@ class TraiNNing:
           '-video_size', f'{clip_dts.clip.width}x{clip_dts.clip.height}',
           '-pixel_format', 'gbrp', '-framerate', str(clip_dts.clip.fps),
           '-i', 'pipe:',
-          path.joinpath('%06d.png')
+          str(path.joinpath('%06d.png'))
       ]
 
       print('Encoding...\n')
@@ -206,14 +206,14 @@ class TraiNNing:
         clip_dts.clip.output(cast(BinaryIO, process.stdin))
 
     def select_val_images(self, dataset: Datasets, number: int) -> None:
-      if not (path_val_hr := self.trainer.PATH_DATASET_VAL.joinpath(dataset.hr.res_type)).exists():
+      if not (path_val_hr := self.trainer.PATH_DATASET_VAL.joinpath(dataset.hr.res_type.value)).exists():
         path_val_hr.mkdir(parents=True)
-      if not (path_val_lr := self.trainer.PATH_DATASET_VAL.joinpath(dataset.lr.res_type)).exists():
+      if not (path_val_lr := self.trainer.PATH_DATASET_VAL.joinpath(dataset.lr.res_type.value)).exists():
         path_val_lr.mkdir(parents=True)
 
-      if not (path_train_hr := self.trainer.PATH_DATASET_TRAIN.joinpath(dataset.hr.res_type)).exists():
+      if not (path_train_hr := self.trainer.PATH_DATASET_TRAIN.joinpath(dataset.hr.res_type.value)).exists():
         raise FileNotFoundError(f'{path_train_hr} not found')
-      if not (path_train_lr := self.trainer.PATH_DATASET_TRAIN.joinpath(dataset.lr.res_type)).exists():
+      if not (path_train_lr := self.trainer.PATH_DATASET_TRAIN.joinpath(dataset.lr.res_type.value)).exists():
         raise FileNotFoundError(f'{path_train_lr} not found')
 
       images_path = sorted(path_train_hr.glob('*.png'))
