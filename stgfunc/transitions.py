@@ -1,10 +1,14 @@
 import lvsfunc as lvf
 import vapoursynth as vs
-from vsutil import insert_clip
+from enum import IntEnum
+from fractions import Fraction
+from lvsfunc.kernels import Kernel, Catrom
+from vsutil import insert_clip, disallow_variable_format
+
 from easing_functions import *  # noqa: F401, F403
 from easing_functions.easing import EasingBase, LinearInOut
 
-from .utils import checkSimilarClips
+from .utils import checkSimilarClips, change_fps
 
 core = vs.core
 
@@ -63,3 +67,4 @@ def crossfade(clipa: vs.VideoNode, clipb: vs.VideoNode, function: EasingBase, de
         return merge.text.Text(weight, 9, 2) if debug else merge
 
     return clipa.std.FrameEval(__fading)
+
