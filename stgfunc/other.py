@@ -6,37 +6,6 @@ from typing import List, Callable, Iterable, Protocol, Sequence, TypeVar, Union,
 core = vs.core
 
 
-# By End-Of-Eternity
-# https://discord.com/channels/856381934052704266/856383287672438824/859069185929248778
-def Maximum(clip: vs.VideoNode, iterations: int = 1, coordinates: Sequence[int] = [1, 1, 1, 1, 1, 1, 1, 1]) -> vs.VideoNode:
-  import numpy as np
-  from cv2 import cv2
-  import EoEfunc as eoe
-
-  if clip.format.color_family != vs.GRAY:
-    raise ValueError("This proof of concept isn't cool enough to handle multiple planes")
-
-  if iterations < 1:
-    raise ValueError("🤔")
-
-  if len(coordinates) != 8:
-    raise ValueError("coordinates must have a length of 8")
-
-  # why don't either the stdlib or cv2 do this?
-  if all(c == 0 for c in coordinates):
-    return clip
-
-  # standard library is faster for less than 5 iterations
-  # cv2 seems less well optimised for non full kernels
-  if iterations < 5 or (iterations < 10 and any(c != 1 for c in coordinates)):
-    return iterate(clip, core.std.Maximum, iterations)
-
-  coordinates = list(coordinates)
-  element = np.array(coordinates[:4] + [1] + coordinates[4:], dtype=np.uint8).reshape(3, 3)
-
-  return eoe.vsnp.array_eval(clip, lambda n, array: cv2.dilate(array[:, :, 0], element, iterations=iterations)[:, :, np.newaxis])
-
-
 # Zastin
 def mt_xxpand_multi(clip, sw=1, sh=None, mode='square', planes=None, start=0, M__imum=core.std.Maximum, **params):
   sh = fallback(sh, sw)
