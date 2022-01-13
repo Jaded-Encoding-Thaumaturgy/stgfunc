@@ -81,13 +81,13 @@ def isGray(clip: vs.VideoNode) -> bool:
     return clip.format.color_family == vs.GRAY
 
 
-def checkValue(condition: bool, error_message: str):
+def checkValue(condition: bool, error_message: str) -> None:
     if condition:
         raise ValueError(error_message)
 
 
 @disallow_variable_format
-def checkSimilarClips(clipa: vs.VideoNode, clipb: vs.VideoNode):
+def checkSimilarClips(clipa: vs.VideoNode, clipb: vs.VideoNode) -> bool:
     assert isinstance(clipa, vs.VideoNode) and clipa.format
     assert isinstance(clipb, vs.VideoNode) and clipb.format
     return clipa.height == clipb.height and clipa.width == clipb.width and clipa.format.id == clipb.format.id

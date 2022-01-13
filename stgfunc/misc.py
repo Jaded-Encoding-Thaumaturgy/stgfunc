@@ -39,7 +39,7 @@ def set_output(clip: vs.VideoNode, text: Union[bool, int, Tuple[int, int]] = Tru
 
 def source(
     file: Union[str, Path], depth: Optional[int] = None, ref: Optional[vs.VideoNode] = None,
-    force_lsmas: bool = False, matrix_prop: Union[bool, int] = None, **index_args: Any
+    force_lsmas: bool = False, matrix_prop: Optional[int] = None, **index_args: Any
 ) -> vs.VideoNode:
     """
     Generic clip import function.
@@ -187,7 +187,7 @@ def get_mime_from_file_header(fbytes) -> Tuple[Union[str, None], Union[str, None
     return (info["type"], info["mime"])
 
 
-def get_ffprobe_stream_properties(filename: str, stream_type: str = "video", ffprobe_path="ffprobe"):
+def get_ffprobe_stream_properties(filename: str, stream_type: str = "video", ffprobe_path="ffprobe") -> Any:
     checkValue(stream_type not in {'video', 'audio'}, "Stream type not supported.")
 
     if not which(ffprobe_path):
@@ -214,7 +214,7 @@ def get_ffprobe_stream_properties(filename: str, stream_type: str = "video", ffp
     return ffprobe_data['streams'][0]
 
 
-def isMPLS(filename: str, /):
+def isMPLS(filename: str, /) -> bool:
     try:
         with open(filename, "rb") as file:
             head = file.read(8).decode("UTF-8")
@@ -225,7 +225,7 @@ def isMPLS(filename: str, /):
 
 
 @cache
-def _get_shader(name: str):
+def _get_shader(name: str) -> str:
     return path.join(path.dirname(__file__), rf".\.shaders\{name}")
 
 
