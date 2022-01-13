@@ -5,7 +5,7 @@ import os
 import random
 import subprocess
 from pathlib import Path
-from typing import BinaryIO, Dict, Any, NamedTuple, cast, Callable, Union, TypeVar
+from typing import BinaryIO, Dict, Any, NamedTuple, cast, Callable, TypeVar
 
 import vapoursynth as vs
 from lvsfunc.render import clip_async_render
