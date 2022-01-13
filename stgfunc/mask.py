@@ -2,9 +2,9 @@ import os
 import lvsfunc as lvf
 import vapoursynth as vs
 from pathlib import Path
-from vsutil import iterate
 from vsmask.edge import Kirsch
 from lvsfunc.types import VSFunction
+from vsutil import depth, iterate, get_depth
 from typing import NamedTuple, List, Optional
 
 from .misc import source as stgsource
@@ -92,3 +92,31 @@ def linemask(clip_y: vs.VideoNode) -> vs.VideoNode:
         generate_detail_mask(clip_y, 0.011),
         generate_detail_mask(clip_y, 0.013)
     ], "x y + z a + + b c + +")
+
+
+def getCreditMask(
+    clip: vs.VideoNode, ref: vs.VideoNode, thr: int,
+    blur: Optional[float] = 1.65, prefilter: bool = True,
+    expand: int = 8
+) -> vs.VideoNode:
+    from vardefunc.mask import Difference
+
+    if blur is None or blur <= 0:
+        blur_src, blur_ref = clip, ref
+    else:
+        blur_src = clip.bilateral.Gaussian(blur)
+        blur_ref = ref.bilateral.Gaussian(blur)
+
+    ed_mask = Difference().creditless(
+        blur_src[0] + blur_src, blur_src, blur_ref,
+        start_frame=0, thr=thr, prefilter=prefilter
+    )
+
+    credit_mask = depth(ed_mask, 16)
+    credit_mask = iterate(credit_mask, core.std.Minimum, 6)
+    credit_mask = iterate(credit_mask, lambda x: x.std.Minimum().std.Maximum(), 8)
+    if expand:
+        credit_mask = iterate(credit_mask, core.std.Maximum, expand)
+    credit_mask = credit_mask.std.Inflate().std.Inflate().std.Inflate()
+
+    return depth(credit_mask, get_depth(clip))
