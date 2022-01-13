@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from math import sqrt, pow, sin, cos, pi
 
 
-class EasingBase(ABC):
+class EasingBaseMeta(ABC):
     limit: Tuple[int, int] = (0, 1)
 
     def __init__(self, start: int = 0, end: int = 1, duration: int = 1) -> None:
@@ -17,10 +17,24 @@ class EasingBase(ABC):
     def func(self, t: float) -> float:
         pass
 
+    @abstractmethod
+    def ease(self, alpha: float) -> float:
+        pass
+
+
+class EasingBase(EasingBaseMeta):
     def ease(self, alpha: float) -> float:
         t = self.limit[0] * (1 - alpha) + self.limit[1] * alpha / self.duration
         a = self.func(t)
         return self.end * a + self.start * (1 - a)
+
+
+class OnAxis(EasingBaseMeta):
+    def func(self, t: float) -> float:
+        return 0
+
+    def ease(self, alpha: float) -> float:
+        return 0
 
 
 class Linear(EasingBase):
