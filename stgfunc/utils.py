@@ -1,5 +1,7 @@
 import lvsfunc as lvf
+from math import floor
 import vapoursynth as vs
+from fractions import Fraction
 from lvsfunc.types import Range
 from typing import Tuple, Union, List, Sequence, Optional, Dict, Any
 from vsutil import depth as vdepth, get_depth, disallow_variable_format
@@ -89,3 +91,23 @@ def checkSimilarClips(clipa: vs.VideoNode, clipb: vs.VideoNode):
     assert isinstance(clipa, vs.VideoNode) and clipa.format
     assert isinstance(clipb, vs.VideoNode) and clipb.format
     return clipa.height == clipb.height and clipa.width == clipb.width and clipa.format.id == clipb.format.id
+
+
+def change_fps(clip: vs.VideoNode, fps: Fraction) -> vs.VideoNode:
+    src_num, src_den = clip.fps_num, clip.fps_den
+    dest_num, dest_den = fps.as_integer_ratio()
+
+    if (dest_num, dest_den) == (src_num, src_den):
+        return clip
+
+    factor = (dest_num / dest_den) * (src_den / src_num)
+
+    def _frame_adjuster(n: int) -> vs.VideoNode:
+        original = floor(n / factor)
+        return clip[original] * (clip.num_frames + 100)
+
+    new_fps_clip = clip.std.BlankClip(
+        length=floor(clip.num_frames * factor), fpsnum=dest_num, fpsden=dest_den
+    )
+
+    return new_fps_clip.std.FrameEval(_frame_adjuster)
