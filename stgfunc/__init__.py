@@ -1,4 +1,4 @@
-from . import (mask, misc, other, oyster, traiNNing, transitions, utils)  # noqa
+from . import (easing, mask, misc, other, oyster, traiNNing, transitions, utils)  # noqa
 
 src = misc.source
 depth = utils.depth
