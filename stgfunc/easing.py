@@ -211,12 +211,12 @@ class BounceEaseOut(EasingBase):
         t2 = pow(t, 2)
 
         if t < 4 / 11:
-            return 121.0 * t2 / 16.0
+            return 121 * t2 / 16
         elif t < 8 / 11:
-            return (363.0 / 40.0 * t2) - (99.0 / 10.0 * t) + 17.0 / 5.0
+            return (363 / 40 * t2) - (99 / 10 * t) + 17 / 5
         elif t < 9 / 10:
-            return (4356.0 / 361.0 * t2) - (35442.0 / 1805.0 * t) + 16061.0 / 1805.0
-        return (54.0 / 5.0 * t2) - (513.0 / 25.0 * t) + 268.0 / 25.0
+            return (4356 / 361 * t2) - (35442 / 1805 * t) + 16061 / 1805
+        return (54 / 5 * t2) - (513 / 25 * t) + 268 / 25
 
 
 class BounceEaseInOut(EasingBase):
