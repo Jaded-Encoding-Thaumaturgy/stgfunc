@@ -54,8 +54,8 @@ def disallow_variable_resolution(function: F, only_first: bool = False) -> F:
 
     @wraps(function)
     def _check(*args: Any, **kwargs: Any) -> Any:
-        if ((only_first and not all(args[0].width, args[0].height)) or any([
-            not all(a.width, a.height) for a in args if isinstance(a, vs.VideoNode)
+        if ((only_first and not all([args[0].width, args[0].height])) or not all([
+            c for s in [[a.width, a.height] for a in args if isinstance(a, vs.VideoNode)] for c in s
         ])):
             raise ValueError('Variable-resolution clips not supported.')
 
