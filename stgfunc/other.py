@@ -5,6 +5,7 @@ from vsutil import fallback
 from lvsfunc.util import get_prop
 from typing import List, Callable, Iterable, Protocol, Sequence, TypeVar, Union, Tuple, Literal, Optional
 
+from .utils import get_planes
 from .types import SingleOrArrOpt
 
 core = vs.core
@@ -17,7 +18,8 @@ def mt_xxpand_multi(
 ) -> List[vs.VideoNode]:
     sh = fallback(sh, sw)
     assert clip.format
-    planes = list(range(clip.format.num_planes)) if planes is None else [planes] if isinstance(planes, int) else planes
+
+    planes = get_planes(planes, clip)
 
     if mode == 'ellipse':
         coordinates = [[1] * 8, [0, 1, 0, 1, 1, 0, 1, 0], [0, 1, 0, 1, 1, 0, 1, 0]]
