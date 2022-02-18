@@ -121,3 +121,30 @@ def getCreditMask(
 
     return credit_mask if bits == 16 else depth(credit_mask, bits)
 
+
+# Stolen from Light by yours truly <3
+def detail_mask(
+    clip: vs.VideoNode,
+    sigma: float = 1.0, rxsigma: List[int] = [50, 200, 350],
+    pf_sigma: Optional[float] = 1.0, brz: Tuple[int, int] = (2500, 4500),
+    rg_mode: int = 17
+) -> vs.VideoNode:
+    bits, clip = get_bits(clip)
+
+    clip_y = get_y(clip)
+
+    pf = core.bilateral.Gaussian(clip_y, pf_sigma) if pf_sigma else clip_y
+    ret = pf.retinex.MSRCP(rxsigma, None, 0.005)
+
+    blur_ret = core.bilateral.Gaussian(ret, sigma)
+    blur_ret_diff = combine([blur_ret, ret], ExprOp.SUB).std.Deflate()
+    blur_ret_brz = iterate(blur_ret_diff, core.std.Inflate, 4)
+    blur_ret_brz = blur_ret_brz.std.Binarize(brz[0]).morpho.Close(size=8)
+
+    prewitt_mask = clip_y.std.Prewitt().std.Binarize(brz[1]).std.Deflate().std.Inflate()
+    prewitt_brz = prewitt_mask.std.Binarize(brz[1]).morpho.Close(size=4)
+
+    merged = combine([blur_ret_brz, prewitt_brz], ExprOp.ADD)
+    rm_grain = core.rgvs.RemoveGrain(merged, rg_mode)
+
+    return rm_grain if bits == 16 else depth(rm_grain, bits)
