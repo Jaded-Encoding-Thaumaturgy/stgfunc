@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import string
 import lvsfunc as lvf
-from math import floor
+from enum import Enum
 import vapoursynth as vs
+from math import ceil, floor
 from fractions import Fraction
 from lvsfunc.types import Range
 from vsutil import depth as vdepth, get_depth
@@ -13,12 +15,64 @@ from .types import SingleOrArr, SingleOrArrOpt, SupportsString, disallow_variabl
 core = vs.core
 
 T = TypeVar('T')
+StrArr = SingleOrArr[SupportsString]
+
+vs_alph = (alph := list(string.ascii_lowercase))[(idx := alph.index('x')):] + alph[:idx]
+
+
 @disallow_variable_format
 def get_planes(_planes: SingleOrArrOpt[int], clip: vs.VideoNode) -> List[int]:
     assert clip.format
     n_planes = clip.format.num_planes
 
     return [p for p in to_arr(range(n_planes) if _planes is None else _planes) if p < n_planes]  # type: ignore
+
+
+class ExprOp(str, Enum):
+    MAX = "max"
+    MIN = "min"
+    ADD = "+"
+    SUB = "-"
+    MUL = "*"
+    DIV = "/"
+    POW = "pow"
+    GT = ">"
+    LT = "<"
+    EQ = "="
+    GTE = ">="
+    LTE = "<="
+    AND = "and"
+    OR = "or"
+    XOR = "xor"
+    SWAP = "swap"
+    SWAPN = "swapN"
+
+    def __str__(self) -> str:
+        return self.value
+
+
+def combine(
+    clips: Sequence[vs.VideoNode], operator: ExprOp = ExprOp.MAX, planes: List[int] | None = None,
+    prefix: StrArr = '', suffix: StrArr = '', expr_prefix: StrArr = '', expr_suffix: StrArr = ''
+) -> vs.VideoNode:
+    n_clips = len(clips)
+
+    prefixes = ((p := to_arr(prefix)) * max(1, ceil(n_clips / len(p))))
+    suffixes = ((s := to_arr(suffix)) * max(1, ceil(n_clips / len(s))))
+    expr_arr = [c for s[:n_clips + 1] in zip(prefixes, vs_alph, suffixes) for c in s] + [operator] * (n_clips - 1)
+
+    return expr(clips, [*to_arr(expr_prefix), *expr_arr, *to_arr(expr_suffix)], planes)
+
+
+def expr(clips: Sequence[vs.VideoNode], expr: StrArr, planes: List[int] | None) -> vs.VideoNode:
+    firstclip = clips[0]
+    assert firstclip.format
+
+    expr_string = ' '.join([x for x in map(lambda x: str(x).strip(), expr) if x])  # type: ignore
+
+    planesl = get_planes(planes, firstclip)
+
+    return core.std.Expr(clips, [expr_string if x in planesl else '' for x in range(firstclip.format.num_planes)])
 
 
 @disallow_variable_format
