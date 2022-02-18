@@ -5,11 +5,20 @@ from math import floor
 import vapoursynth as vs
 from fractions import Fraction
 from lvsfunc.types import Range
-from typing import Tuple, Union, List, Sequence, Optional, Dict, Any
-from vsutil import depth as vdepth, get_depth, disallow_variable_format
+from vsutil import depth as vdepth, get_depth
+from typing import Tuple, Union, List, Sequence, Dict, Any, TypeVar
 
+from .types import SingleOrArr, SingleOrArrOpt, SupportsString, disallow_variable_format
 
 core = vs.core
+
+T = TypeVar('T')
+@disallow_variable_format
+def get_planes(_planes: SingleOrArrOpt[int], clip: vs.VideoNode) -> List[int]:
+    assert clip.format
+    n_planes = clip.format.num_planes
+
+    return [p for p in to_arr(range(n_planes) if _planes is None else _planes) if p < n_planes]  # type: ignore
 
 
 @disallow_variable_format
@@ -113,3 +122,5 @@ def change_fps(clip: vs.VideoNode, fps: Fraction) -> vs.VideoNode:
     )
 
     return new_fps_clip.std.FrameEval(_frame_adjuster)
+def to_arr(array: SingleOrArr[T]) -> List[T]:
+    return list(array) if (type(array) in [list, tuple, range]) else [array]  # type: ignore
