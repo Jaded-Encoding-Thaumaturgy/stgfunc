@@ -4,10 +4,11 @@ import vapoursynth as vs
 from pathlib import Path
 from vsmask.edge import Kirsch
 from lvsfunc.types import VSFunction
-from vsutil import depth, iterate, get_depth
-from typing import NamedTuple, List, Optional
+from vsutil import depth, iterate, get_y
+from typing import NamedTuple, List, Optional, Tuple
 
 from .misc import source as stgsource
+from .utils import get_bits, combine, ExprOp
 
 core = vs.core
 
@@ -20,7 +21,7 @@ class MaskCredit(NamedTuple):
 
 def perform_masks_credit(path: Path) -> List[MaskCredit]:
     if not os.path.isdir(path):
-        raise ValueError("stgfunc.mask.perform_mask_credit: 'path' must be an existing path!")
+        raise ValueError("perform_mask_credit: 'path' must be an existing path!")
 
     files = [file.stem for file in path.glob('*')]
 
@@ -35,7 +36,7 @@ def perform_masks_credit(path: Path) -> List[MaskCredit]:
     ]
 
 
-def to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
+def _to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
     return core.std.AssumeFPS(clip, ref).resize.Point(format=vs.GRAY16)
 
 
@@ -46,7 +47,7 @@ def manual_masking(
     manual_masks = perform_masks_credit(Path(path))
 
     for mask in manual_masks:
-        maskclip = to_gray(mask.mask, src)
+        maskclip = _to_gray(mask.mask, src)
         maskclip = mapfunc(maskclip) if mapfunc else maskclip.std.Binarize()
         clip = lvf.rfs(clip, core.std.MaskedMerge(clip, src, maskclip), [(mask.start_frame, mask.end_frame)])
 
@@ -56,7 +57,7 @@ def manual_masking(
 def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[VSFunction] = None) -> vs.VideoNode:
     mask = MaskCredit(stgsource(path), 0, 0)
 
-    maskclip = to_gray(mask.mask, clip)
+    maskclip = _to_gray(mask.mask, clip)
 
     return mapfunc(maskclip) if mapfunc else maskclip.std.Binarize()
 
@@ -64,17 +65,16 @@ def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[VSFunction]
 def generate_detail_mask(clip: vs.VideoNode, thr: float = 0.015) -> vs.VideoNode:
     general_mask = lvf.mask.detail_mask(clip, rad=1, brz_a=1, brz_b=24.3 * thr)
 
-    return core.std.Expr([
-        core.std.Expr([
+    return combine([
+        combine([
             lvf.mask.detail_mask(clip, brz_a=1, brz_b=2 * thr),
             iterate(general_mask, core.std.Maximum, 3).std.Maximum().std.Inflate()
-        ], "x y -"), general_mask.std.Maximum()
-    ], "x y -")
+        ], ExprOp.MIN), general_mask.std.Maximum()
+    ], ExprOp.MIN)
 
 
 def tcanny(clip: vs.VideoNode, thr: float, openCL: bool = False) -> vs.VideoNode:
-    gaussian = clip.bilateral.Gaussian(1)
-    msrcp = core.retinex.MSRCP(gaussian, sigma=[50, 200, 350], upper_thr=thr)
+    msrcp = clip.bilateral.Gaussian(1).retinex.MSRCP([50, 200, 350], None, thr)
 
     params = dict(mode=1, sigma=1)
 
@@ -84,14 +84,14 @@ def tcanny(clip: vs.VideoNode, thr: float, openCL: bool = False) -> vs.VideoNode
 
 
 def linemask(clip_y: vs.VideoNode) -> vs.VideoNode:
-    return core.std.Expr([
+    return combine([
         Kirsch().get_mask(clip_y),
         tcanny(clip_y, 0.000125),
         tcanny(clip_y, 0.0025),
         tcanny(clip_y, 0.0055),
         generate_detail_mask(clip_y, 0.011),
         generate_detail_mask(clip_y, 0.013)
-    ], "x y + z a + + b c + +")
+    ], ExprOp.ADD)
 
 
 def getCreditMask(
@@ -112,11 +112,12 @@ def getCreditMask(
         start_frame=0, thr=thr, prefilter=prefilter
     )
 
-    credit_mask = depth(ed_mask, 16)
+    bits, credit_mask = get_bits(ed_mask)
     credit_mask = iterate(credit_mask, core.std.Minimum, 6)
     credit_mask = iterate(credit_mask, lambda x: x.std.Minimum().std.Maximum(), 8)
     if expand:
         credit_mask = iterate(credit_mask, core.std.Maximum, expand)
     credit_mask = credit_mask.std.Inflate().std.Inflate().std.Inflate()
 
-    return depth(credit_mask, get_depth(clip))
+    return credit_mask if bits == 16 else depth(credit_mask, bits)
+
