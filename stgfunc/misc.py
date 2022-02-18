@@ -75,7 +75,7 @@ def source(
     mimeType, mimeName = getMimeType(file)
     extention = path.splitext(file)[1][1:].lower()
 
-    def checkMimeExt(mType, ext):
+    def checkMimeExt(mType: str, ext: str) -> bool:
         return mType == mimeType and extention == ext
 
     checkValue(mimeType is None, "source: 'The source file format is not supported'")
@@ -94,7 +94,7 @@ def source(
         else:
             if (extention == 'm2ts') or (mimeName in ['mpeg-tts', 'hevc', 'mpeg2', 'vc1']):
                 clip = core.lsmas.LWLibavSource(file, **index_args)
-            elif mimeName in ['h264', 'h263', 'vp8', 'mpeg1', 'mpeg4', 'ffv1'] or checkMimeExt('av1', 'ivf') or checkMimeExt('vp9', 'mkv'):
+            elif mimeName in ['h264', 'h263', 'vp8', 'mpeg1', 'mpeg4', 'ffv1'] or checkMimeExt('av1', 'ivf') or checkMimeExt('vp9', 'mkv'):  # noqa
                 clip = core.ffms2.Source(file, **index_args)
             elif mimeName == 'mpeg1':
                 clip = core.ffms2.Source(file, seekmode=0, **index_args)
@@ -140,7 +140,7 @@ def getMimeType(filename: str, /) -> Tuple[Optional[str], ...]:
     return tuple(x.lower() if x else x for x in info if isinstance(x, str) or x is None)
 
 
-def getInfoFFProbe(filename: str, audio: bool = False, /):
+def getInfoFFProbe(filename: str, audio: bool = False, /) -> Any:
     try:
         info = get_ffprobe_stream_properties(filename, "audio" if audio else "video")
         return (info["codec_type"], info["codec_name"])
@@ -148,7 +148,7 @@ def getInfoFFProbe(filename: str, audio: bool = False, /):
         return None
 
 
-def getInfoFromFileHeaders(filename: str, /):
+def getInfoFromFileHeaders(filename: str, /) -> Optional[Tuple[str, ...]]:
     try:
         with open(filename, "rb") as file:
             ftype, fmime = get_mime_from_file_header(file.read(128))
@@ -162,7 +162,7 @@ def getInfoFromFileHeaders(filename: str, /):
         return None
 
 
-def get_mime_from_file_header(fbytes) -> Tuple[Union[str, None], Union[str, None]]:
+def get_mime_from_file_header(fbytes: bytearray) -> Tuple[Union[str, None], Union[str, None]]:
     global file_headers_data
 
     if file_headers_data is None:
@@ -187,7 +187,7 @@ def get_mime_from_file_header(fbytes) -> Tuple[Union[str, None], Union[str, None
     return (info["type"], info["mime"])
 
 
-def get_ffprobe_stream_properties(filename: str, stream_type: str = "video", ffprobe_path="ffprobe") -> Any:
+def get_ffprobe_stream_properties(filename: str, stream_type: str = "video", ffprobe_path: str = "ffprobe") -> Any:
     checkValue(stream_type not in {'video', 'audio'}, "Stream type not supported.")
 
     if not which(ffprobe_path):

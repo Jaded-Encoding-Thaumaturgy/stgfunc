@@ -1,15 +1,19 @@
+from __future__ import annotations
+
 import vapoursynth as vs
 from vsutil import fallback
 from lvsfunc.util import get_prop
 from typing import List, Callable, Iterable, Protocol, Sequence, TypeVar, Union, Tuple, Literal, Optional
+
+from .types import SingleOrArrOpt
 
 core = vs.core
 
 
 # Zastin
 def mt_xxpand_multi(
-    clip: vs.VideoNode, sw: int = 1, sh: Optional[int] = None, mode: Literal['ellipse', 'losange', 'square'] = 'square',
-    planes: Union[int, Sequence[int]] = None, start: int = 0, M__imum=core.std.Maximum, **params
+    clip: vs.VideoNode, sw: int = 1, sh: int | None = None, mode: Literal['ellipse', 'losange', 'square'] = 'square',
+    planes: SingleOrArrOpt[int] = None, start: int = 0, M__imum=core.std.Maximum, **params
 ) -> List[vs.VideoNode]:
     sh = fallback(sh, sw)
     assert clip.format
@@ -75,11 +79,8 @@ def bestframeselect(
 
         if do_debug:
             return clips[best].text.Text(
-                "\n".join([
-                    f"Prop: {prop}",
-                    *[f"{i}: {s}"for i, s in enumerate(scores)],
-                    f"Best: {best}"
-                ]), alignment)
+                "\n".join([f"Prop: {prop}", *[f"{i}: {s}"for i, s in enumerate(scores)], f"Best: {best}"]), alignment
+            )
 
         return clips[best]
 

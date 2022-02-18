@@ -49,17 +49,15 @@ T = TypeVar('T')
 
 
 def ensure_ffmpeg_GBR(func: Callable[[T], vs.VideoNode]) -> Callable[[T], vs.VideoNode]:
-    def _to_BGR(self, *args: Any, **kwargs: Any) -> vs.VideoNode:
+    def _to_BGR(self: Any, *args: Any, **kwargs: Any) -> vs.VideoNode:
         clip = func(self, *args, **kwargs)
 
         try:
-            return_gbr = self.is_train if isinstance(
-                self, TraiNNing) else self.trainer.is_train
+            return_gbr = self.is_train if isinstance(self, TraiNNing) else self.trainer.is_train
         except AttributeError:
             return_gbr = True
 
-        rgb = clip.resize.Bicubic(
-            format=vs.RGB24, dither_type='error_diffusion')
+        rgb = clip.resize.Bicubic(format=vs.RGB24, dither_type='error_diffusion')
 
         return rgb.std.ShufflePlanes([1, 2, 0], vs.RGB) if return_gbr else rgb
     return _to_BGR
@@ -75,8 +73,7 @@ class PrepareDataset:
 
         print('Checking clips lengths...')
         if (length := self.trainer.hr_clip.num_frames) == self.trainer.lr_clip.num_frames:
-            frames = sorted(random.sample(
-                population=range(length), k=round(length / 2)))
+            frames = sorted(random.sample(population=range(length), k=round(length / 2)))
         else:
             raise IndexError("LR and HR aren't the same length!")
 

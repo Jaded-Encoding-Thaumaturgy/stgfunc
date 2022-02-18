@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import lvsfunc as lvf
 from math import floor
 import vapoursynth as vs
@@ -35,7 +37,7 @@ def squaremask(clip: vs.VideoNode, width: int, height: int, offset_x: int, offse
 def replace_squaremask(
     clipa: vs.VideoNode, clipb: vs.VideoNode, mask_params: Tuple[int, int, int, int],
     ranges: Union[Range, List[Range], None] = None,
-    blur_sigma: Optional[int] = None, invert: bool = False
+    blur_sigma: int | None = None, invert: bool = False
 ) -> vs.VideoNode:
     assert clipa.format
     assert clipb.format
@@ -63,9 +65,9 @@ def freeze_replace_mask(
 
 
 def depth(*clips_depth: vs.VideoNode, **kwargs: Dict[str, Any]) -> Sequence[vs.VideoNode]:
-    assert isinstance(clips_depth[-1], int)
+    assert isinstance(clips_depth[-1], int)  # type: ignore
 
-    clips = [vdepth(clip, clips_depth[-1], **kwargs) for clip in clips_depth[:-1]]
+    clips = [vdepth(clip, clips_depth[-1], **kwargs) for clip in clips_depth[:-1]]  # type: ignore
 
     return clips[0] if len(clips) == 1 else clips
 

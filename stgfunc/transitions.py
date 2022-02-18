@@ -7,8 +7,9 @@ from fractions import Fraction
 from lvsfunc.util import clamp_values
 from lvsfunc.kernels import Kernel, Catrom
 from typing import NamedTuple, Type, Union, Tuple
-from vsutil import insert_clip, disallow_variable_format
+from vsutil import insert_clip
 
+from .types import disallow_variable_format
 from .easing import EasingBaseMeta, Linear, OnAxis
 from .utils import checkSimilarClips, change_fps
 
@@ -59,7 +60,8 @@ def fade_out_freeze(clip: vs.VideoNode, start: int, end: int, function: Type[Eas
 
 def crossfade(
         clipa: vs.VideoNode, clipb: vs.VideoNode, function: Type[EasingBaseMeta],
-        debug: Union[bool, int, Tuple[int, int]] = False) -> vs.VideoNode:
+        debug: Union[bool, int, Tuple[int, int]] = False
+) -> vs.VideoNode:
     if not checkSimilarClips(clipa, clipb):
         raise ValueError('crossfade: Both clips must have the same length, dimensions and format.')
 
