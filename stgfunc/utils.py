@@ -176,5 +176,15 @@ def change_fps(clip: vs.VideoNode, fps: Fraction) -> vs.VideoNode:
     )
 
     return new_fps_clip.std.FrameEval(_frame_adjuster)
+
+
+def weighted_merge(*weighted_clips: Tuple[vs.VideoNode, float]) -> vs.VideoNode:
+    assert len(weighted_clips) <= len(vs_alph), ValueError("weighted_merge: Too many clips!")
+
+    clips, weights = zip(*weighted_clips)
+
+    return combine(clips, ExprOp.ADD, None, weights, ExprOp.MUL, None, [sum(weights), ExprOp.DIV])
+
+
 def to_arr(array: SingleOrArr[T]) -> List[T]:
     return list(array) if (type(array) in [list, tuple, range]) else [array]  # type: ignore
