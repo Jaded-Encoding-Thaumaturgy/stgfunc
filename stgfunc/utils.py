@@ -12,6 +12,7 @@ from typing import Tuple, Union, List, Sequence, Dict, Any, TypeVar
 
 from .types import SingleOrArr, SingleOrArrOpt, SupportsString, disallow_variable_format
 
+
 core = vs.core
 
 T = TypeVar('T')

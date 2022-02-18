@@ -1,17 +1,19 @@
 from __future__ import annotations
 
-import enum
 import os
+import enum
 import random
 import subprocess
-from pathlib import Path
-from typing import BinaryIO, Dict, Any, NamedTuple, cast, Callable, TypeVar
-
 import vapoursynth as vs
+from pathlib import Path
 from lvsfunc.render import clip_async_render
+from typing import BinaryIO, Dict, Any, NamedTuple, cast, Callable, TypeVar
 from lvsfunc.progress import BarColumn, FPSColumn, Progress, TextColumn, TimeRemainingColumn
 
+
 core = vs.core
+
+
 # Mostly code and base idea from LightArrowsEXE and Vardë,
 # rewrote a bunch of it and put everything into a handy class
 

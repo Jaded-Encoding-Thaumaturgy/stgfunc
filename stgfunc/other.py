@@ -8,6 +8,7 @@ from typing import List, Callable, Iterable, Protocol, Sequence, TypeVar, Union,
 from .utils import get_planes
 from .types import SingleOrArrOpt
 
+
 core = vs.core
 
 

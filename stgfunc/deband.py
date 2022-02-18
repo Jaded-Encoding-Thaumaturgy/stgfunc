@@ -5,6 +5,7 @@ from typing import Dict, Union, List, Any
 from .utils import get_bits
 from .mask import detail_mask
 
+
 core = vs.core
 
 

@@ -2,13 +2,13 @@ import os
 import lvsfunc as lvf
 import vapoursynth as vs
 from pathlib import Path
-from vsmask.edge import Kirsch
 from lvsfunc.types import VSFunction
 from vsutil import depth, iterate, get_y
 from typing import NamedTuple, List, Optional, Tuple
 
 from .misc import source as stgsource
 from .utils import get_bits, combine, ExprOp
+
 
 core = vs.core
 
@@ -84,6 +84,8 @@ def tcanny(clip: vs.VideoNode, thr: float, openCL: bool = False) -> vs.VideoNode
 
 
 def linemask(clip_y: vs.VideoNode) -> vs.VideoNode:
+    from vsmask.edge import Kirsch
+
     return combine([
         Kirsch().get_mask(clip_y),
         tcanny(clip_y, 0.000125),

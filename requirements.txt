@@ -1,2 +1,3 @@
 VapourSynth>=57
 lvsfunc>=0.3.11
+vsutil>=0.6.0

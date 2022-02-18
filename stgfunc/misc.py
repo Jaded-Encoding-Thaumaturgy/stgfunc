@@ -6,10 +6,12 @@ import vapoursynth as vs
 from shutil import which
 from pathlib import Path
 from functools import cache
-from .utils import checkValue
 from os import access, path, R_OK
 from subprocess import check_output
 from typing import Tuple, Any, Optional, Union
+
+from .utils import checkValue
+
 
 core = vs.core
 
