@@ -10,7 +10,7 @@ from os import access, path, R_OK
 from subprocess import check_output
 from typing import Tuple, Any, Optional, Union
 
-from .utils import checkValue
+from .utils import checkValue, destructure
 
 
 core = vs.core
@@ -108,16 +108,17 @@ def source(
         if ref:
             clip = clip * (ref.num_frames - 1)
 
+    if isinstance(matrix_prop, int):
+        clip = clip.std.SetFrameProp('_Matrix', intval=matrix_prop)
+
     if ref:
-        assert ref.format
-        clip = core.std.AssumeFPS(clip, fpsnum=ref.fps.numerator, fpsden=ref.fps.denominator)
-        clip = core.resize.Bicubic(clip, width=ref.width, height=ref.height, format=ref.format.id, matrix=matrix_prop)
+        width, height, fps, format = destructure(ref)
+
+        clip = clip.std.AssumeFPS(None, fps.numerator, fps.denominator)
+        clip = core.resize.Bicubic(clip, width=width, height=height, format=format.id, matrix=matrix_prop)
 
     if depth:
         clip = vsutil.depth(clip, depth)
-
-    if isinstance(matrix_prop, int):
-        clip = clip.std.SetFrameProp('_Matrix', intval=matrix_prop)
 
     return clip
 
