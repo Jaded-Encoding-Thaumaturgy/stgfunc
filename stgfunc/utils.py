@@ -7,6 +7,7 @@ import vapoursynth as vs
 from math import ceil, floor
 from fractions import Fraction
 from lvsfunc.types import Range
+from lvsfunc.kernels import Point
 from vsutil import depth as vdepth, get_depth
 from typing import Tuple, Union, List, Sequence, Dict, Any, TypeVar
 
@@ -203,3 +204,9 @@ def weighted_merge(*weighted_clips: Tuple[vs.VideoNode, float]) -> vs.VideoNode:
 
 def to_arr(array: SingleOrArr[T]) -> List[T]:
     return list(array) if (type(array) in [list, tuple, range]) else [array]  # type: ignore
+
+
+def pad_reflect(clip: vs.VideoNode, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> vs.VideoNode:
+    d_width, d_height = clip.width + left + right, clip.height + top + bottom
+
+    return Point(src_width=d_width, src_height=d_height).scale(clip, d_width, d_height, (-top, -left))
