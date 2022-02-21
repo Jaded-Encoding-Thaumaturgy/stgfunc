@@ -30,6 +30,17 @@ def get_planes(_planes: SingleOrArrOpt[int], clip: vs.VideoNode) -> List[int]:
 
 
 class ExprOp(str, Enum):
+    # 1 Argument
+    EXP = "exp"
+    LOG = "log"
+    SQRT = "sqrt"
+    SIN = "sin"
+    COS = "cos"
+    ABS = "abs"
+    NOT = "not"
+    DUP = "dup"
+    DUPN = "dupN"
+    # 2 Arguments
     MAX = "max"
     MIN = "min"
     ADD = "+"
@@ -47,6 +58,8 @@ class ExprOp(str, Enum):
     XOR = "xor"
     SWAP = "swap"
     SWAPN = "swapN"
+    # 3 Arguments
+    TERN = "?"
 
     def __str__(self) -> str:
         return self.value
