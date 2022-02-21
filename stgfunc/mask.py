@@ -36,7 +36,7 @@ def perform_masks_credit(path: Path) -> List[MaskCredit]:
     ]
 
 
-def _to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
+def to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
     return core.std.AssumeFPS(clip, ref).resize.Point(format=vs.GRAY16)
 
 
@@ -47,7 +47,7 @@ def manual_masking(
     manual_masks = perform_masks_credit(Path(path))
 
     for mask in manual_masks:
-        maskclip = _to_gray(mask.mask, src)
+        maskclip = to_gray(mask.mask, src)
         maskclip = mapfunc(maskclip) if mapfunc else maskclip.std.Binarize()
         clip = lvf.rfs(clip, core.std.MaskedMerge(clip, src, maskclip), [(mask.start_frame, mask.end_frame)])
 
@@ -57,7 +57,7 @@ def manual_masking(
 def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[VSFunction] = None) -> vs.VideoNode:
     mask = MaskCredit(stgsource(path), 0, 0)
 
-    maskclip = _to_gray(mask.mask, clip)
+    maskclip = to_gray(mask.mask, clip)
 
     return mapfunc(maskclip) if mapfunc else maskclip.std.Binarize()
 
