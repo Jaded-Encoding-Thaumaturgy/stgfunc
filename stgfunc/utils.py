@@ -17,6 +17,7 @@ core = vs.core
 
 T = TypeVar('T')
 StrArr = SingleOrArr[SupportsString]
+StrArrOpt = SingleOrArrOpt[SupportsString]
 
 vs_alph = (alph := list(string.ascii_lowercase))[(idx := alph.index('x')):] + alph[:idx]
 
@@ -67,7 +68,7 @@ class ExprOp(str, Enum):
 
 def combine(
     clips: Sequence[vs.VideoNode], operator: ExprOp = ExprOp.MAX, planes: List[int] | None = None,
-    prefix: StrArr = '', suffix: StrArr = '', expr_prefix: StrArr = '', expr_suffix: StrArr = ''
+    prefix: StrArrOpt = '', suffix: StrArrOpt = '', expr_prefix: StrArrOpt = '', expr_suffix: StrArrOpt = ''
 ) -> vs.VideoNode:
     n_clips = len(clips)
 
@@ -82,7 +83,7 @@ def expr(clips: Sequence[vs.VideoNode], expr: StrArr, planes: List[int] | None) 
     firstclip = clips[0]
     assert firstclip.format
 
-    expr_string = ' '.join([x for x in map(lambda x: str(x).strip(), expr) if x])  # type: ignore
+    expr_string = ' '.join([str(x).strip() for x in expr if x is not None and x != ''])  # type: ignore
 
     planesl = get_planes(planes, firstclip)
 
