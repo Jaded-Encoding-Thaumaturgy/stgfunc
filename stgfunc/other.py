@@ -3,47 +3,14 @@ from __future__ import annotations
 import vapoursynth as vs
 from vsutil import fallback
 from lvsfunc.util import get_prop
-from typing import List, Callable, Iterable, Protocol, Sequence, TypeVar, Union, Tuple, Literal, Optional
+from lvsfunc.types import VSFunction
+from typing import List, Callable, Iterable, Protocol, Sequence, TypeVar, Union, Tuple, Literal, Any
 
 from .utils import get_planes
 from .types import SingleOrArrOpt
 
 
 core = vs.core
-
-
-# Zastin
-def mt_xxpand_multi(
-    clip: vs.VideoNode, sw: int = 1, sh: int | None = None, mode: Literal['ellipse', 'losange', 'square'] = 'square',
-    planes: SingleOrArrOpt[int] = None, start: int = 0, M__imum=core.std.Maximum, **params
-) -> List[vs.VideoNode]:
-    sh = fallback(sh, sw)
-    assert clip.format
-
-    planes = get_planes(planes, clip)
-
-    if mode == 'ellipse':
-        coordinates = [[1] * 8, [0, 1, 0, 1, 1, 0, 1, 0], [0, 1, 0, 1, 1, 0, 1, 0]]
-    elif mode == 'losange':
-        coordinates = [[0, 1, 0, 1, 1, 0, 1, 0]] * 3
-    else:
-        coordinates = [[1] * 8] * 3
-
-    clips = [clip]
-
-    end = min(sw, sh) + start
-
-    for x in range(start, end):
-        clips += [M__imum(clips[-1], coordinates=coordinates[x % 3], planes=planes, **params)]
-
-    for x in range(end, end + sw - sh):
-        clips += [M__imum(clips[-1], coordinates=[0, 0, 0, 1, 1, 0, 0, 0], planes=planes, **params)]
-
-    for x in range(end, end + sh - sw):
-        clips += [M__imum(clips[-1], coordinates=[0, 1, 0, 0, 0, 0, 1, 0], planes=planes, **params)]
-
-    return clips
-
 
 T = TypeVar('T')
 
