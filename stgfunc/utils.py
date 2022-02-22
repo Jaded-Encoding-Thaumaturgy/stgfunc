@@ -209,6 +209,13 @@ def to_arr(array: Sequence[T] | T) -> List[T]:
     }) else [array])  # type: ignore
 
 
+def flatten(items: Iterable[T]) -> Iterable[T]:
+    for val in items:
+        if isinstance(val, Iterable) and not isinstance(val, (str, bytes)):
+            for sub_x in flatten(val):
+                yield sub_x
+        else:
+            yield val  # type: ignore
 
 
 def pad_reflect(clip: vs.VideoNode, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> vs.VideoNode:
