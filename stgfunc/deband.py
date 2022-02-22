@@ -12,8 +12,8 @@ core = vs.core
 
 
 def masked_f3kdb(
-    clip: vs.VideoNode, rad: int = 16, threshold: Union[int, List[int]] = 24,
-    grain: Union[int, List[int]] = [12, 0], mask_args: Dict[str, Any] = {}
+    clip: vs.VideoNode, rad: int = 16, threshold: SingleOrArr[int] = 24,
+    grain: SingleOrArr[int] = [12, 0], mask_args: Dict[str, Any] = {}
 ) -> vs.VideoNode:
     bits, clip = get_bits(clip)
     clip = depth(clip, 16)
@@ -28,11 +28,15 @@ def masked_f3kdb(
     return deband_masked if bits == 16 else depth(deband_masked, bits)
 
 
-class DebanderFN:
-    def __call__(self, clip: vs.VideoNode, threshold: int | Sequence[int], *args: Any, **kwargs: Any) -> vs.VideoNode:
+class DebanderFN():
+    def __call__(
+        self, clip: vs.VideoNode, threshold: SingleOrArr[SupportsFloat], *args: Any, **kwargs: Any
+    ) -> vs.VideoNode:
         ...
 
 
+@disallow_variable_format(only_first=True)
+@disallow_variable_resolution(only_first=True)
 def auto_deband(
     clip: vs.VideoNode, cambi_thr: float = 12.0, cambi_scale: float = 1.2,
     min_thr: int | float = 24, max_thr: int | float = 48, steps: int = 4,
