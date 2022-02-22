@@ -180,7 +180,7 @@ def freeze_replace_mask(
     return lvf.rfs(mask, masked_insert * mask.num_frames, frame_range)
 
 
-def depth(*clips_depth: vs.VideoNode, **kwargs: Dict[str, Any]) -> Sequence[vs.VideoNode]:
+def depth(*clips_depth: vs.VideoNode, **kwargs: Dict[str, Any]) -> Iterable[vs.VideoNode]:
     assert isinstance(clips_depth[-1], int)  # type: ignore
 
     clips = [vdepth(clip, clips_depth[-1], **kwargs) for clip in clips_depth[:-1]]  # type: ignore
@@ -206,8 +206,7 @@ def checkValue(condition: bool, error_message: str) -> None:
 
 @disallow_variable_format
 def checkSimilarClips(clipa: vs.VideoNode, clipb: vs.VideoNode) -> bool:
-    assert isinstance(clipa, vs.VideoNode) and clipa.format
-    assert isinstance(clipb, vs.VideoNode) and clipb.format
+    assert clipa.format and clipb.format
     return clipa.height == clipb.height and clipa.width == clipb.width and clipa.format.id == clipb.format.id
 
 
