@@ -69,6 +69,24 @@ class ExprOp(str, Enum):
     def __str__(self) -> str:
         return self.value
 
+    def __next__(self) -> ExprOp:
+        return self
+
+    def __iter__(self) -> Iterator[ExprOp]:
+        return cycle([self])
+
+    def __mul__(self, n: int) -> List[ExprOp]:  # type: ignore
+        return [self] * n
+
+
+def _combine_norm__ix(ffix: StrArrOpt, n_clips: int) -> List[SupportsString]:
+    if ffix is None:
+        return [''] * n_clips
+
+    ffix = [ffix] if (type(ffix) in {str, tuple}) else list(ffix)  # type: ignore
+
+    return ffix * max(1, ceil(n_clips / len(ffix)))
+
 
 def combine(
     clips: Sequence[vs.VideoNode], operator: ExprOp = ExprOp.MAX, planes: List[int] | None = None,
