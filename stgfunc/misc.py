@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import vsutil
 import inspect
@@ -10,7 +12,7 @@ from os import access, path, R_OK
 from subprocess import check_output
 from typing import Tuple, Any, Optional, Union
 
-from .utils import checkValue, destructure
+from .utils import checkValue, destructure, to_arr
 
 
 core = vs.core
@@ -21,20 +23,28 @@ index_formats_mimes = ['video/d2v', 'video/dgi']
 file_headers_filename = path.join(path.dirname(path.abspath(__file__)), "__file_headers.json")
 
 
-def set_output(clip: vs.VideoNode, text: Union[bool, int, Tuple[int, int]] = True) -> None:
+def set_output(clip: vs.VideoNode, text: bool | int | str | Tuple[int, int] | Tuple[int, int, str] = True) -> None:
     index = len(vs.get_outputs()) + 1
 
     if text:
         ref_id = str(id(clip))
-        ref_name = f"Clip {index}"
-        for x in inspect.currentframe().f_back.f_locals.items():  # type: ignore
-            if (str(id(x[1])) == ref_id):
-                ref_name = x[0]
-                break
+        arr = to_arr(text)
 
-        pos, scale = text if isinstance(text, tuple) else (text, 2) if isinstance(text, int) and text != True else (7, 2)  # noqa
+        if any([isinstance(x, str) for x in arr]):
+            ref_name = arr[-1]
+        else:
+            ref_name = f"Clip {index}"
 
-        clip = clip.text.Text(ref_name.title(), pos, scale)
+            for x in inspect.currentframe().f_back.f_locals.items():  # type: ignore
+                if (str(id(x[1])) == ref_id):
+                    ref_name = x[0]
+                    break
+
+            ref_name = ref_name.title()
+
+        pos, scale, title = (*text, ref_name)[:3] if isinstance(text, tuple) else (text, 2, ref_name) if isinstance(text, int) and text != True else (7, 2, ref_name)  # noqa
+
+        clip = clip.text.Text(title, pos, scale)
 
     clip.set_output(index)
 
