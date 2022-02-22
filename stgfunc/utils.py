@@ -203,10 +203,12 @@ def weighted_merge(*weighted_clips: Tuple[vs.VideoNode, float]) -> vs.VideoNode:
     clips, weights = zip(*weighted_clips)
 
     return combine(clips, ExprOp.ADD, None, weights, ExprOp.MUL, None, [sum(weights), ExprOp.DIV])
+def to_arr(array: Sequence[T] | T) -> List[T]:
+    return list(array if (type(array) in {
+        list, tuple, range, zip, set, map, enumerate
+    }) else [array])  # type: ignore
 
 
-def to_arr(array: SingleOrArr[T]) -> List[T]:
-    return list(array) if (type(array) in [list, tuple, range]) else [array]  # type: ignore
 
 
 def pad_reflect(clip: vs.VideoNode, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> vs.VideoNode:
