@@ -9,7 +9,7 @@ from vsutil import depth, get_y, get_w, join, get_depth, iterate, Dither
 
 from .misc import set_output
 from .mask import detail_mask
-from .utils import depth as sdepth, get_bits, combine, ExprOp, checkSimilarClips
+from .utils import depth as sdepth, get_bits, combine, ExprOp, destructure
 from .types import SingleOrArr, disallow_variable_format, disallow_variable_resolution
 
 
@@ -38,6 +38,9 @@ class DebanderFN():
         self, clip: vs.VideoNode, threshold: SingleOrArr[SupportsFloat], *args: Any, **kwargs: Any
     ) -> vs.VideoNode:
         ...
+
+
+__auto_deband_cache: Dict[str, Dict[str, Any]] = {}
 
 
 @disallow_variable_format(only_first=True)
@@ -124,15 +127,18 @@ def auto_deband(
     except ModuleNotFoundError:
         raise ModuleNotFoundError("auto_deband: 'missing dependency `adptvgrnMod`'")
 
-    assert clip.format and (ref_clip.format if ref_clip else True)
+    global __auto_deband_cache
+    assert clip.format
 
     cfamily = clip.format.color_family
 
     if cfamily not in (vs.GRAY, vs.YUV):
         raise ValueError("auto_deband: only YUV and GRAY clips are supported")
 
-    if ref_clip and not checkSimilarClips(clip, ref_clip):
-        raise ValueError("auto_deband: only YUV and GRAY clips are supported")
+    if ref_clip:
+        assert ref_clip.format
+        if clip.format.id != ref_clip.format.id:
+            raise ValueError("auto_deband: Clip and ref must be the same format!")
 
     is_gray = cfamily is vs.GRAY
 
@@ -141,45 +147,63 @@ def auto_deband(
 
     catrom = Catrom(dither_type=Dither.ERROR_DIFFUSION)
 
-    clip16, ref16 = sdepth(clip, ref_clip or clip, 16, dither_type=Dither.ERROR_DIFFUSION)  # type: ignore
+    clip16 = depth(clip, 16, dither_type=Dither.ERROR_DIFFUSION)
 
-    ref16 = get_y(ref16).std.Limiter(16 << 8, 235 << 8)
+    ref = ref_clip or clip
 
-    if downsample_h:
-        ref16 = Lanczos(0, dither_type=Dither.ERROR_DIFFUSION).scale(
-            ref16, get_w(downsample_h, ref16.width / ref16.height), downsample_h
+    cache_key = '_'.join(map(str, map(hash, {
+        ref, frozenset(cambi_args.items()), frozenset(cambi_args.values()), downsample_h
+    })))
+
+    if cache_key in __auto_deband_cache:
+        cambi, cambi_masks, banding_mask, graining_mask = destructure(__auto_deband_cache[cache_key])
+    else:
+        ref16 = depth(ref, 16, dither_type=Dither.ERROR_DIFFUSION)
+
+        ref16 = get_y(ref16).std.Limiter(16 << 8, 235 << 8)
+
+        if downsample_h:
+            ref16 = Lanczos(0, dither_type=Dither.ERROR_DIFFUSION).scale(
+                ref16, get_w(downsample_h, ref16.width / ref16.height), downsample_h
+            )
+
+        ref10 = depth(ref16, 10, dither_type=Dither.ORDERED)
+
+        cambi = ref10.akarin.Cambi(**cambi_args)  # type: ignore
+
+        cambi_masks = [
+            catrom.scale(
+                cambi.std.PropToClip('CAMBI_SCALE%d' % i), clip16.width, clip16.height
+            ) for i in range(5)
+        ]
+
+        banding_mask = combine(
+            cambi_masks, ExprOp.ADD, zip(range(1, 6), ExprOp.LOG, ExprOp.MUL),
+            expr_suffix=[ExprOp.SQRT, 2, ExprOp.LOG, ExprOp.MUL]
+        ).std.Convolution([1, 2, 1, 2, 4, 2, 1, 2, 1])
+
+        graining_mask = combine(
+            cambi_masks, ExprOp.ADD, zip(
+                range(1, 6), cycle({2}), ExprOp.LOG, ExprOp.MUL, ExprOp.MUL
+            ), expr_suffix=[ExprOp.SQRT, 2, ExprOp.LOG, ExprOp.MUL]
         )
 
-    ref10 = depth(ref16, 10, dither_type=Dither.ORDERED)
+        banding_mask, graining_mask = sdepth(banding_mask, graining_mask, 16, dither_type=Dither.NONE)  # type: ignore
 
-    cambi = ref10.akarin.Cambi(**cambi_args)  # type: ignore
+        n_d = round(clip.height / 1080 * 10)
 
-    cambi_masks = [
-        catrom.scale(
-            cambi.std.PropToClip('CAMBI_SCALE%d' % i), clip16.width, clip16.height
-        ) for i in range(5)
-    ]
+        graining_mask = iterate(graining_mask, core.std.Minimum, round(n_d / 3))
+        graining_mask = iterate(graining_mask, core.std.Maximum, n_d)
+        graining_mask = graining_mask.bilateral.Gaussian(5)
+        graining_mask = combine([graining_mask, banding_mask], ExprOp.ADD)
+        graining_mask = graining_mask.bilateral.Gaussian(5)
 
-    banding_mask = combine(
-        cambi_masks, ExprOp.ADD, zip(range(1, 6), ExprOp.LOG, ExprOp.MUL),
-        expr_suffix=[ExprOp.SQRT, 2, ExprOp.LOG, ExprOp.MUL]
-    ).std.Convolution([1, 2, 1, 2, 4, 2, 1, 2, 1])
-
-    graining_mask = combine(
-        cambi_masks, ExprOp.ADD, zip(
-            range(1, 6), cycle({2}), ExprOp.LOG, ExprOp.MUL, ExprOp.MUL
-        ), expr_suffix=[ExprOp.SQRT, 2, ExprOp.LOG, ExprOp.MUL]
-    )
-
-    banding_mask, graining_mask = sdepth(banding_mask, graining_mask, 16, dither_type=Dither.NONE)  # type: ignore
-
-    n_d = round(clip.height / 1080 * 10)
-
-    graining_mask = iterate(graining_mask, core.std.Minimum, round(n_d / 3))
-    graining_mask = iterate(graining_mask, core.std.Maximum, n_d)
-    graining_mask = graining_mask.bilateral.Gaussian(5)
-    graining_mask = combine([graining_mask, banding_mask], ExprOp.ADD)
-    graining_mask = graining_mask.bilateral.Gaussian(5)
+        __auto_deband_cache[cache_key] = dict(
+            cambi=cambi,
+            cambi_masks=cambi_masks,
+            banding_mask=banding_mask,
+            graining_mask=graining_mask
+        )
 
     props_clip = clip16.std.CopyFrameProps(cambi)
 
@@ -236,7 +260,7 @@ def auto_deband(
         )
 
         vals = [
-            cambi_val, ref10.height, score, approx_val,
+            cambi_val, downsample_h or clip.height, score, approx_val,
             *({} if grain_thrs is None else [score / thr for thr in grain_thrs])
         ]
 
@@ -257,7 +281,7 @@ def auto_deband(
             set_output(banding_mask)
             set_output(graining_mask)
 
-            for i, clip in enumerate(cambi_masks):
-                set_output(clip, 'Cambi Mask - %s' % i)
+            for i, cmask in enumerate(cambi_masks):
+                set_output(cmask, 'Cambi Mask - %s' % i)
 
     return depth(process, get_depth(clip))
