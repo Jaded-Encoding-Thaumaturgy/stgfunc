@@ -1,11 +1,16 @@
-import vapoursynth as vs
-from functools import partial
-from debandshit.debanders import f3kbilateral, dumb3kdb
-from typing import Tuple, Any, Dict, Sequence, Union, List
-from vsutil import get_y, get_w, join, depth, get_depth, Dither
+from __future__ import annotations
 
-from .utils import get_bits
+import vapoursynth as vs
+from itertools import cycle
+from lvsfunc.kernels import Catrom, Lanczos
+from typing import Tuple, Any, Dict, SupportsFloat
+from debandshit.debanders import f3kbilateral, dumb3kdb
+from vsutil import depth, get_y, get_w, join, get_depth, iterate, Dither
+
+from .misc import set_output
 from .mask import detail_mask
+from .utils import depth as sdepth, get_bits, combine, ExprOp, checkSimilarClips
+from .types import SingleOrArr, disallow_variable_format, disallow_variable_resolution
 
 
 core = vs.core
@@ -41,111 +46,160 @@ def auto_deband(
     clip: vs.VideoNode, cambi_thr: float = 12.0, cambi_scale: float = 1.2,
     min_thr: int | float = 24, max_thr: int | float = 48, steps: int = 4,
     grain_thrs: Tuple[int, int, int] | None = None,
-    debander: DebanderFN = partial(f3kbilateral, limflt_args={"thr": 0.3}),
-    downsample_h: None | int = None, chroma: bool = False, debug: bool = False,
-    adptvgr_args: Dict[str, Any] = {}, **cambi_kwargs: Dict[str, Any]
+    debander: DebanderFN = f3kbilateral,  # type: ignore
+    ref_clip: vs.VideoNode | None = None, downsample_h: None | int = None,
+    chroma: bool = False, debug: bool = False,
+    debander_args: Dict[str, Any] = {}, adptvgr_args: Dict[str, Any] = {},
+    **cambi_kwargs: Dict[str, Any]
 ) -> vs.VideoNode:
     """
-    Automated banding detection and filtering via the use of CAMBI.
-    A range of potential debanding functions are spawned, of which
-    an approximated value is chosen based off the score returned by CAMBI.
+        Automated banding detection and filtering via the use of CAMBI.
+        A range of potential debanding functions are spawned, of which
+        an approximated value is chosen based off the score returned by CAMBI.
 
-    Please see: https://github.com/AkarinVS/vapoursynth-plugin/wiki/CAMBI
+        Please see:
+            https://github.com/AkarinVS/vapoursynth-plugin/wiki/CAMBI
 
-    Function is extensible, allowing for custom functions for
-    debanding and grain applied in place of defaults.
-    For anime, consider either disabling the graining function, or
-    or using adptvgr_kwargs={"static"=True}
+        Function is extensible, allowing for custom functions for
+        debanding and grain applied in place of defaults.
+        For anime, consider either disabling the graining function, or
+        or using adptvgr_args={"static"=True}
 
-    Initial concept from: https://git.concertos.live/AHD/awsmfunc/src/branch/autodeband/awsmfunc/detect.py#L463-L645
+        Initial concept from:
+            https://git.concertos.live/AHD/awsmfunc/src/branch/autodeband/awsmfunc/detect.py#L463-L645
 
-    Requirements:
-        Plugins:
-            https://github.com/AkarinVS/vapoursynth-plugin
+        Requirements:
+            Plugins:
+                https://github.com/AkarinVS/vapoursynth-plugin
 
-        Modules:
-            https://gitlab.com/Ututu/adptvgrnmod
-            https://github.com/HomeOfVapourSynthEvolution/havsfunc
-            https://github.com/Irrational-Encoding-Wizardry/vs-debandshit
+            Modules:
+                https://gitlab.com/Ututu/adptvgrnmod
+                https://github.com/HomeOfVapourSynthEvolution/havsfunc
+                https://github.com/Irrational-Encoding-Wizardry/vs-debandshit
 
-    :param clip:            Clip to be processed.
-    :param cambi_thr:       CAMBI threshold for processing.
-                            Defaults to 12.0.
-    :param cambi_scale:     Multiplication of CAMBI score passed to function.
-                            Higher values will result in a stronger median strength.
-                            Defaults to 1.2.
-    :param min_thr:         Lower deband threshold.
-                            Defaults to 24 (fk3db).
-    :param max_thr:         Upper deband threshold.
-                            Defaults to 48 (fk3db).
-    :param steps:           Number of spawned filters.
-                            Defaults to 4.
-    :param grain_thrs:      Grain coefficients that will be passed to GrainFactory3.
-                            Higher means less grain will be applied. None to disable grain.
-                            Defaults to None
-    :param debander:        Call a custom debanding function.
-                            Function should take `clip` and `threshold` parameters.
-                            Threshold is dynamically generated as per usual. Use your own mask.
-                            Defaults to None.
-    :param downsample_h:    Decrease CAMBI CPU usage by downsampling input to desired resolution.
-                            Defaults to None.
-    :param chroma:          Whether to process chroma or not.
-                            Defaults to False.
-    :param debug:           Show relevant frame properties.
-                            Defaults to False.
-    :param adptvgr_args:    Adaptive grain args, dict.
-                            Can pass parameters such as `static` (bool).
-    :param cambi_kwargs:    Kwargs values passed to core.akarin.Cambi.
-                            Can pass parameteres such as:
-                                `topk` (default: 0.1)
-                                `tvi_threshold` (default: 0.012)
+        :param clip:            Clip to be processed.
+        :param cambi_thr:       CAMBI threshold for processing.
+                                Defaults to 12.0.
+        :param cambi_scale:     Multiplication of CAMBI score passed to function.
+                                Higher values will result in a stronger median strength.
+                                Defaults to 1.2.
+        :param min_thr:         Lower deband threshold.
+                                Defaults to 24 (fk3db).
+        :param max_thr:         Upper deband threshold.
+                                Defaults to 48 (fk3db).
+        :param steps:           Number of spawned filters.
+                                Defaults to 4.
+        :param grain_thrs:      Grain coefficients that will be passed to GrainFactory3.
+                                Higher means less grain will be applied. None to disable grain.
+                                Defaults to None
+        :param debander:        Call a custom debandshit debanding function.
+                                Function should take `clip` and `threshold` parameters.
+                                Threshold is dynamically generated as per usual. Use your own mask.
+                                Defaults to None.
+        :param ref_clip:        Ref clips which gets used to compute CAMBI calculations.
+                                Defaults to None.
+        :param downsample_h:    Decrease CAMBI CPU usage by downsampling input to desired resolution.
+                                Defaults to None.
+        :param chroma:          Whether to process chroma or not.
+                                Defaults to False.
+        :param debug:           Show relevant frame properties.
+                                Defaults to False.
+        :param debander_args:   Args passed to the debandshit debander.
+        :param adptvgr_args:    Adaptive grain args, dict.
+                                Can pass parameters such as `static` (bool).
+        :param cambi_kwargs:    Kwargs values passed to core.akarin.Cambi.
+                                Can pass parameteres such as:
+                                    `topk` (default: 0.1)
+                                    `tvi_threshold` (default: 0.012)
     """
     try:
-        from havsfunc import GrainFactory3
+        from havsfunc import GrainFactory3  # type: ignore
     except ModuleNotFoundError:
         raise ModuleNotFoundError("auto_deband: 'missing dependency `havsfunc`'")
 
     try:
-        from adptvgrnMod import adptvgrnMod
+        from adptvgrnMod import adptvgrnMod  # type: ignore
     except ModuleNotFoundError:
         raise ModuleNotFoundError("auto_deband: 'missing dependency `adptvgrnMod`'")
 
-    if clip.format.color_family not in (vs.GRAY, vs.YUV):
+    assert clip.format and (ref_clip.format if ref_clip else True)
+
+    cfamily = clip.format.color_family
+
+    if cfamily not in (vs.GRAY, vs.YUV):
         raise ValueError("auto_deband: only YUV and GRAY clips are supported")
 
-    is_gray = clip.format.color_family is vs.GRAY
+    if ref_clip and not checkSimilarClips(clip, ref_clip):
+        raise ValueError("auto_deband: only YUV and GRAY clips are supported")
 
-    cambi_args = dict(topk=0.1, tvi_threshold=0.012) | cambi_kwargs
+    is_gray = cfamily is vs.GRAY
+
+    cambi_args = dict(topk=0.1, tvi_threshold=0.012) | cambi_kwargs | dict(scores=True)
     adptvgr_args = dict(lo=18, hi=240, grain_chroma=not is_gray or chroma) | adptvgr_args
 
-    clip16 = depth(clip, 16)
+    catrom = Catrom(dither_type=Dither.ERROR_DIFFUSION)
 
-    ref = get_y(clip16).std.Limiter(16 << 8, 235 << 8)
+    clip16, ref16 = sdepth(clip, ref_clip or clip, 16, dither_type=Dither.ERROR_DIFFUSION)  # type: ignore
+
+    ref16 = get_y(ref16).std.Limiter(16 << 8, 235 << 8)
 
     if downsample_h:
-        ref = ref.resize.Lanczos(
-            get_w(downsample_h, ref.width / ref.height), downsample_h,
-            filter_param_a=0, dither_type="error_diffusion"
+        ref16 = Lanczos(0, dither_type=Dither.ERROR_DIFFUSION).scale(
+            ref16, get_w(downsample_h, ref16.width / ref16.height), downsample_h
         )
 
-    ref = depth(ref, 10, dither_type=Dither.ORDERED)
+    ref10 = depth(ref16, 10, dither_type=Dither.ORDERED)
 
-    cambi = ref.akarin.Cambi(**cambi_args)
+    cambi = ref10.akarin.Cambi(**cambi_args)  # type: ignore
+
+    cambi_masks = [
+        catrom.scale(
+            cambi.std.PropToClip('CAMBI_SCALE%d' % i), clip16.width, clip16.height
+        ) for i in range(5)
+    ]
+
+    banding_mask = combine(
+        cambi_masks, ExprOp.ADD, zip(range(1, 6), ExprOp.LOG, ExprOp.MUL),
+        expr_suffix=[ExprOp.SQRT, 2, ExprOp.LOG, ExprOp.MUL]
+    ).std.Convolution([1, 2, 1, 2, 4, 2, 1, 2, 1])
+
+    graining_mask = combine(
+        cambi_masks, ExprOp.ADD, zip(
+            range(1, 6), cycle({2}), ExprOp.LOG, ExprOp.MUL, ExprOp.MUL
+        ), expr_suffix=[ExprOp.SQRT, 2, ExprOp.LOG, ExprOp.MUL]
+    )
+
+    banding_mask, graining_mask = sdepth(banding_mask, graining_mask, 16, dither_type=Dither.NONE)  # type: ignore
+
+    n_d = round(clip.height / 1080 * 10)
+
+    graining_mask = iterate(graining_mask, core.std.Minimum, round(n_d / 3))
+    graining_mask = iterate(graining_mask, core.std.Maximum, n_d)
+    graining_mask = graining_mask.bilateral.Gaussian(5)
+    graining_mask = combine([graining_mask, banding_mask], ExprOp.ADD)
+    graining_mask = graining_mask.bilateral.Gaussian(5)
 
     props_clip = clip16.std.CopyFrameProps(cambi)
 
-    def _perform_graining(clip: vs.VideoNode, threshold: float = None) -> vs.VideoNode:
-        gkwargs = {f"g{i}str": threshold * thr / 100 for i, thr in enumerate(grain_thrs, 1)}
+    def _perform_graining(deband: vs.VideoNode, threshold: SupportsFloat) -> vs.VideoNode:
+        assert grain_thrs
+
+        gkwargs = {f"g{i}str": float(threshold) * thr / 100 for i, thr in enumerate(grain_thrs, 1)}
+
+        yuv = join([deband] * 3) if is_gray else deband
 
         grained = adptvgrnMod(
-            join([clip] * 3) if is_gray else clip,
-            grainer=lambda g: GrainFactory3(g, **gkwargs), **adptvgr_args
+            yuv, grainer=lambda g: GrainFactory3(g, **gkwargs), **adptvgr_args
         )
 
-        return get_y(grained) if is_gray else grained
+        grain = get_y(grained) if is_gray else grained
 
-    def _perform_deband(threshold: float) -> vs.VideoNode:
+        return deband.std.MaskedMerge(grain, graining_mask)
+
+    def _perform_deband(threshold: SupportsFloat) -> vs.VideoNode:
         deband = debander(clip=clip16, threshold=threshold)
+
+        deband = clip16.std.MaskedMerge(deband, banding_mask)
 
         return deband if grain_thrs is None else _perform_graining(deband, threshold)
 
@@ -180,7 +234,7 @@ def auto_deband(
         )
 
         vals = [
-            cambi_val, ref.height, score, approx_val,
+            cambi_val, ref10.height, score, approx_val,
             *({} if grain_thrs is None else [score / thr for thr in grain_thrs])
         ]
 
@@ -191,9 +245,13 @@ def auto_deband(
 
         return deb_clip
 
-    process = props_clip.std.FrameEval(_select_deband, props_clip)
+    process = props_clip.std.FrameEval(_select_deband, props_clip, props_clip)
 
     if debug:
+        set_output(banding_mask, False)
+        set_output(graining_mask, False)
+        for clip in cambi_masks:
+            set_output(clip, False)
         process = process.text.FrameProps(debug_props)
 
     return depth(process, get_depth(clip))
