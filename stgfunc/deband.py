@@ -48,7 +48,7 @@ def auto_deband(
     grain_thrs: Tuple[int, int, int] | None = None,
     debander: DebanderFN = f3kbilateral,  # type: ignore
     ref_clip: vs.VideoNode | None = None, downsample_h: None | int = None,
-    chroma: bool = False, debug: bool = False,
+    chroma: bool = False, debug: Tuple[bool, bool] = (False, False),
     debander_args: Dict[str, Any] = {}, adptvgr_args: Dict[str, Any] = {},
     **cambi_kwargs: Dict[str, Any]
 ) -> vs.VideoNode:
@@ -102,8 +102,10 @@ def auto_deband(
                                 Defaults to None.
         :param chroma:          Whether to process chroma or not.
                                 Defaults to False.
-        :param debug:           Show relevant frame properties.
-                                Defaults to False.
+        :param debug:           A tuple of booleans.
+                                Set first value to True to show relevant frame properties.
+                                Set second value to True to ouput CAMBI's masks.
+                                Defaults to (False, False).
         :param debander_args:   Args passed to the debandshit debander.
         :param adptvgr_args:    Adaptive grain args, dict.
                                 Can pass parameters such as `static` (bool).
@@ -247,11 +249,15 @@ def auto_deband(
 
     process = props_clip.std.FrameEval(_select_deband, props_clip, props_clip)
 
-    if debug:
-        set_output(banding_mask, False)
-        set_output(graining_mask, False)
-        for clip in cambi_masks:
-            set_output(clip, False)
-        process = process.text.FrameProps(debug_props)
+    if any(debug):
+        if debug[0]:
+            process = process.text.FrameProps(debug_props)
+
+        if debug[1]:
+            set_output(banding_mask)
+            set_output(graining_mask)
+
+            for i, clip in enumerate(cambi_masks):
+                set_output(clip, 'Cambi Mask - %s' % i)
 
     return depth(process, get_depth(clip))
