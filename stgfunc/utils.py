@@ -5,14 +5,15 @@ import ast
 import string
 import inspect
 import lvsfunc as lvf
-from enum import Enum
 import vapoursynth as vs
+from enum import Enum
+from itertools import cycle
 from math import ceil, floor
 from fractions import Fraction
 from lvsfunc.types import Range
 from lvsfunc.kernels import Point
 from vsutil import depth as vdepth, get_depth
-from typing import Tuple, Union, List, Sequence, Dict, Any, TypeVar, Iterator
+from typing import Tuple, Union, List, Sequence, Dict, Any, TypeVar, Iterator, Iterable
 
 from .types import SingleOrArr, SingleOrArrOpt, SupportsString, disallow_variable_format
 
@@ -31,7 +32,9 @@ def get_planes(_planes: SingleOrArrOpt[int], clip: vs.VideoNode) -> List[int]:
     assert clip.format
     n_planes = clip.format.num_planes
 
-    return [p for p in to_arr(range(n_planes) if _planes is None else _planes) if p < n_planes]  # type: ignore
+    planes = to_arr(range(n_planes) if _planes is None else _planes)
+
+    return [p for p in planes if p < n_planes]
 
 
 class ExprOp(str, Enum):
@@ -89,27 +92,40 @@ def _combine_norm__ix(ffix: StrArrOpt, n_clips: int) -> List[SupportsString]:
 
 
 def combine(
-    clips: Sequence[vs.VideoNode], operator: ExprOp = ExprOp.MAX, planes: List[int] | None = None,
-    prefix: StrArrOpt = '', suffix: StrArrOpt = '', expr_prefix: StrArrOpt = '', expr_suffix: StrArrOpt = ''
+    clips: Sequence[vs.VideoNode], operator: ExprOp = ExprOp.MAX, suffix: StrArrOpt = None, prefix: StrArrOpt = None,
+    expr_suffix: StrArrOpt = None, expr_prefix: StrArrOpt = None, planes: SingleOrArrOpt[int] = None,
 ) -> vs.VideoNode:
     n_clips = len(clips)
 
-    prefixes = ((p := to_arr(prefix)) * max(1, ceil(n_clips / len(p))))
-    suffixes = ((s := to_arr(suffix)) * max(1, ceil(n_clips / len(s))))
-    expr_arr = [c for s[:n_clips + 1] in zip(prefixes, vs_alph, suffixes) for c in s] + [operator] * (n_clips - 1)
+    prefixes, suffixes = (_combine_norm__ix(x, n_clips) for x in (prefix, suffix))
 
-    return expr(clips, [*to_arr(expr_prefix), *expr_arr, *to_arr(expr_suffix)], planes)
+    normalized_args = [to_arr(x)[:n_clips + 1] for x in (prefixes, vs_alph, suffixes)]
+
+    args = zip(*normalized_args)
+
+    operators = operator * (n_clips - 1)
+
+    return expr(clips, [expr_prefix, args, operators, expr_suffix], planes)
 
 
-def expr(clips: Sequence[vs.VideoNode], expr: StrArr, planes: List[int] | None) -> vs.VideoNode:
+def expr(clips: Sequence[vs.VideoNode], expr: StrArr, planes: SingleOrArrOpt[int]) -> vs.VideoNode:
     firstclip = clips[0]
     assert firstclip.format
 
-    expr_string = ' '.join([str(x).strip() for x in expr if x is not None and x != ''])  # type: ignore
+    n_planes = firstclip.format.num_planes
+
+    expr_array = flatten(expr)  # type: ignore
+
+    expr_array = filter(lambda x: x is not None and x != '', expr_array)
+
+    expr_string = ' '.join([str(x).strip() for x in expr_array])
 
     planesl = get_planes(planes, firstclip)
 
-    return core.std.Expr(clips, [expr_string if x in planesl else '' for x in range(firstclip.format.num_planes)])
+    return core.std.Expr(clips, [
+        expr_string if x in planesl else ''
+        for x in range(n_planes)
+    ])
 
 
 @disallow_variable_format
@@ -220,7 +236,9 @@ def weighted_merge(*weighted_clips: Tuple[vs.VideoNode, float]) -> vs.VideoNode:
 
     clips, weights = zip(*weighted_clips)
 
-    return combine(clips, ExprOp.ADD, None, weights, ExprOp.MUL, None, [sum(weights), ExprOp.DIV])
+    return combine(clips, ExprOp.ADD, zip(weights, ExprOp.MUL), expr_suffix=[sum(weights), ExprOp.DIV])
+
+
 def to_arr(array: Sequence[T] | T) -> List[T]:
     return list(array if (type(array) in {
         list, tuple, range, zip, set, map, enumerate
