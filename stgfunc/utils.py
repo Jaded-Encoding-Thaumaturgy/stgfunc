@@ -7,10 +7,12 @@ import inspect
 import lvsfunc as lvf
 import vapoursynth as vs
 from enum import Enum
+import vapoursynth as vs
 from itertools import cycle
 from math import ceil, floor
 from fractions import Fraction
 from lvsfunc.types import Range
+from lvsfunc.util import get_prop
 from lvsfunc.kernels import Point
 from vsutil import depth as vdepth, get_depth
 from typing import Tuple, Union, List, Sequence, Dict, Any, TypeVar, Iterator, Iterable
@@ -366,3 +368,9 @@ def destructure(dict_: Dict[str, T], ignore_no_key: bool = False) -> T | Iterato
         return next(gen_result)
     else:
         return gen_result
+
+
+def get_color_range(clip: vs.VideoNode) -> vs.ColorRange:
+    f = clip.get_frame(0)
+
+    return vs.ColorRange(get_prop(f, '_ColorRange', int) if '_ColorRange' in f.props else 1)
