@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import Tuple
+from typing import Tuple, Type
 from abc import ABC, abstractmethod
 from math import sqrt, pow, sin, cos, pi
 
+F_Easing = Type[EasingBaseMeta]
 
 class EasingBaseMeta(ABC):
     limit: Tuple[int, int] = (0, 1)

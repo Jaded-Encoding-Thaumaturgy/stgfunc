@@ -7,18 +7,18 @@ from vsutil import insert_clip
 from fractions import Fraction
 from lvsfunc.util import clamp_values
 from lvsfunc.kernels import Kernel, Catrom
-from typing import NamedTuple, Type, Union, Tuple
+from typing import NamedTuple, Union, Tuple
 
 from .types import disallow_variable_format
+from .easing import F_Easing, Linear, OnAxis
 from .utils import checkSimilarClips, change_fps
-from .easing import EasingBaseMeta, Linear, OnAxis
 
 core = vs.core
 
 
 def fade(
     clipa: vs.VideoNode, clipb: vs.VideoNode, invert: bool, start: int,
-    end: int, function: Type[EasingBaseMeta] = Linear
+    end: int, function: F_Easing = Linear
 ) -> vs.VideoNode:
     clipa_cut = clipa[start:end]
     clipb_cut = clipb[start:end]
@@ -33,7 +33,7 @@ def fade(
 
 def fade_freeze(
     clipa: vs.VideoNode, clipb: vs.VideoNode, invert: bool, start: int,
-    end: int, function: Type[EasingBaseMeta] = Linear
+    end: int, function: F_Easing = Linear
 ) -> vs.VideoNode:
     return fade(
         lvf.rfs(clipa, clipa[start if invert else end] * clipa.num_frames, (start, end)),
@@ -42,19 +42,19 @@ def fade_freeze(
     )
 
 
-def fade_in(clip: vs.VideoNode, start: int, end: int, function: Type[EasingBaseMeta] = Linear) -> vs.VideoNode:
+def fade_in(clip: vs.VideoNode, start: int, end: int, function: F_Easing = Linear) -> vs.VideoNode:
     return fade(clip, clip.std.BlankClip(), False, start, end, function)
 
 
-def fade_out(clip: vs.VideoNode, start: int, end: int, function: Type[EasingBaseMeta] = Linear) -> vs.VideoNode:
+def fade_out(clip: vs.VideoNode, start: int, end: int, function: F_Easing = Linear) -> vs.VideoNode:
     return fade(clip, clip.std.BlankClip(), True, start, end, function)
 
 
-def fade_in_freeze(clip: vs.VideoNode, start: int, end: int, function: Type[EasingBaseMeta] = Linear) -> vs.VideoNode:
+def fade_in_freeze(clip: vs.VideoNode, start: int, end: int, function: F_Easing = Linear) -> vs.VideoNode:
     return fade_in(lvf.rfs(clip, clip[end] * clip.num_frames, (start, end)), start, end, function)
 
 
-def fade_out_freeze(clip: vs.VideoNode, start: int, end: int, function: Type[EasingBaseMeta] = Linear) -> vs.VideoNode:
+def fade_out_freeze(clip: vs.VideoNode, start: int, end: int, function: F_Easing = Linear) -> vs.VideoNode:
     return fade_out(lvf.rfs(clip, clip[start] * clip.num_frames, (start, end)), start, end, function)
 
 
@@ -82,8 +82,8 @@ class PanDirection(IntEnum):
 
 class PanFunction(NamedTuple):
     direction: PanDirection = PanDirection.NORMAL
-    function_x: Type[EasingBaseMeta] = OnAxis
-    function_y: Type[EasingBaseMeta] = OnAxis
+    function_x: F_Easing = OnAxis
+    function_y: F_Easing = OnAxis
 
 
 class PanFunctions(PanFunction, Enum):
