@@ -5,7 +5,6 @@ import ast
 import string
 import inspect
 import lvsfunc as lvf
-import vapoursynth as vs
 from enum import Enum
 import vapoursynth as vs
 from itertools import cycle
@@ -70,6 +69,10 @@ class ExprOp(str, Enum):
     SWAPN = "swapN"
     # 3 Arguments
     TERN = "?"
+
+    @classmethod
+    def clamp(cls, min: float, max: float) -> List[str]:
+        return map(str, [min, ExprOp.MAX, max, ExprOp.MIN])
 
     def __str__(self) -> str:
         return self.value
