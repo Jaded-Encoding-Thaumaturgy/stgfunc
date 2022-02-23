@@ -4,7 +4,6 @@ from typing import Tuple, Type
 from abc import ABC, abstractmethod
 from math import sqrt, pow, sin, cos, pi
 
-F_Easing = Type[EasingBaseMeta]
 
 class EasingBaseMeta(ABC):
     limit: Tuple[int, int] = (0, 1)
@@ -21,6 +20,9 @@ class EasingBaseMeta(ABC):
     @abstractmethod
     def ease(self, alpha: float) -> float:
         pass
+
+
+F_Easing = Type[EasingBaseMeta]
 
 
 class EasingBase(EasingBaseMeta):
