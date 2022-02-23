@@ -59,7 +59,7 @@ def fade_out_freeze(clip: vs.VideoNode, start: int, end: int, function: F_Easing
 
 
 def crossfade(
-        clipa: vs.VideoNode, clipb: vs.VideoNode, function: Type[EasingBaseMeta],
+        clipa: vs.VideoNode, clipb: vs.VideoNode, function: F_Easing,
         debug: Union[bool, int, Tuple[int, int]] = False
 ) -> vs.VideoNode:
     if not checkSimilarClips(clipa, clipb):
