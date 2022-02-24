@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from math import ceil
 import lvsfunc as lvf
 import vapoursynth as vs
@@ -5,9 +7,10 @@ from functools import partial
 from enum import Enum, IntEnum
 from vsutil import insert_clip
 from fractions import Fraction
-from lvsfunc.util import clamp_values
+from lvsfunc.types import Range
 from lvsfunc.kernels import Kernel, Catrom
-from typing import NamedTuple, Union, Tuple
+from typing import NamedTuple, Union, Tuple, Sequence
+from lvsfunc.util import clamp_values, normalize_ranges
 
 from .types import disallow_variable_format
 from .easing import F_Easing, Linear, OnAxis
@@ -75,6 +78,40 @@ def crossfade(
     return clipa.std.FrameEval(_fading)
 
 
+def fade_ranges(
+    clip_a: vs.VideoNode, clip_b: vs.VideoNode, ranges: Range | Sequence[Range],
+    fade_length: int = 5, ease_func: F_Easing = Linear
+) -> vs.VideoNode:
+    nranges = normalize_ranges(clip_b, ranges)  # type: ignore
+    nranges = [(s - fade_length, e + fade_length) for s, e in nranges]
+    nranges = normalize_ranges(clip_b, nranges)  # type: ignore
+
+    franges = [range(s, e + 1) for s, e in nranges]
+
+    ease_function = ease_func(0, 1, fade_length)
+
+    def _fading(n: int) -> vs.VideoNode:
+        frange: range | None = next((x for x in franges if n in x), None)
+
+        print(frange)
+
+        if frange is None:
+            return clip_a
+
+        if frange.start + fade_length >= n >= frange.start:
+            weight = ease_function.ease(n - frange.start)
+
+            return clip_a.std.Merge(clip_b, weight)
+        elif frange.stop - fade_length <= n <= frange.stop:
+            weight = ease_function.ease(frange.stop - n)
+
+            return clip_b.std.Merge(clip_a, 1 - weight)
+
+        return clip_b
+
+    return clip_a.std.FrameEval(_fading)
+
+
 class PanDirection(IntEnum):
     NORMAL = 0
     INVERTED = 1
@@ -95,7 +132,7 @@ class PanFunctions(PanFunction, Enum):
 
 @disallow_variable_format
 def panner(
-    clip: vs.VideoNode, stitched: vs.VideoNode, pan_func: PanFunction = PanFunctions.VERTICAL_TTB,
+    clip: vs.VideoNode, stitched: vs.VideoNode, pan_func: PanFunction = PanFunctions.VERTICAL_TTB,  # type: ignore
     fps: Fraction = Fraction(24000, 1001), kernel: Kernel = Catrom()
 ) -> vs.VideoNode:
     assert clip.format
