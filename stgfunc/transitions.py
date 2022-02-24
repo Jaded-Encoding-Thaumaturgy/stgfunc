@@ -93,8 +93,6 @@ def fade_ranges(
     def _fading(n: int) -> vs.VideoNode:
         frange: range | None = next((x for x in franges if n in x), None)
 
-        print(frange)
-
         if frange is None:
             return clip_a
 
