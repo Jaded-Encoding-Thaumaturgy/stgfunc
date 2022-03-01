@@ -14,7 +14,7 @@ from lvsfunc.types import Range
 from lvsfunc.util import get_prop
 from lvsfunc.kernels import Point
 from vsutil import depth as vdepth, get_depth
-from typing import Tuple, Union, List, Sequence, Dict, Any, TypeVar, Iterator, Iterable
+from typing import Tuple, Union, List, Sequence, Dict, Any, TypeVar, Iterator, Iterable, SupportsFloat
 
 from .types import SingleOrArr, SingleOrArrOpt, SupportsString, disallow_variable_format
 
@@ -36,6 +36,22 @@ def get_planes(_planes: SingleOrArrOpt[int], clip: vs.VideoNode) -> List[int]:
     planes = to_arr(range(n_planes) if _planes is None else _planes)
 
     return [p for p in planes if p < n_planes]
+
+
+class StrList(List[SupportsString]):
+    @property
+    def string(self) -> str:
+        pass
+
+    @string.getter
+    def string(self) -> str:
+        return self.to_str()
+
+    def to_str(self) -> str:
+        return str(self)
+
+    def __str__(self) -> str:
+        return ' '.join(map(str, flatten(self)))
 
 
 class ExprOp(str, Enum):
@@ -71,8 +87,32 @@ class ExprOp(str, Enum):
     TERN = "?"
 
     @classmethod
-    def clamp(cls, min: float, max: float) -> List[str]:
-        return map(str, [min, ExprOp.MAX, max, ExprOp.MIN])
+    def clamp(cls, min: float, max: float) -> StrList:
+        return StrList([min, ExprOp.MAX, max, ExprOp.MIN])
+
+    @classmethod
+    def convolution(cls, var: str, convolution: Sequence[SupportsFloat]) -> StrList:
+        expr_conv = [
+            x.format(c=var, w=w) for x, w in zip([
+                '{c}[-1,-1] {w} *', '{c}[0,-1] {w} *', '{c}[1,-1] {w} *',
+                '{c}[-1,0] {w} *', '{c} {w} *', '{c}[1,0] {w} *',
+                '{c}[-1,1] {w} *', '{c}[0,1] {w} *', '{c}[1,1] {w} *'
+            ], convolution)
+        ]
+
+        return StrList([*expr_conv, cls.ADD * 8, sum(map(float, convolution)), cls.DIV])
+
+    @classmethod
+    def matrix(cls, var: str, full: bool = True) -> StrList:
+        return StrList([
+            f'{var}[-1,-1]', f'{var}[0,-1]', f'{var}[1,-1]',
+            f'{var}[-1,0]', *([f'{var}'] if full else []), f'{var}[1,0]',
+            f'{var}[-1,1]', f'{var}[0,1]', f'{var}[1,1]'
+        ])
+
+    @classmethod
+    def boxblur(cls, var: str) -> StrList:
+        return StrList([*cls.matrix(var), cls.ADD * 8, 9, cls.DIV])
 
     def __str__(self) -> str:
         return self.value
