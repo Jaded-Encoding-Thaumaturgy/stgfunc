@@ -1,21 +1,25 @@
 from __future__ import annotations
 
+from math import floor
 import vapoursynth as vs
 from enum import IntEnum
 from itertools import cycle
 from math import pi, sin, cos, degrees
+from lvsfunc.kernels import Point, BSpline
 from lvsfunc.types import VSFunction, Range
 from lvsfunc.util import get_prop, normalize_ranges
 from typing import Tuple, Sequence, SupportsFloat, Dict, Any, NamedTuple, List
 from vsutil import fallback, scale_value, get_depth, insert_clip, get_neutral_value
 
 from .transitions import crossfade
-from .types import disallow_variable_format
 from .easing import ExponentialEaseIn, F_Easing
 from .utils import get_color_range, expr, ExprOp
+from .types import disallow_variable_format, disallow_variable_resolution
 
 
 core = vs.core
+
+bspline = BSpline()
 
 
 @disallow_variable_format()
@@ -265,3 +269,83 @@ def auto_balance(
     ]
 
     return clip.std.FrameEval(_autobalance, stats_clips, clip)
+
+
+@disallow_variable_format
+@disallow_variable_resolution
+def bbmod_fast(
+    clip: vs.VideoNode, top: int = 0, bottom: int = 0,
+    left: int = 0, right: int = 0, thresh: int = 128,
+    blur: int = 1000, scale: int = 1
+) -> vs.VideoNode:
+    assert clip.format
+
+    if clip.format.color_family not in {vs.YUV, vs.GRAY}:
+        raise ValueError("bbmod_fast: Only YUV and GRAY color family supported!")
+
+    if thresh <= 0 or thresh > 255:
+        raise ValueError("bbmod_fast: Threshold has to be in range (1, 255) !")
+
+    if scale < 1:
+        raise ValueError("bbmod_fast: Scale has to be > 1!")
+
+    if any(x < 0 for x in {top, bottom, left, right}):
+        raise ValueError("bbmod_fast: All sides have to be >= 0!")
+
+    bits = get_depth(clip)
+
+    neutral_luma = get_neutral_value(clip)
+    neutral_chroma = get_neutral_value(clip, chroma=True)
+
+    blur_width = max(8, floor(clip.width / blur)) * scale * 2
+
+    tv_clamp = scale_value(16, 8, bits, scale_offsets=True)
+    thr_scaled = scale_value(thresh, 8, bits)
+
+    euler_clamp = '1 exp sin 8 clamp'
+    clamp_luma = f'{neutral_luma - thr_scaled} {neutral_luma + thr_scaled} clamp'
+
+    expressions = [
+        f'{tv_clamp} i!   z i@ - y i@ - / {euler_clamp} x i@ - * {clamp_luma} i@ +',
+        f'{neutral_chroma} n! z y - z y / {euler_clamp} x n@ - * n@ + + x - x +'
+    ][:clip.format.num_planes]
+
+    def _brescale(ref: vs.VideoNode) -> vs.VideoNode:
+        return bspline.scale(bspline.scale(ref, blur_width, ref.height), ref.width, ref.height)
+
+    def _bbmod(clip: vs.VideoNode, top: int, bottom: int) -> vs.VideoNode:
+        originalRows = core.std.StackVertical([
+            clip.std.CropAbs(clip.width, top),
+            clip.std.CropAbs(clip.width, bottom, top=clip.height - bottom)
+        ])
+
+        upsampleRows = core.std.StackVertical([
+            clip.std.CropAbs(clip.width, 1, top=top),
+            clip.std.CropAbs(clip.width, 1, top=clip.height - bottom)
+        ]).resize.Point(height=top + bottom)
+
+        balanced = core.akarin.Expr([
+            originalRows, _brescale(originalRows), _brescale(upsampleRows)
+        ], expressions)
+
+        return core.std.StackVertical([
+            balanced.std.CropAbs(clip.width, top),
+            clip.std.CropAbs(clip.width, clip.height - top - bottom, top=top),
+            balanced.std.CropAbs(clip.width, bottom, top=balanced.height - bottom),
+        ])
+
+    upsample = Point().scale(
+        clip, clip.width * scale, clip.height * scale
+    ) if scale > 1 else clip
+
+    fixed = _bbmod(upsample, top * scale, bottom * scale)
+
+    if any({left, right}):
+        fixed = fixed.std.Transpose()
+        fixed = _bbmod(fixed, right * scale, left * scale)
+        fixed = fixed.std.Transpose()
+
+    if scale > 1:
+        fixed = Point().scale(fixed, clip.width, clip.height)
+
+    return fixed
