@@ -223,7 +223,7 @@ def auto_deband(
         return deband.std.MaskedMerge(grain, graining_mask)
 
     def _perform_deband(threshold: SupportsFloat) -> vs.VideoNode:
-        deband = debander(clip=clip16, threshold=threshold)
+        deband = debander(clip=clip16, threshold=threshold, **debander_args)
 
         deband = clip16.std.MaskedMerge(deband, banding_mask)
 
