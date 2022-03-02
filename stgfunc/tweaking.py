@@ -7,9 +7,9 @@ from itertools import cycle
 from math import pi, sin, cos, degrees
 from lvsfunc.kernels import Point, BSpline
 from lvsfunc.types import VSFunction, Range
-from lvsfunc.util import get_prop, normalize_ranges
+from lvsfunc.util import normalize_ranges
 from typing import Tuple, Sequence, SupportsFloat, Dict, Any, NamedTuple, List
-from vsutil import fallback, scale_value, get_depth, insert_clip, get_neutral_value
+from vsutil import fallback, scale_value, get_depth, insert_clip, get_neutral_value, get_peak_value
 
 from .transitions import crossfade
 from .easing import ExponentialEaseIn, F_Easing
@@ -148,9 +148,9 @@ def multi_tweak(clip: vs.VideoNode, tweaks: List[Tweak], debug: bool = False, **
 
 
 class BalanceMode(IntEnum):
-    BOTH = 0
-    UNDIM = 1
-    DIM = 2
+    AUTO = 0
+    UNDIMMING = 1
+    DIMMING = 2
 
 
 class WeightMode(IntEnum):
@@ -170,11 +170,12 @@ class Override(NamedTuple):
 
 @disallow_variable_format()
 def auto_balance(
-    clip: vs.VideoNode, target_max: SupportsFloat | None = None, relative_sat: SupportsFloat = 1.0,
-    range_in: vs.ColorRange = vs.RANGE_LIMITED, frame_overrides: Sequence[Override] = [],
-    ref: vs.VideoNode | None = None, radius: int = 1, threshold: float = 0.4,
-    balance_mode: BalanceMode = BalanceMode.UNDIM, weight_mode: WeightMode = WeightMode.MEAN,
-    **range_kwargs: Dict[str, Any]
+    clip: vs.VideoNode, target_max: SupportsFloat | None = None, relative_sat: float = 1.0,
+    range_in: vs.ColorRange = vs.RANGE_LIMITED, frame_overrides: Override | Sequence[Override] = [],
+    ref: vs.VideoNode | None = None, radius: int = 1, delta_thr: float = 0.4,
+    min_thr: int | float | None = None, max_thr: SupportsFloat | None = None,
+    balance_mode: BalanceMode = BalanceMode.UNDIMMING, weight_mode: WeightMode = WeightMode.MEAN,
+    debug: bool = False, **range_kwargs: Dict[str, Any]
 ) -> vs.VideoNode:
     import numpy as np
 
@@ -192,16 +193,21 @@ def auto_balance(
         )
     )) - float(zero)
 
+    min_thr = fallback(min_thr, 0)
+    max_thr = fallback(max_thr, get_peak_value(clip))
+
     if weight_mode == WeightMode.NONE:
-        return ValueError("auto_balance: Global weight mode can't be NONE!")
+        raise ValueError("auto_balance: Global weight mode can't be NONE!")
 
     ref_stats = ref_clip.std.PlaneStats()
 
     range_kwargs = range_kwargs | {"range_in": range_in}
 
-    over_mapped: List[Tuple[range, float, BalanceMode]] = []
+    over_mapped: List[Tuple[range, float, WeightMode]] = []
 
-    if frame_overrides and len(frame_overrides):
+    if frame_overrides:
+        frame_overrides = [frame_overrides] if isinstance(frame_overrides, Override) else list(frame_overrides)
+
         over_frames, over_conts, over_int_modes = list(zip(*frame_overrides))
 
         oframes_ranges = [
@@ -217,22 +223,25 @@ def auto_balance(
         return max(1, x - z) / max(1, y - z)
 
     def _autobalance(n: int, f: Sequence[vs.VideoFrame]) -> vs.VideoNode:
-        override: Tuple[range, float, BalanceMode] | None = next((x for x in over_mapped if n in x[0]), None)
+        override: Tuple[range, float, WeightMode] | None = next((x for x in over_mapped if n in x[0]), None)
 
-        psvalues = np.asarray([
-            _weighted(target, get_prop(frame, 'PlaneStatsMax', SupportsFloat), zero) for frame in f
+        psvalues: Any = np.asarray([
+            _weighted(target, frame.props.PlaneStatsMax, zero) for frame in f
         ])
 
         middle_idx = psvalues.size // 2
 
         curr_value = psvalues[middle_idx]
 
-        if balance_mode == BalanceMode.UNDIM:
+        if not min_thr <= curr_value <= max_thr:
+            return clip
+
+        if balance_mode == BalanceMode.UNDIMMING:
             psvalues[psvalues < 1.0] = 1.0
-        elif balance_mode == BalanceMode.DIM:
+        elif balance_mode == BalanceMode.DIMMING:
             psvalues[psvalues > 1.0] = 1.0
 
-        psvalues[(abs(psvalues - curr_value) > threshold)] = curr_value
+        psvalues[(abs(psvalues - curr_value) > delta_thr)] = curr_value
 
         def _get_cont(mode: WeightMode, frange: range) -> SupportsFloat:
             if mode == WeightMode.INTERPOLATE:
@@ -253,6 +262,8 @@ def auto_balance(
                 return psvalues.max()
             elif mode == WeightMode.MIN:
                 return psvalues.min()
+
+            return psvalues[middle_idx]
 
         if override:
             frange, cont, override_mode = override
