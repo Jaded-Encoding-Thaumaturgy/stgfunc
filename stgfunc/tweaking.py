@@ -159,6 +159,7 @@ class WeightMode(IntEnum):
     MEAN = 2
     MAX = 3
     MIN = 4
+    NONE = 5
 
 
 class Override(NamedTuple):
@@ -191,6 +192,9 @@ def auto_balance(
         )
     )) - float(zero)
 
+    if weight_mode == WeightMode.NONE:
+        return ValueError("auto_balance: Global weight mode can't be NONE!")
+
     ref_stats = ref_clip.std.PlaneStats()
 
     range_kwargs = range_kwargs | {"range_in": range_in}
@@ -202,7 +206,7 @@ def auto_balance(
 
         oframes_ranges = [
             range(start, stop + 1)
-            for start, stop in normalize_ranges(clip, over_frames)
+            for start, stop in normalize_ranges(clip, list(over_frames))
         ]
 
         over_mapped = list(zip(oframes_ranges, over_conts, over_int_modes))
@@ -225,7 +229,7 @@ def auto_balance(
 
         if balance_mode == BalanceMode.UNDIM:
             psvalues[psvalues < 1.0] = 1.0
-        elif balance_mode == BalanceMode.UNDIM:
+        elif balance_mode == BalanceMode.DIM:
             psvalues[psvalues > 1.0] = 1.0
 
         psvalues[(abs(psvalues - curr_value) > threshold)] = curr_value
@@ -253,7 +257,16 @@ def auto_balance(
         if override:
             frange, cont, override_mode = override
 
-            if cont is None or (override_mode != weight_mode):
+            if override_mode == WeightMode.NONE:
+                return clip
+
+            if cont is not None:
+                psvalues[
+                    max(0, middle_idx - (n - frange.start)):
+                    min(len(psvalues), middle_idx + (frange.stop - n))
+                ] = cont
+
+            if (override_mode != weight_mode):
                 cont = _get_cont(override_mode, frange)
         else:
             cont = _get_cont(weight_mode, clipfrange)
