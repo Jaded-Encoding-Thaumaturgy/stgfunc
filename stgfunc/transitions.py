@@ -165,7 +165,9 @@ def panner(
 
         shifted = kernel.shift(cropped, (y_v, x_v))
 
-        return shifted.std.Crop(bottom=y_c, right=x_c)
+        cropped = shifted.std.Crop(bottom=y_c, right=x_c)
+
+        return kernel.resample(cropped, clip.format)
 
     newpan = clip_cfps.std.FrameEval(_pan)
 
