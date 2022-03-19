@@ -135,11 +135,6 @@ def auto_deband(
     if cfamily not in (vs.GRAY, vs.YUV):
         raise ValueError("auto_deband: only YUV and GRAY clips are supported")
 
-    if ref_clip:
-        assert ref_clip.format
-        if clip.format.id != ref_clip.format.id:
-            raise ValueError("auto_deband: Clip and ref must be the same format!")
-
     is_gray = cfamily is vs.GRAY
 
     cambi_args = dict(topk=0.1, tvi_threshold=0.012) | cambi_kwargs | dict(scores=True)
