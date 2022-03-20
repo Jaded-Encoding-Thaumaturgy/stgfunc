@@ -26,6 +26,9 @@ StrArr = SingleOrArr[SupportsString]
 StrArrOpt = SingleOrArrOpt[SupportsString]
 
 vs_alph = (alph := list(string.ascii_lowercase))[(idx := alph.index('x')):] + alph[:idx]
+akarin_available = hasattr(core, 'akarin')
+
+expr_func = core.__getattr__('akarin' if akarin_available else 'std').Expr
 
 
 @disallow_variable_format
@@ -138,7 +141,7 @@ def _combine_norm__ix(ffix: StrArrOpt, n_clips: int) -> List[SupportsString]:
 
 def combine(
     clips: Sequence[vs.VideoNode], operator: ExprOp = ExprOp.MAX, suffix: StrArrOpt = None, prefix: StrArrOpt = None,
-    expr_suffix: StrArrOpt = None, expr_prefix: StrArrOpt = None, planes: SingleOrArrOpt[int] = None,
+    expr_suffix: StrArrOpt = None, expr_prefix: StrArrOpt = None, planes: SingleOrArrOpt[int] = None, **expr_kwargs
 ) -> vs.VideoNode:
     n_clips = len(clips)
 
@@ -150,7 +153,7 @@ def combine(
 
     operators = operator * (n_clips - 1)
 
-    return expr(clips, [expr_prefix, args, operators, expr_suffix], planes)
+    return expr(clips, [expr_prefix, args, operators, expr_suffix], planes, **expr_kwargs)
 
 
 def expr(clips: Sequence[vs.VideoNode], expr: StrArr, planes: SingleOrArrOpt[int]) -> vs.VideoNode:
@@ -167,10 +170,10 @@ def expr(clips: Sequence[vs.VideoNode], expr: StrArr, planes: SingleOrArrOpt[int
 
     planesl = get_planes(planes, firstclip)
 
-    return core.std.Expr(clips, [
+    return expr_func(clips, [
         expr_string if x in planesl else ''
         for x in range(n_planes)
-    ])
+    ], **kwargs)
 
 
 @disallow_variable_format
