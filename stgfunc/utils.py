@@ -141,7 +141,8 @@ def _combine_norm__ix(ffix: StrArrOpt, n_clips: int) -> List[SupportsString]:
 
 def combine(
     clips: Sequence[vs.VideoNode], operator: ExprOp = ExprOp.MAX, suffix: StrArrOpt = None, prefix: StrArrOpt = None,
-    expr_suffix: StrArrOpt = None, expr_prefix: StrArrOpt = None, planes: SingleOrArrOpt[int] = None, **expr_kwargs
+    expr_suffix: StrArrOpt = None, expr_prefix: StrArrOpt = None, planes: SingleOrArrOpt[int] = None,
+    **expr_kwargs: Dict[str, Any]
 ) -> vs.VideoNode:
     n_clips = len(clips)
 
@@ -156,7 +157,9 @@ def combine(
     return expr(clips, [expr_prefix, args, operators, expr_suffix], planes, **expr_kwargs)
 
 
-def expr(clips: Sequence[vs.VideoNode], expr: StrArr, planes: SingleOrArrOpt[int]) -> vs.VideoNode:
+def expr(
+    clips: Sequence[vs.VideoNode], expr: StrArr, planes: SingleOrArrOpt[int], **expr_kwargs: Dict[str, Any]
+) -> vs.VideoNode:
     firstclip = clips[0]
     assert firstclip.format
 
@@ -173,7 +176,7 @@ def expr(clips: Sequence[vs.VideoNode], expr: StrArr, planes: SingleOrArrOpt[int
     return expr_func(clips, [
         expr_string if x in planesl else ''
         for x in range(n_planes)
-    ], **kwargs)
+    ], **expr_kwargs)
 
 
 @disallow_variable_format
