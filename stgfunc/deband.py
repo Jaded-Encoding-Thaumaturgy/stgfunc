@@ -138,7 +138,7 @@ def auto_deband(
     is_gray = cfamily is vs.GRAY
 
     cambi_args = dict(topk=0.1, tvi_threshold=0.012) | cambi_kwargs | dict(scores=True)
-    adptvgr_args = dict(lo=18, hi=240, grain_chroma=not is_gray or chroma) | adptvgr_args
+    adptvgr_args = dict(lo=18, hi=240) | adptvgr_args
 
     catrom = Catrom(dither_type=Dither.ERROR_DIFFUSION)
 

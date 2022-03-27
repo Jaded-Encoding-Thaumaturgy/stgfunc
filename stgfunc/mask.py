@@ -73,12 +73,10 @@ def generate_detail_mask(clip: vs.VideoNode, thr: float = 0.015) -> vs.VideoNode
     ], ExprOp.MIN)
 
 
-def tcanny(clip: vs.VideoNode, thr: float, openCL: bool = False) -> vs.VideoNode:
+def tcanny(clip: vs.VideoNode, thr: float) -> vs.VideoNode:
     msrcp = clip.bilateral.Gaussian(1).retinex.MSRCP([50, 200, 350], None, thr)
 
-    params = dict(mode=1, sigma=1)
-
-    tcunnied = msrcp.tcanny.TCannyCL(**params) if openCL else msrcp.tcanny.TCanny(**params)
+    tcunnied = msrcp.tcanny.TCanny(mode=1, sigma=1)
 
     return tcunnied.std.Minimum(coordinates=[1, 0, 1, 0, 0, 1, 0, 1])
 
