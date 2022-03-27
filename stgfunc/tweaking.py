@@ -5,11 +5,11 @@ import vapoursynth as vs
 from enum import IntEnum
 from itertools import cycle
 from math import pi, sin, cos, degrees
-from lvsfunc.kernels import Point, BSpline
-from lvsfunc.types import VSFunction, Range
 from lvsfunc.util import normalize_ranges
+from lvsfunc.types import VSFunction, Range
+from lvsfunc.kernels import Catrom, Point, BSpline
 from typing import Tuple, Sequence, SupportsFloat, Dict, Any, NamedTuple, List
-from vsutil import fallback, scale_value, get_depth, insert_clip, get_neutral_value, get_peak_value
+from vsutil import fallback, scale_value, get_depth, insert_clip, get_neutral_value, get_peak_value, get_subsampling
 
 from .transitions import crossfade
 from .easing import ExponentialEaseIn, F_Easing
@@ -19,6 +19,7 @@ from .types import disallow_variable_format, disallow_variable_resolution
 
 core = vs.core
 
+catrom = Catrom()
 bspline = BSpline()
 
 
@@ -316,7 +317,12 @@ def bbmod_fast(
     if any(x < 0 for x in {top, bottom, left, right}):
         raise ValueError("bbmod_fast: All sides have to be >= 0!")
 
-    bits = get_depth(clip)
+    if get_subsampling(clip):
+        clip444 = catrom.resample(clip, clip.format.replace(subsampling_h=0, subsampling_w=0))
+    else:
+        clip444 = clip
+
+    bits = get_depth(clip444)
 
     neutral_luma = get_neutral_value(clip)
     neutral_chroma = get_neutral_value(clip, chroma=True)
@@ -359,8 +365,8 @@ def bbmod_fast(
         ])
 
     upsample = Point().scale(
-        clip, clip.width * scale, clip.height * scale
-    ) if scale > 1 else clip
+        clip444, clip.width * scale, clip.height * scale
+    ) if scale > 1 else clip444
 
     fixed = _bbmod(upsample, top * scale, bottom * scale)
 
@@ -372,4 +378,4 @@ def bbmod_fast(
     if scale > 1:
         fixed = Point().scale(fixed, clip.width, clip.height)
 
-    return fixed
+    return catrom.resample(fixed, clip.format)
