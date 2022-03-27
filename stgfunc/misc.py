@@ -44,7 +44,7 @@ def set_output(clip: vs.VideoNode, text: bool | int | str | Tuple[int, int] | Tu
 
         pos, scale, title = (*text, ref_name)[:3] if isinstance(text, tuple) else (text, 2, ref_name) if isinstance(text, int) and text != True else (7, 2, ref_name)  # noqa
 
-        clip = clip.text.Text(title, pos, scale)
+        clip = clip.text.Text(title, pos, scale).std.SetFrameProp('Name', data=title)
 
     clip.set_output(index)
 
