@@ -7,7 +7,7 @@ from itertools import cycle
 from math import pi, sin, cos, degrees
 from lvsfunc.util import normalize_ranges
 from lvsfunc.types import VSFunction, Range
-from lvsfunc.kernels import Catrom, Point, BSpline
+from vskernels import Catrom, Point, BSpline
 from typing import Tuple, Sequence, SupportsFloat, Dict, Any, NamedTuple, List
 from vsutil import fallback, scale_value, get_depth, insert_clip, get_neutral_value, get_peak_value, get_subsampling
 
