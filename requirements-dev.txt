@@ -5,3 +5,4 @@ packaging==21.0
 pycodestyle==2.7.0
 typing-extensions>=3.10.0.2
 VapourSynth>=57
+vs-kernels>=1.0.0

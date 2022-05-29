@@ -8,7 +8,7 @@ from enum import Enum, IntEnum
 from vsutil import insert_clip
 from fractions import Fraction
 from lvsfunc.types import Range
-from lvsfunc.kernels import Kernel, Catrom
+from vskernels import Kernel, Catrom
 from typing import NamedTuple, Union, Tuple, Sequence
 from lvsfunc.util import clamp_values, normalize_ranges
 

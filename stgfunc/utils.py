@@ -12,7 +12,7 @@ from math import ceil, floor
 from fractions import Fraction
 from lvsfunc.types import Range
 from lvsfunc.util import get_prop
-from lvsfunc.kernels import Point
+from vskernels import Point
 from vsutil import depth as vdepth, get_depth
 from typing import Tuple, Union, List, Sequence, Dict, Any, TypeVar, Iterator, Iterable, SupportsFloat
 

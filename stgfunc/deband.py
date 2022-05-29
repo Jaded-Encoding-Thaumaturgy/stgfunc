@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import vapoursynth as vs
 from itertools import cycle
-from lvsfunc.kernels import Catrom, Lanczos
+from vskernels import Catrom, Lanczos
 from typing import Tuple, Any, Dict, SupportsFloat
 from debandshit.debanders import f3kbilateral, dumb3kdb
 from vsutil import depth, get_y, get_w, join, get_depth, iterate, Dither
