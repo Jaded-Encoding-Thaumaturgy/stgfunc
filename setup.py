@@ -10,7 +10,7 @@ with open("requirements.txt") as fh:
 
 setuptools.setup(
     name="stgfunc",
-    version="0.0.6",
+    version="0.1.0",
     author="Setsugen no ao",
     author_email="setsugen@setsugen.dev",
     description="Vapoursynth functions and utils",
