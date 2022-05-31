@@ -2,3 +2,4 @@ VapourSynth>=58
 lvsfunc>=0.4.2
 vsutil>=0.6.0
 vs-kernels>=1.0.2
+vs-debandshit>=0.4.4
