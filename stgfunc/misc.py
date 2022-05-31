@@ -264,3 +264,6 @@ x16_SHADERS = _get_shader('FSRCNNX_x2_16-0-4-1.glsl')
 x56_SHADERS = _get_shader('FSRCNNX_x2_56-16-4-1.glsl')
 SSIM_DOWNSCALER_SHADERS = _get_shader('SSimDownscaler.glsl')
 SSIM_SUPERSAMPLER_SHADERS = _get_shader('SSimSuperRes.glsl')
+
+src = source
+output = set_output
