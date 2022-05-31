@@ -6,7 +6,7 @@ from typing import List, Optional, Tuple
 
 import lvsfunc as lvf
 import vapoursynth as vs
-from lvsfunc.types import VSFunction
+from lvsfunc.types import VSFunction, Range
 from vsutil import depth, get_y, iterate, get_depth
 
 from .misc import source as stgsource

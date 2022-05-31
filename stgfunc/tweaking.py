@@ -136,11 +136,11 @@ def multi_tweak(clip: vs.VideoNode, tweaks: List[Tweak], debug: bool = False, **
         spliced_clip = clip[start:stop]
 
         if tweak == tnext:
-            tweaked_clip = tweak_clip(spliced_clip, *tweak, **tkargs)
+            tweaked_clip = tweak_clip(spliced_clip, *tweak, **tkargs)  # type: ignore
         else:
-            clipa, clipb = (tweak_clip(spliced_clip, *args, **tkargs) for args in (tweak, tnext))
+            clipa, clipb = (tweak_clip(spliced_clip, *args, **tkargs) for args in (tweak, tnext))  # type: ignore
 
-            tweaked_clip = crossfade(clipa, clipb, cefunc, debug)
+            tweaked_clip = crossfade(clipa, clipb, cefunc, debug)  # type: ignore
 
         clip = insert_clip(clip, tweaked_clip, start)
 
@@ -243,7 +243,7 @@ def auto_balance(
 
         psvalues[(abs(psvalues - curr_value) > delta_thr)] = curr_value
 
-        def _get_cont(mode: WeightMode, frange: range) -> SupportsFloat:
+        def _get_cont(mode: WeightMode, frange: range) -> Any:
             if mode == WeightMode.INTERPOLATE:
                 if radius < 1:
                     raise ValueError("auto_balance: 'Radius has to be >= 1 with WeightMode.INTERPOLATE!'")
@@ -282,9 +282,11 @@ def auto_balance(
         else:
             cont = _get_cont(weight_mode, clipfrange)
 
-        sat = (cont - 1) * relative_sat + 1
+        fcont = float(cont)
 
-        return tweak_clip(clip, cont, sat, **range_kwargs)
+        sat = (fcont - 1) * relative_sat + 1
+
+        return tweak_clip(clip, fcont, sat, **range_kwargs)
 
     stats_clips = [
         *(ref_stats[0] * i + ref_stats[:-i] for i in range(1, radius + 1)),

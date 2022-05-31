@@ -4,7 +4,7 @@ from enum import Enum, IntEnum
 from fractions import Fraction
 from functools import partial
 from math import ceil
-from typing import NamedTuple, Sequence, Tuple
+from typing import NamedTuple, List, Tuple, cast
 
 import lvsfunc as lvf
 import vapoursynth as vs
@@ -79,12 +79,12 @@ def crossfade(
 
 
 def fade_ranges(
-    clip_a: vs.VideoNode, clip_b: vs.VideoNode, ranges: Range | Sequence[Range],
+    clip_a: vs.VideoNode, clip_b: vs.VideoNode, ranges: Range | List[Range],
     fade_length: int = 5, ease_func: F_Easing = Linear
 ) -> vs.VideoNode:
     nranges = normalize_ranges(clip_b, ranges)
     nranges = [(s - fade_length, e + fade_length) for s, e in nranges]
-    nranges = normalize_ranges(clip_b, nranges)
+    nranges = normalize_ranges(clip_b, nranges)  # type: ignore
 
     franges = [range(s, e + 1) for s, e in nranges]
 
@@ -130,7 +130,8 @@ class PanFunctions(PanFunction, Enum):
 
 @disallow_variable_format
 def panner(
-    clip: vs.VideoNode, stitched: vs.VideoNode, pan_func: PanFunction = PanFunctions.VERTICAL_TTB,
+    clip: vs.VideoNode, stitched: vs.VideoNode,
+    pan_func: PanFunction | PanFunctions = PanFunctions.VERTICAL_TTB,
     fps: Fraction = Fraction(24000, 1001), kernel: Kernel = Catrom()
 ) -> vs.VideoNode:
     assert clip.format
@@ -167,7 +168,7 @@ def panner(
 
         cropped = shifted.std.Crop(bottom=y_c, right=x_c)
 
-        return kernel.resample(cropped, clip.format)
+        return kernel.resample(cropped, cast(vs.VideoFormat, clip.format))
 
     newpan = clip_cfps.std.FrameEval(_pan)
 

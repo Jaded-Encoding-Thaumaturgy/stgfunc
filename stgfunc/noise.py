@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import List, Callable
+from typing import List, Callable, Sequence
 
 import vapoursynth as vs
 from vsutil import depth, fallback, get_depth, get_neutral_value, get_peak_value, scale_value, split
@@ -90,7 +90,7 @@ def sizedgrain(
     strength: float | List[float] = 0.25, size: float = 1, sharp: int = 50,
     static: bool = False, grainer: Grainer | GrainerFuncGenerator | str | None = Grainer.AddGrain,
     fade_edges: bool = True, tv_range: bool = True,
-    lo: int | List[int] | None = None, hi: int | List[int] | None = None,
+    lo: int | Sequence[int] | None = None, hi: int | Sequence[int] | None = None,
     protect_neutral: bool = True, seed: int = -1, temporal_average: int = 0
 ) -> vs.VideoNode:
     """
@@ -184,17 +184,17 @@ def sizedgrain(
     if fade_edges:
         if lo is None:
             lovals = [scale_val8x(16), scale_val8x(16, True)]
-        elif not isinstance(lo, List):
+        elif not isinstance(lo, Sequence):
             lovals = [scale_val8x(lo), scale_val8x(lo, True)]
         else:
-            lovals = lo
+            lovals = list(lo)
 
         if hi is None:
             hivals = [scale_val8x(235), scale_val8x(240, True)]
-        elif not isinstance(hi, List):
+        elif not isinstance(hi, Sequence):
             hivals = [scale_val8x(hi), scale_val8x(hi, True)]
         else:
-            hivals = hi
+            hivals = list(hi)
 
         limit_expr = ['x y {mid} - abs - {low} < x y {mid} - abs + {high} > or x y {mid} - x + ?']
 

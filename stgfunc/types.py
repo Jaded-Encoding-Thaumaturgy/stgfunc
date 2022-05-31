@@ -56,4 +56,3 @@ class MaskCredit(NamedTuple):
 class Grainer(IntEnum):
     AddGrain = auto()
     AddNoise = auto()
-    ChickenDream = auto()

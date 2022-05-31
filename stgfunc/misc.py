@@ -163,14 +163,16 @@ def getMimeType(filename: str, /) -> Tuple[Optional[str], ...]:
         info = getInfoFFProbe(filename, True)
 
     if info is None:
-        info = mimetypes.guess_type(filename)
-        if info[0]:
-            info = tuple(info[0].split("/"))
+        infogt = mimetypes.guess_type(filename)
+        if infogt[0]:
+            info = tuple(infogt[0].split("/"))
 
     if info and info[1] is not None:
         info = tuple([info[0], info[1].split(".")[-1].rstrip("video")])
 
-    return tuple(x.lower() if x else x for x in info if isinstance(x, str) or x is None)
+    return tuple(
+        x.lower() if x else x for x in info if isinstance(x, str) or x is None  # type: ignore
+    )
 
 
 def getInfoFFProbe(filename: str, audio: bool = False, /) -> Any:

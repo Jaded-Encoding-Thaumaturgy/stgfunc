@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Iterable, List, Protocol, Sequence, Tuple, TypeVar
+from typing import Callable, Iterable, List, Protocol, Sequence, Tuple
 
 import vapoursynth as vs
 from lvsfunc.util import get_prop

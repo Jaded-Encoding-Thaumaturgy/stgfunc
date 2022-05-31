@@ -15,7 +15,6 @@ def mod4(x: float) -> int:
     return 16 if x < 16 else floor(x / 4 + 0.5) * 4
 
 
-
 @overload
 def disallow_variable_format(*, only_first: bool = False) -> Callable[[F], F]:
     ...
@@ -85,7 +84,9 @@ def disallow_variable_resolution(function: F | None = None, /, *, only_first: bo
 
 
 def to_arr(array: Sequence[T] | T) -> List[T]:
-    return list(array if (type(array) in {list, tuple, range, zip, set, map, enumerate}) else [array])  # type: ignore
+    return list(
+        array if (type(array) in {list, tuple, range, zip, set, map, enumerate}) else [array]  # type: ignore
+    )
 
 
 def flatten(items: Iterable[T]) -> Iterable[T]:

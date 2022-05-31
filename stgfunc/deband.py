@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import partial
 from itertools import cycle
-from typing import Any, Dict, SupportsFloat, Tuple
+from typing import Any, Dict, SupportsFloat, Tuple, List
 
 import vapoursynth as vs
 from debandshit import dumb3kdb, f3kbilateral
@@ -47,11 +47,11 @@ def auto_deband(
     clip: vs.VideoNode, cambi_thr: float = 12.0, cambi_scale: float = 1.2,
     min_thr: int | float = 24, max_thr: int | float = 48, steps: int = 4,
     grain_thrs: Tuple[int, int, int] | None = None,
-    debander: DebanderFN = f3kbilateral,
+    debander: DebanderFN = f3kbilateral,  # type: ignore
     ref_clip: vs.VideoNode | None = None, downsample_h: None | int = None,
     chroma: bool = False, debug: Tuple[bool, bool] = (False, False),
     debander_args: Dict[str, Any] = {}, adptvgr_args: Dict[str, Any] = {},
-    **cambi_kwargs: Dict[str, Any]
+    **cambi_kwargs: Any
 ) -> vs.VideoNode:
     """
         Automated banding detection and filtering via the use of CAMBI.
@@ -157,7 +157,7 @@ def auto_deband(
 
         ref10 = depth(ref16, 10, dither_type=Dither.ORDERED)
 
-        cambi = ref10.akarin.Cambi(**cambi_args)
+        cambi = ref10.akarin.Cambi(**cambi_args)  # type: ignore
 
         cambi_masks = [
             catrom.scale(
@@ -176,7 +176,9 @@ def auto_deband(
             ), expr_suffix=[ExprOp.SQRT, 2, ExprOp.LOG, ExprOp.MUL]
         )
 
-        banding_mask, graining_mask = map(partial(depth, 16, dither_type=Dither.NONE), [banding_mask, graining_mask])
+        banding_mask, graining_mask = map(
+            partial(depth, 16, dither_type=Dither.NONE), [banding_mask, graining_mask]
+        )
 
         n_d = round(clip.height / 1080 * 10)
 

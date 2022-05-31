@@ -5,7 +5,7 @@ import os
 import random
 import subprocess
 from pathlib import Path
-from typing import Any, BinaryIO, Callable, Dict, NamedTuple, TypeVar, cast
+from typing import Any, BinaryIO, Callable, Dict, NamedTuple, cast
 
 import vapoursynth as vs
 from lvsfunc.progress import BarColumn, FPSColumn, Progress, TextColumn, TimeRemainingColumn

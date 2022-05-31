@@ -4,7 +4,7 @@ import string
 from enum import Enum
 from itertools import cycle
 from math import ceil
-from typing import Any, Dict, Iterator, List, Sequence, SupportsFloat, Tuple
+from typing import Any, Dict, Iterator, List, Sequence, SupportsFloat, Tuple, Callable
 
 import vapoursynth as vs
 
@@ -19,7 +19,9 @@ StrArrOpt = SingleOrArrOpt[SupportsString]
 vs_alph = (alph := list(string.ascii_lowercase))[(idx := alph.index('x')):] + alph[:idx]
 akarin_available = hasattr(core, 'akarin')
 
-expr_func = getattr(core, 'akarin' if akarin_available else 'std').Expr
+expr_func: Callable[
+    [vs.VideoNode | Sequence[vs.VideoNode], str | Sequence[str]], vs.VideoNode
+] = getattr(core, 'akarin' if akarin_available else 'std').Expr
 
 
 class ExprOp(str, Enum):
@@ -91,7 +93,7 @@ class ExprOp(str, Enum):
     def __iter__(self) -> Iterator[ExprOp]:
         return cycle([self])
 
-    def __mul__(self, n: int) -> List[ExprOp]:
+    def __mul__(self, n: int) -> List[ExprOp]:  # type: ignore[override]
         return [self] * n
 
 
@@ -99,7 +101,7 @@ def _combine_norm__ix(ffix: StrArrOpt, n_clips: int) -> List[SupportsString]:
     if ffix is None:
         return [''] * n_clips
 
-    ffix = [ffix] if (type(ffix) in {str, tuple}) else list(ffix)
+    ffix = [ffix] if (type(ffix) in {str, tuple}) else list(ffix)  # type: ignore
 
     return ffix * max(1, ceil(n_clips / len(ffix)))
 
@@ -130,11 +132,11 @@ def expr(
 
     n_planes = firstclip.format.num_planes
 
-    expr_array = flatten(expr)
+    expr_array: List[SupportsString] = flatten(expr)  # type: ignore
 
-    expr_array = filter(lambda x: x is not None and x != '', expr_array)
+    expr_array_filtered = filter(lambda x: x is not None and x != '', expr_array)
 
-    expr_string = ' '.join([str(x).strip() for x in expr_array])
+    expr_string = ' '.join([str(x).strip() for x in expr_array_filtered])
 
     planesl = get_planes(planes, firstclip)
 
