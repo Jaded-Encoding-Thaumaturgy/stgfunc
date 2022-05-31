@@ -13,7 +13,7 @@ setuptools.setup(
     version="0.1.0",
     author="Setsugen no ao",
     author_email="setsugen@setsugen.dev",
-    description="Vapoursynth functions and utils",
+    description="VapourSynth functions and utils",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=["stgfunc", "stgfunc.utils", "stgfunc.shaders"],
