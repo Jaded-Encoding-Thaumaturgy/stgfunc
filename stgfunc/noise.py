@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Callable, List, cast
+from typing import List, Callable
 
 import vapoursynth as vs
 from vsutil import depth, fallback, get_depth, get_neutral_value, get_peak_value, scale_value, split
@@ -86,9 +86,11 @@ def adaptive_grain(
 @disallow_variable_format
 @disallow_variable_resolution
 def sizedgrain(
-    clip: vs.VideoNode, strength: float | List[float] = 0.25, size: float = 1, sharp: int = 50,
+    clip: vs.VideoNode,
+    strength: float | List[float] = 0.25, size: float = 1, sharp: int = 50,
     static: bool = False, grainer: Grainer | GrainerFuncGenerator | str | None = Grainer.AddGrain,
-    fade_edges: bool = True, tv_range: bool = True, lo: int | None = None, hi: int | None = None,
+    fade_edges: bool = True, tv_range: bool = True,
+    lo: int | List[int] | None = None, hi: int | List[int] | None = None,
     protect_neutral: bool = True, seed: int = -1, temporal_average: int = 0
 ) -> vs.VideoNode:
     """
@@ -147,7 +149,7 @@ def sizedgrain(
 
     blank = clip.std.BlankClip(sx, sy, color=neutral)
 
-    grainer = fallback(grainer, Grainer.AddGrain)
+    grainer = fallback(grainer, Grainer.AddGrain)  # type: ignore
 
     if isinstance(grainer, str):
         grainer_name = grainer.lower()
@@ -155,13 +157,15 @@ def sizedgrain(
         if grainer_name in _grainer_str_map:
             grainer = _grainer_str_map[grainer_name]
 
+    grainer_func: GrainerFunc
+
     if isinstance(grainer, Grainer):
         if grainer in {Grainer.AddGrain, Grainer.AddNoise}:
             plugin = getattr(core, 'grain' if grainer is Grainer.AddGrain else 'noise')
             grainer_func = partial(plugin.Add, var=strength[0], uvar=strength[1], constant=static, seed=seed)
         else:
             raise NotImplementedError
-    elif isinstance(grainer, Callable):
+    elif callable(grainer):
         grainer_func = grainer(strength[0], strength[1], seed, static)
     else:
         raise ValueError('sizedgrain: Invalid grainer specified!')
@@ -183,14 +187,14 @@ def sizedgrain(
         elif not isinstance(lo, List):
             lovals = [scale_val8x(lo), scale_val8x(lo, True)]
         else:
-            lovals = cast(List[int], lo)
+            lovals = lo
 
         if hi is None:
             hivals = [scale_val8x(235), scale_val8x(240, True)]
         elif not isinstance(hi, List):
             hivals = [scale_val8x(hi), scale_val8x(hi, True)]
         else:
-            hivals = cast(List[int], hi)
+            hivals = hi
 
         limit_expr = ['x y {mid} - abs - {low} < x y {mid} - abs + {high} > or x y {mid} - x + ?']
 

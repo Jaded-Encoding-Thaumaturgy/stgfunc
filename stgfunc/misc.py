@@ -37,6 +37,7 @@ def set_output(clip: vs.VideoNode, text: bool | int | str | Tuple[int, int] | Tu
         current_frame = inspect.currentframe()
 
         assert current_frame
+        assert current_frame.f_back
 
         for x in current_frame.f_back.f_locals.items():
             if (str(id(x[1])) == ref_id):
@@ -137,6 +138,7 @@ def source(
             clip = clip * (ref.num_frames - 1)
 
     if ref:
+        assert ref.format
 
         clip = clip.std.AssumeFPS(None, ref.fps.numerator, ref.fps.denominator)
         clip = clip.resize.Bicubic(

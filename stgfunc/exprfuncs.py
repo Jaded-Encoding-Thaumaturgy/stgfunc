@@ -19,7 +19,7 @@ StrArrOpt = SingleOrArrOpt[SupportsString]
 vs_alph = (alph := list(string.ascii_lowercase))[(idx := alph.index('x')):] + alph[:idx]
 akarin_available = hasattr(core, 'akarin')
 
-expr_func = core.__getattr__('akarin' if akarin_available else 'std').Expr
+expr_func = getattr(core, 'akarin' if akarin_available else 'std').Expr
 
 
 class ExprOp(str, Enum):

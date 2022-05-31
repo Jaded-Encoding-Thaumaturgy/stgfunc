@@ -1,3 +1,5 @@
+# type: ignore
+
 from typing import Literal, Optional, Union
 import vapoursynth as vs
 import math
