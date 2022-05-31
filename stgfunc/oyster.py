@@ -12,13 +12,11 @@ dfttest_args = dict(smode=0, sosize=0, tbsize=1, tosize=0, tmode=0)
 
 
 class SuperClip(vs.VideoNode):
-    def __init__(self, clip):
-        self = clip
+    ...
 
 
 class BasicClip(vs.VideoNode):
-    def __init__(self, clip):
-        self = clip
+    ...
 
 
 class Core(vs.Core):
@@ -328,10 +326,11 @@ class internal:
 
     @staticmethod
     def destaircase(
-            core: Core, src: vs.VideoNode, ref: BasicClip, radius: int, sigma: float, mse: tuple[float, float],
-            hard_thr: float, block_size: int, block_step: int, group_size: int, bm_range: int, bm_step: int,
+        core: Core, src: vs.VideoNode, ref: BasicClip, radius: int, sigma: float, mse: tuple[float, float],
+        hard_thr: float, block_size: int, block_step: int, group_size: int, bm_range: int, bm_step: int,
         ps_num: int, ps_range: int, ps_step: int, thr: float, elast: float, lowpass: list[float],
-            matrix: int):
+        matrix: int
+    ):
         mask = core.GenBlockMask(core.ShufflePlanes(src, 0, vs.GRAY))
         ref = core.FreqMerge(src, ref, block_size // 2 * 2 + 1, lowpass)
         ref = core.ThrMerge(src, ref, thr=thr, elast=elast)
@@ -419,7 +418,12 @@ def Basic(src, super=None, radius=6, pel=4, sad=2000.0, short_time=False):
     if not isinstance(super, vs.VideoNode) and super is not None:
         raise TypeError("Oyster.Basic: super has to be a video clip or None!")
     elif super is not None:
-        if super.format.sample_type != vs.FLOAT or super.format.bits_per_sample < 32 or super.format.subsampling_w > 0 or super.format.subsampling_h > 0:
+        if (
+            super.format.sample_type != vs.FLOAT or  # noqa: W504
+            super.format.bits_per_sample < 32 or  # noqa: W504
+            super.format.subsampling_w > 0 or  # noqa: W504
+            super.format.subsampling_h > 0
+        ):
             raise RuntimeError("Oyster.Basic: corrupted super clip!")
     if not isinstance(radius, int):
         raise TypeError("Oyster.Basic: radius has to be an integer!")

@@ -23,7 +23,7 @@ class _CompFunction(Protocol):
 def bestframeselect(
     clips: Sequence[vs.VideoNode], ref: vs.VideoNode,
     stat_func: Callable[[vs.VideoNode, vs.VideoNode], vs.VideoNode] = core.std.PlaneStats,
-    prop: str = 'PlaneStatsDiff', comp_func: _CompFunction = max, debug: Union[bool, Tuple[bool, int]] = False
+    prop: str = 'PlaneStatsDiff', comp_func: _CompFunction = max, debug: bool | Tuple[bool, int] = False
 ) -> vs.VideoNode:
     """
     Rewritten from https://github.com/po5/notvlc/blob/master/notvlc.py#L23.

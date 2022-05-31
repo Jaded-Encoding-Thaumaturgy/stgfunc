@@ -63,7 +63,7 @@ def fade_out_freeze(clip: vs.VideoNode, start: int, end: int, function: F_Easing
 
 def crossfade(
         clipa: vs.VideoNode, clipb: vs.VideoNode, function: F_Easing,
-        debug: Union[bool, int, Tuple[int, int]] = False
+        debug: bool | int | Tuple[int, int] = False
 ) -> vs.VideoNode:
     if not checkSimilarClips(clipa, clipb):
         raise ValueError('crossfade: Both clips must have the same length, dimensions and format.')
@@ -82,9 +82,9 @@ def fade_ranges(
     clip_a: vs.VideoNode, clip_b: vs.VideoNode, ranges: Range | Sequence[Range],
     fade_length: int = 5, ease_func: F_Easing = Linear
 ) -> vs.VideoNode:
-    nranges = normalize_ranges(clip_b, ranges)  # type: ignore
+    nranges = normalize_ranges(clip_b, ranges)
     nranges = [(s - fade_length, e + fade_length) for s, e in nranges]
-    nranges = normalize_ranges(clip_b, nranges)  # type: ignore
+    nranges = normalize_ranges(clip_b, nranges)
 
     franges = [range(s, e + 1) for s, e in nranges]
 
@@ -130,7 +130,7 @@ class PanFunctions(PanFunction, Enum):
 
 @disallow_variable_format
 def panner(
-    clip: vs.VideoNode, stitched: vs.VideoNode, pan_func: PanFunction = PanFunctions.VERTICAL_TTB,  # type: ignore
+    clip: vs.VideoNode, stitched: vs.VideoNode, pan_func: PanFunction = PanFunctions.VERTICAL_TTB,
     fps: Fraction = Fraction(24000, 1001), kernel: Kernel = Catrom()
 ) -> vs.VideoNode:
     assert clip.format

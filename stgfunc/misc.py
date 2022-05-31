@@ -53,7 +53,7 @@ def set_output(clip: vs.VideoNode, text: bool | int | str | Tuple[int, int] | Tu
 
 
 def source(
-    file: Union[str, Path], depth: Optional[int] = None, ref: Optional[vs.VideoNode] = None,
+    file: str | Path, depth: Optional[int] = None, ref: Optional[vs.VideoNode] = None,
     force_lsmas: bool = False, matrix_prop: Optional[int] = None, **index_args: Any
 ) -> vs.VideoNode:
     """
@@ -95,8 +95,10 @@ def source(
 
     checkValue(mimeType is None, "source: 'The source file format is not supported'")
     checkValue(mimeType == "audio", "source: 'Audio files are not supported'")
-    checkValue(extention in annoying_formats_exts,
-               "source: 'Please use an external indexer like d2vwitch or DGIndexNV for this file and import that'")
+    checkValue(
+        extention in annoying_formats_exts,
+        "source: 'Please use an external indexer like d2vwitch or DGIndexNV for this file and import that'"
+    )
     checkValue(not not ref and ref.format is None, "source: 'Variable-format clips not supported.'")
 
     if mimeType == "video":
@@ -109,7 +111,11 @@ def source(
         else:
             if (extention == 'm2ts') or (mimeName in ['mpeg-tts', 'hevc', 'mpeg2', 'vc1']):
                 clip = core.lsmas.LWLibavSource(file, **index_args)
-            elif mimeName in ['h264', 'h263', 'vp8', 'mpeg1', 'mpeg4', 'ffv1'] or checkMimeExt('av1', 'ivf') or checkMimeExt('vp9', 'mkv'):  # noqa
+            elif (
+                mimeName in ['h264', 'h263', 'vp8', 'mpeg1', 'mpeg4', 'ffv1'] or  # noqa: W504
+                checkMimeExt('av1', 'ivf') or  # noqa: W504
+                checkMimeExt('vp9', 'mkv')
+            ):
                 clip = core.ffms2.Source(file, **index_args)
             elif mimeName == 'mpeg1':
                 clip = core.ffms2.Source(file, seekmode=0, **index_args)
@@ -166,7 +172,7 @@ def getInfoFFProbe(filename: str, audio: bool = False, /) -> Any:
 def getInfoFromFileHeaders(filename: str, /) -> Optional[Tuple[str, ...]]:
     try:
         with open(filename, "rb") as file:
-            ftype, fmime = get_mime_from_file_header(file.read(128))
+            ftype, fmime = get_mime_from_file_header(cast(bytearray, file.read(128)))
             file.close()
 
         if not ftype or (fmime not in index_formats_mimes and ftype == "video"):
@@ -177,7 +183,7 @@ def getInfoFromFileHeaders(filename: str, /) -> Optional[Tuple[str, ...]]:
         return None
 
 
-def get_mime_from_file_header(fbytes: bytearray) -> Tuple[Union[str, None], Union[str, None]]:
+def get_mime_from_file_header(fbytes: bytearray) -> Tuple[str | None, str | None]:
     global file_headers_data
 
     if file_headers_data is None:

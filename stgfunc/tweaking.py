@@ -137,11 +137,11 @@ def multi_tweak(clip: vs.VideoNode, tweaks: List[Tweak], debug: bool = False, **
         spliced_clip = clip[start:stop]
 
         if tweak == tnext:
-            tweaked_clip = tweak_clip(spliced_clip, *tweak, **tkargs)  # type: ignore
+            tweaked_clip = tweak_clip(spliced_clip, *tweak, **tkargs)
         else:
-            clipa, clipb = (tweak_clip(spliced_clip, *args, **tkargs) for args in (tweak, tnext))  # type: ignore
+            clipa, clipb = (tweak_clip(spliced_clip, *args, **tkargs) for args in (tweak, tnext))
 
-            tweaked_clip = crossfade(clipa, clipb, cefunc, debug)  # type: ignore
+            tweaked_clip = crossfade(clipa, clipb, cefunc, debug)
 
         clip = insert_clip(clip, tweaked_clip, start)
 
@@ -176,7 +176,7 @@ def auto_balance(
     ref: vs.VideoNode | None = None, radius: int = 1, delta_thr: float = 0.4,
     min_thr: int | float | None = None, max_thr: SupportsFloat | None = None,
     balance_mode: BalanceMode = BalanceMode.UNDIMMING, weight_mode: WeightMode = WeightMode.MEAN,
-    debug: bool = False, **range_kwargs: Dict[str, Any]
+    debug: bool = False, **range_kwargs: Any
 ) -> vs.VideoNode:
     import numpy as np
 
@@ -202,7 +202,7 @@ def auto_balance(
 
     ref_stats = ref_clip.std.PlaneStats()
 
-    range_kwargs = range_kwargs | {"range_in": range_in}
+    range_kwargs.update({'range_in': range_in})
 
     over_mapped: List[Tuple[range, float, WeightMode]] = []
 
@@ -227,7 +227,7 @@ def auto_balance(
         override: Tuple[range, float, WeightMode] | None = next((x for x in over_mapped if n in x[0]), None)
 
         psvalues: Any = np.asarray([
-            _weighted(target, frame.props.PlaneStatsMax, zero) for frame in f
+            _weighted(target, get_prop(frame.props, 'PlaneStatsMax', float, 1.0), zero) for frame in f
         ])
 
         middle_idx = psvalues.size // 2
