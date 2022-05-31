@@ -36,7 +36,9 @@ def masked_f3kdb(
     return deband_masked if bits == 16 else depth(deband_masked, bits)
 
 
-__auto_deband_cache: Dict[str, Dict[str, Any]] = {}
+__auto_deband_cache: Dict[
+    str, Tuple[vs.VideoNode, vs.VideoNode, vs.VideoNode, vs.VideoNode]
+] = {}
 
 
 @disallow_variable_format(only_first=True)
@@ -184,12 +186,7 @@ def auto_deband(
         graining_mask = combine([graining_mask, banding_mask], ExprOp.ADD)
         graining_mask = graining_mask.bilateral.Gaussian(5)
 
-        __auto_deband_cache[cache_key] = dict(
-            cambi=cambi,
-            cambi_masks=cambi_masks,
-            banding_mask=banding_mask,
-            graining_mask=graining_mask
-        )
+        __auto_deband_cache[cache_key] = (cambi, cambi_masks, banding_mask, graining_mask)
 
     props_clip = clip16.std.CopyFrameProps(cambi)
 
