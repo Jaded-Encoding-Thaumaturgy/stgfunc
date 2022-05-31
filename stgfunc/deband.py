@@ -37,7 +37,7 @@ def masked_f3kdb(
 
 
 __auto_deband_cache: Dict[
-    str, Tuple[vs.VideoNode, vs.VideoNode, vs.VideoNode, vs.VideoNode]
+    str, Tuple[vs.VideoNode, List[vs.VideoNode], vs.VideoNode, vs.VideoNode]
 ] = {}
 
 
