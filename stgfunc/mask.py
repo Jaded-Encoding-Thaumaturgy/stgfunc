@@ -13,12 +13,6 @@ from .utils import get_bits, combine, ExprOp
 core = vs.core
 
 
-class MaskCredit(NamedTuple):
-    mask: vs.VideoNode
-    start_frame: int
-    end_frame: int
-
-
 def perform_masks_credit(path: Path) -> List[MaskCredit]:
     if not os.path.isdir(path):
         raise ValueError("perform_mask_credit: 'path' must be an existing path!")

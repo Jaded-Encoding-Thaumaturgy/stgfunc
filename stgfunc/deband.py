@@ -12,6 +12,7 @@ from .mask import detail_mask
 from .utils import depth as sdepth, get_bits, combine, ExprOp, destructure
 from .types import SingleOrArr, disallow_variable_format, disallow_variable_resolution
 
+from .types import DebanderFN, SingleOrArr
 
 core = vs.core
 
@@ -31,13 +32,6 @@ def masked_f3kdb(
     deband_masked = deband.std.MaskedMerge(clip, deband_mask)
 
     return deband_masked if bits == 16 else depth(deband_masked, bits)
-
-
-class DebanderFN():
-    def __call__(
-        self, clip: vs.VideoNode, threshold: SingleOrArr[SupportsFloat], *args: Any, **kwargs: Any
-    ) -> vs.VideoNode:
-        ...
 
 
 __auto_deband_cache: Dict[str, Dict[str, Any]] = {}
