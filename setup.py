@@ -20,7 +20,7 @@ setuptools.setup(
     description="Vapoursynth functions and utils",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=["stgfunc"],
+    packages=["stgfunc", "stgfunc.utils"],
     url="https://github.com/Setsugennoao/stgfunc",
     package_data={
         'stgfunc': ['py.typed'],
