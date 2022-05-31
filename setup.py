@@ -8,22 +8,18 @@ with open("README.md") as fh:
 with open("requirements.txt") as fh:
     install_requires = fh.read()
 
-name = "stgfunc"
-version = "0.0.6"
-release = "0.0.6"
-
 setuptools.setup(
-    name=name,
-    version=release,
+    name="stgfunc",
+    version="0.0.6",
     author="Setsugen no ao",
     author_email="setsugen@setsugen.dev",
     description="Vapoursynth functions and utils",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=["stgfunc", "stgfunc.utils"],
+    packages=["stgfunc", "stgfunc.utils", "stgfunc.shaders"],
     url="https://github.com/Setsugennoao/stgfunc",
     package_data={
-        'stgfunc': ['py.typed'],
+        'stgfunc': ['py.typed', '*.json', 'shaders/*.glsl'],
     },
     install_requires=install_requires,
     classifiers=[
