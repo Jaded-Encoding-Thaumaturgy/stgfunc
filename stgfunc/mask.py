@@ -11,7 +11,7 @@ from vsutil import depth, get_y, iterate, get_depth
 
 from .misc import source as stgsource
 from .exprfuncs import ExprOp, combine
-from .utils import get_bits, disallow_variable_format
+from .utils import expect_bits, disallow_variable_format
 from .types import MaskCredit
 
 core = vs.core
@@ -110,7 +110,7 @@ def getCreditMask(
         start_frame=0, thr=thr, prefilter=prefilter
     )
 
-    bits, credit_mask = get_bits(ed_mask)
+    bits, credit_mask = expect_bits(ed_mask)
     credit_mask = iterate(credit_mask, core.std.Minimum, 6)
     credit_mask = iterate(credit_mask, lambda x: x.std.Minimum().std.Maximum(), 8)
     if expand:
@@ -127,7 +127,7 @@ def detail_mask(
     pf_sigma: Optional[float] = 1.0, brz: Tuple[int, int] = (2500, 4500),
     rg_mode: int = 17
 ) -> vs.VideoNode:
-    bits, clip = get_bits(clip)
+    bits, clip = expect_bits(clip)
 
     clip_y = get_y(clip)
 

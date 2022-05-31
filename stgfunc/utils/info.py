@@ -10,7 +10,7 @@ from .func import disallow_variable_format
 
 
 @disallow_variable_format
-def get_bits(clip: vs.VideoNode, expected_depth: int = 16) -> Tuple[int, vs.VideoNode]:
+def expect_bits(clip: vs.VideoNode, expected_depth: int = 16) -> Tuple[int, vs.VideoNode]:
     return (bits := get_depth(clip)), depth(clip, expected_depth) if bits != expected_depth else clip
 
 

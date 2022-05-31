@@ -14,7 +14,7 @@ from .mask import detail_mask
 from .misc import set_output
 from .noise import adaptive_grain
 from .types import DebanderFN, SingleOrArr
-from .utils import get_bits, disallow_variable_format, disallow_variable_resolution, get_prop
+from .utils import expect_bits, disallow_variable_format, disallow_variable_resolution, get_prop
 
 core = vs.core
 
@@ -23,7 +23,7 @@ def masked_f3kdb(
     clip: vs.VideoNode, rad: int = 16, threshold: SingleOrArr[int] = 24,
     grain: SingleOrArr[int] = [12, 0], mask_args: Dict[str, Any] = {}
 ) -> vs.VideoNode:
-    bits, clip = get_bits(clip)
+    bits, clip = expect_bits(clip)
     clip = depth(clip, 16)
 
     mask_kwargs: Dict[str, Any] = dict(brz=(1000, 2750)) | mask_args
