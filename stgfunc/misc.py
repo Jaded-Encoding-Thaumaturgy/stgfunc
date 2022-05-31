@@ -261,7 +261,7 @@ def isMPLS(filename: str, /) -> bool:
 
 @cache
 def _get_shader(name: str) -> str:
-    return path.join(path.dirname(__file__), f"./.shaders/{name}")
+    return path.join(path.dirname(__file__), f"./shaders/{name}")
 
 
 x8_SHADERS = _get_shader('FSRCNNX_x2_8-0-4-1.glsl')
