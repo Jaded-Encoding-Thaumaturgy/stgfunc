@@ -34,7 +34,11 @@ def set_output(clip: vs.VideoNode, text: bool | int | str | Tuple[int, int] | Tu
     else:
         ref_name = f"Clip {index}"
 
-        for x in inspect.currentframe().f_back.f_locals.items():  # type: ignore
+        current_frame = inspect.currentframe()
+
+        assert current_frame
+
+        for x in current_frame.f_back.f_locals.items():
             if (str(id(x[1])) == ref_id):
                 ref_name = x[0]
                 break
@@ -42,7 +46,12 @@ def set_output(clip: vs.VideoNode, text: bool | int | str | Tuple[int, int] | Tu
             ref_name = ref_name.title()
         ref_name = ref_name.title()
 
-    pos, scale, title = (*text, ref_name)[:3] if isinstance(text, tuple) else (text, 2, ref_name) if isinstance(text, int) and text != True else (7, 2, ref_name)  # noqa
+    if isinstance(text, tuple):
+        pos, scale, title = (*text, ref_name)[:3]
+    elif isinstance(text, int) and text is not True:
+        pos, scale, title = (text, 2, ref_name)
+    else:
+        pos, scale, title = (7, 2, ref_name)
 
     if text:
         clip = clip.text.Text(title, pos, scale)

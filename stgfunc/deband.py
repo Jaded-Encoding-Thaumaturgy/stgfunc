@@ -200,8 +200,8 @@ def auto_deband(
 
         yuv = join([deband] * 3) if is_gray else deband
 
-        grained = adptvgrnMod(
-            yuv, grainer=lambda g: GrainFactory3(g, **gkwargs), **adptvgr_args
+        grained = adaptive_grain(
+            yuv, grainer=lambda str_luma, str_chr, static, seed: partial(GrainFactory3, **gkwargs), **adptvgr_args
         )
 
         grain = get_y(grained) if is_gray else grained

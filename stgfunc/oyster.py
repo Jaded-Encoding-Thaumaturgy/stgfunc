@@ -87,7 +87,8 @@ class Core(vs.Core):
         elast = thr / 2 if elast is None else elast
 
         BExp = [
-            "x {thr} {elast} + z - 2 {elast} * / * y {elast} z + {thr} - 2 {elast} * / * +".format(thr=thr, elast=elast)]
+            "x {thr} {elast} + z - 2 {elast} * / * y {elast} z + {thr} - 2 {elast} * / * +".format(thr=thr, elast=elast)
+        ]
         BDif = self.Expr(ref1, "0.0")
 
         PDif = self.Expr([src, ref1], "x y - 0.0 max")
