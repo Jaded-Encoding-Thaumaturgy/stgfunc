@@ -26,25 +26,28 @@ file_headers_filename = path.join(path.dirname(path.abspath(__file__)), "__file_
 def set_output(clip: vs.VideoNode, text: bool | int | str | Tuple[int, int] | Tuple[int, int, str] = True) -> None:
     index = len(vs.get_outputs()) + 1
 
-    if text:
-        ref_id = str(id(clip))
-        arr = to_arr(text)
+    ref_id = str(id(clip))
+    arr = to_arr(text)
 
-        if any([isinstance(x, str) for x in arr]):
-            ref_name = arr[-1]
-        else:
-            ref_name = f"Clip {index}"
+    if any([isinstance(x, str) for x in arr]):
+        ref_name = arr[-1]
+    else:
+        ref_name = f"Clip {index}"
 
-            for x in inspect.currentframe().f_back.f_locals.items():  # type: ignore
-                if (str(id(x[1])) == ref_id):
-                    ref_name = x[0]
-                    break
+        for x in inspect.currentframe().f_back.f_locals.items():  # type: ignore
+            if (str(id(x[1])) == ref_id):
+                ref_name = x[0]
+                break
 
             ref_name = ref_name.title()
+        ref_name = ref_name.title()
 
-        pos, scale, title = (*text, ref_name)[:3] if isinstance(text, tuple) else (text, 2, ref_name) if isinstance(text, int) and text != True else (7, 2, ref_name)  # noqa
+    pos, scale, title = (*text, ref_name)[:3] if isinstance(text, tuple) else (text, 2, ref_name) if isinstance(text, int) and text != True else (7, 2, ref_name)  # noqa
 
-        clip = clip.text.Text(title, pos, scale).std.SetFrameProp('Name', data=title)
+    if text:
+        clip = clip.text.Text(title, pos, scale)
+
+    clip = clip.std.SetFrameProp('Name', data=title)
 
     clip.set_output(index)
 
