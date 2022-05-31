@@ -121,14 +121,13 @@ def source(
         if ref:
             clip = clip * (ref.num_frames - 1)
 
-    if isinstance(matrix_prop, int):
-        clip = clip.std.SetFrameProp('_Matrix', intval=matrix_prop)
-
     if ref:
         width, height, fps, format = destructure(ref)
 
         clip = clip.std.AssumeFPS(None, fps.numerator, fps.denominator)
         clip = core.resize.Bicubic(clip, width=width, height=height, format=format.id, matrix=matrix_prop)
+    elif isinstance(matrix_prop, int):
+        clip = clip.std.SetFrameProp('_Matrix', intval=matrix_prop)
 
     if depth:
         clip = vsutil.depth(clip, depth)
