@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Tuple, Type
 from abc import ABC, abstractmethod
-from math import sqrt, pow, sin, cos, pi
+from math import cos, pi, pow, sin, sqrt
+from typing import Tuple, Type
 
 
 class EasingBaseMeta(ABC):

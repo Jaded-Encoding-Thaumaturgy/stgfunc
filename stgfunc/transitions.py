@@ -1,20 +1,20 @@
 from __future__ import annotations
 
+from enum import Enum, IntEnum
+from fractions import Fraction
+from functools import partial
 from math import ceil
+from typing import NamedTuple, Sequence, Tuple
+
 import lvsfunc as lvf
 import vapoursynth as vs
-from functools import partial
-from enum import Enum, IntEnum
-from vsutil import insert_clip
-from fractions import Fraction
 from lvsfunc.types import Range
-from vskernels import Kernel, Catrom
-from typing import NamedTuple, Union, Tuple, Sequence
 from lvsfunc.util import clamp_values, normalize_ranges
+from vskernels import Catrom, Kernel
+from vsutil import insert_clip
 
-from .types import disallow_variable_format
 from .easing import F_Easing, Linear, OnAxis
-from .utils import checkSimilarClips, change_fps
+from .utils import change_fps, checkSimilarClips, disallow_variable_format
 
 core = vs.core
 

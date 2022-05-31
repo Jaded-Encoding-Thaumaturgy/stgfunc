@@ -1,18 +1,13 @@
 from __future__ import annotations
 
+from typing import Callable, Iterable, List, Protocol, Sequence, Tuple, TypeVar
+
 import vapoursynth as vs
-from vsutil import fallback
 from lvsfunc.util import get_prop
-from lvsfunc.types import VSFunction
-from typing import List, Callable, Iterable, Protocol, Sequence, TypeVar, Union, Tuple, Literal, Any
 
-from .utils import get_planes
-from .types import SingleOrArrOpt
-
+from .types import T
 
 core = vs.core
-
-T = TypeVar('T')
 
 
 class _CompFunction(Protocol):

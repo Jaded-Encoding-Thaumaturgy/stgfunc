@@ -1,14 +1,18 @@
+from __future__ import annotations
+
 import os
+from pathlib import Path
+from typing import List, Optional, Tuple
+
 import lvsfunc as lvf
 import vapoursynth as vs
-from pathlib import Path
 from lvsfunc.types import VSFunction
-from vsutil import depth, iterate, get_y
-from typing import NamedTuple, List, Optional, Tuple
+from vsutil import depth, get_y, iterate, get_depth
 
 from .misc import source as stgsource
-from .utils import get_bits, combine, ExprOp
-
+from .exprfuncs import ExprOp, combine
+from .utils import get_bits, disallow_variable_format
+from .types import MaskCredit
 
 core = vs.core
 

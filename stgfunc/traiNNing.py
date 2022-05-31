@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-import os
 import enum
+import os
 import random
 import subprocess
-import vapoursynth as vs
 from pathlib import Path
-from lvsfunc.render import clip_async_render
-from typing import BinaryIO, Dict, Any, NamedTuple, cast, Callable, TypeVar
-from lvsfunc.progress import BarColumn, FPSColumn, Progress, TextColumn, TimeRemainingColumn
+from typing import Any, BinaryIO, Callable, Dict, NamedTuple, TypeVar, cast
 
+import vapoursynth as vs
+from lvsfunc.progress import BarColumn, FPSColumn, Progress, TextColumn, TimeRemainingColumn
+from lvsfunc.render import clip_async_render
+
+from .types import T
 
 core = vs.core
 
@@ -45,9 +47,6 @@ class DatasetClip(NamedTuple):
 class Datasets(NamedTuple):
     hr: DatasetClip
     lr: DatasetClip
-
-
-T = TypeVar('T')
 
 
 def ensure_ffmpeg_GBR(func: Callable[[T], vs.VideoNode]) -> Callable[[T], vs.VideoNode]:

@@ -1,18 +1,20 @@
 from __future__ import annotations
 
-import vapoursynth as vs
+from functools import partial
 from itertools import cycle
+from typing import Any, Dict, SupportsFloat, Tuple
+
+import vapoursynth as vs
+from debandshit import dumb3kdb, f3kbilateral
 from vskernels import Catrom, Lanczos
-from typing import Tuple, Any, Dict, SupportsFloat
-from debandshit.debanders import f3kbilateral, dumb3kdb
-from vsutil import depth, get_y, get_w, join, get_depth, iterate, Dither
+from vsutil import Dither, depth, get_depth, get_w, get_y, iterate, join
 
-from .misc import set_output
+from .exprfuncs import ExprOp, combine
 from .mask import detail_mask
-from .utils import depth as sdepth, get_bits, combine, ExprOp, destructure
-from .types import SingleOrArr, disallow_variable_format, disallow_variable_resolution
-
+from .misc import set_output
+from .noise import adaptive_grain
 from .types import DebanderFN, SingleOrArr
+from .utils import destructure, get_bits, disallow_variable_format, disallow_variable_resolution, get_prop
 
 core = vs.core
 
@@ -112,14 +114,9 @@ def auto_deband(
                                     `tvi_threshold` (default: 0.012)
     """
     try:
-        from havsfunc import GrainFactory3  # type: ignore
+        from havsfunc import GrainFactory3
     except ModuleNotFoundError:
         raise ModuleNotFoundError("auto_deband: 'missing dependency `havsfunc`'")
-
-    try:
-        from adptvgrnMod import adptvgrnMod  # type: ignore
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError("auto_deband: 'missing dependency `adptvgrnMod`'")
 
     global __auto_deband_cache
     assert clip.format

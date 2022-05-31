@@ -1,19 +1,19 @@
 from __future__ import annotations
 
-import json
-import vsutil
 import inspect
+import json
 import mimetypes
-import vapoursynth as vs
-from shutil import which
-from pathlib import Path
 from functools import cache
-from os import access, path, R_OK
+from os import R_OK, access, path
+from pathlib import Path
+from shutil import which
 from subprocess import check_output
-from typing import Tuple, Any, Optional, Union
+from typing import Any, Optional, Tuple, cast
+
+import vapoursynth as vs
+import vsutil
 
 from .utils import checkValue, destructure, to_arr
-
 
 core = vs.core
 

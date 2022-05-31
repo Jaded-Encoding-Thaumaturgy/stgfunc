@@ -1,21 +1,20 @@
 from __future__ import annotations
 
-from math import floor
-import vapoursynth as vs
 from enum import IntEnum
 from itertools import cycle
-from math import pi, sin, cos, degrees
+from math import cos, degrees, floor, pi, sin
+from typing import Any, Dict, List, NamedTuple, Sequence, SupportsFloat, Tuple
+
+import vapoursynth as vs
+from lvsfunc.types import Range, VSFunction
 from lvsfunc.util import normalize_ranges
-from lvsfunc.types import VSFunction, Range
-from vskernels import Catrom, Point, BSpline
-from typing import Tuple, Sequence, SupportsFloat, Dict, Any, NamedTuple, List
-from vsutil import fallback, scale_value, get_depth, insert_clip, get_neutral_value, get_peak_value, get_subsampling
+from vskernels import BSpline, Catrom, Point
+from vsutil import fallback, get_depth, get_neutral_value, get_peak_value, get_subsampling, insert_clip, scale_value
 
-from .transitions import crossfade
 from .easing import ExponentialEaseIn, F_Easing
-from .utils import get_color_range, expr, ExprOp
-from .types import disallow_variable_format, disallow_variable_resolution
-
+from .transitions import crossfade
+from .exprfuncs import ExprOp, expr
+from .utils import get_color_range, get_prop, disallow_variable_format, disallow_variable_resolution
 
 core = vs.core
 
