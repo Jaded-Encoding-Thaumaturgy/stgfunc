@@ -139,4 +139,3 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-stgfunc/oysterV2.py
