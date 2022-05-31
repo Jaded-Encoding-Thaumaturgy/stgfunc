@@ -10,6 +10,10 @@ from ..types import F, T
 core = vs.core
 
 
+def mod4(x: float) -> int:
+    return 16 if x < 16 else math.floor(x / 4 + 0.5) * 4
+
+
 
 @overload
 def disallow_variable_format(*, only_first: bool = False) -> Callable[[F], F]:
