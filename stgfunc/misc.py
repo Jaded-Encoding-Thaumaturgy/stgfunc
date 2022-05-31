@@ -13,7 +13,7 @@ from typing import Any, Optional, Tuple, cast
 import vapoursynth as vs
 import vsutil
 
-from .utils import checkValue, destructure, to_arr
+from .utils import checkValue, to_arr
 
 core = vs.core
 
@@ -137,10 +137,11 @@ def source(
             clip = clip * (ref.num_frames - 1)
 
     if ref:
-        width, height, fps, format = destructure(ref)
 
-        clip = clip.std.AssumeFPS(None, fps.numerator, fps.denominator)
-        clip = core.resize.Bicubic(clip, width=width, height=height, format=format.id, matrix=matrix_prop)
+        clip = clip.std.AssumeFPS(None, ref.fps.numerator, ref.fps.denominator)
+        clip = clip.resize.Bicubic(
+            ref.width, ref.height, format=ref.format.id, matrix=matrix_prop
+        )
     elif isinstance(matrix_prop, int):
         clip = clip.std.SetFrameProp('_Matrix', intval=matrix_prop)
 

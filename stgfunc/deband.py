@@ -14,7 +14,7 @@ from .mask import detail_mask
 from .misc import set_output
 from .noise import adaptive_grain
 from .types import DebanderFN, SingleOrArr
-from .utils import destructure, get_bits, disallow_variable_format, disallow_variable_resolution, get_prop
+from .utils import get_bits, disallow_variable_format, disallow_variable_resolution, get_prop
 
 core = vs.core
 
@@ -142,7 +142,7 @@ def auto_deband(
     })))
 
     if cache_key in __auto_deband_cache:
-        cambi, cambi_masks, banding_mask, graining_mask = destructure(__auto_deband_cache[cache_key])
+        cambi, cambi_masks, banding_mask, graining_mask = __auto_deband_cache[cache_key]
     else:
         ref16 = depth(ref, 16, dither_type=Dither.ERROR_DIFFUSION)
 
