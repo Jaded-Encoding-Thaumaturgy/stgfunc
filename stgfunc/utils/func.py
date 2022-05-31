@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from math import floor
 from functools import partial, wraps
 from typing import Any, Callable, Iterable, List, Sequence, cast, overload
 
@@ -11,7 +12,7 @@ core = vs.core
 
 
 def mod4(x: float) -> int:
-    return 16 if x < 16 else math.floor(x / 4 + 0.5) * 4
+    return 16 if x < 16 else floor(x / 4 + 0.5) * 4
 
 
 
