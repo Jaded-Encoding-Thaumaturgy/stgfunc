@@ -1,8 +1,10 @@
 from . import (  # noqa: F401
-    deband, easing, exprfuncs, mask, misc, noise, other, oyster, traiNNing, transitions, tweaking, types, utils
+    deband, dehalo, easing, exprfuncs, mask, misc, noise,
+    other, oyster, traiNNing, transitions, tweaking, types, utils
 )
 
 from .deband import *  # noqa: F401, F403
+from .dehalo import *  # noqa: F401, F403
 from .easing import *  # noqa: F401, F403
 from .exprfuncs import *  # noqa: F401, F403
 from .mask import *  # noqa: F401, F403
