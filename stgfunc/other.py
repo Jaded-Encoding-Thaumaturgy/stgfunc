@@ -6,6 +6,7 @@ import vapoursynth as vs
 from lvsfunc.util import get_prop
 
 from .types import T
+from .utils import get_prop
 
 core = vs.core
 
@@ -37,7 +38,7 @@ def bestframeselect(
 
     def _select(n: int, f: List[vs.VideoFrame]) -> vs.VideoNode:
         scores = [
-            get_prop(diff, prop, float) for diff in f
+            get_prop(diff.props, prop, float) for diff in f
         ]
 
         best = comp_func(indices, key=lambda i: scores[i])
