@@ -24,7 +24,7 @@ file_headers_filename = path.join(path.dirname(path.abspath(__file__)), "__file_
 
 
 def set_output(clip: vs.VideoNode, text: bool | int | str | Tuple[int, int] | Tuple[int, int, str] = True) -> None:
-    index = len(vs.get_outputs()) + 1
+    index = len(vs.get_outputs())
 
     ref_id = str(id(clip))
     arr = to_arr(text)
