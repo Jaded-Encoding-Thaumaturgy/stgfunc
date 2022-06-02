@@ -226,7 +226,7 @@ def auto_balance(
         override: Tuple[range, float, WeightMode] | None = next((x for x in over_mapped if n in x[0]), None)
 
         psvalues: Any = np.asarray([
-            _weighted(target, get_prop(frame.props, 'PlaneStatsMax', float, 1.0), zero) for frame in f
+            _weighted(target, get_prop(frame.props, 'PlaneStatsMax', SupportsFloat), zero) for frame in f
         ])
 
         middle_idx = psvalues.size // 2
@@ -282,11 +282,9 @@ def auto_balance(
         else:
             cont = _get_cont(weight_mode, clipfrange)
 
-        fcont = float(cont)
+        sat = (cont - 1) * relative_sat + 1
 
-        sat = (fcont - 1) * relative_sat + 1
-
-        return tweak_clip(clip, fcont, sat, **range_kwargs)
+        return tweak_clip(clip, cont, sat, **range_kwargs)
 
     stats_clips = [
         *(ref_stats[0] * i + ref_stats[:-i] for i in range(1, radius + 1)),
