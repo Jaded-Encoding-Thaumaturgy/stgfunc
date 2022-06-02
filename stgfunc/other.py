@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Callable, Iterable, List, Protocol, Sequence, Tuple
 
 import vapoursynth as vs
-from vsmask.better_vsutil import split
+from vsmask.better_vsutil import split, join
 from vsmask.edge import EdgeDetect, PrewittStd
 from vsmask.types import ensure_format as _ensure_format
 from vsutil import Dither
@@ -115,4 +115,4 @@ def edge_cleaner(
 
         final = core.std.MaskedMerge(final, clip_y, mask)
 
-    return final
+    return join([final, *chroma], clip.format.color_family)
