@@ -8,7 +8,6 @@ from math import floor
 import vapoursynth as vs
 
 from .func import disallow_variable_format
-from ..types import SingleOrArrOpt
 
 core = vs.core
 
@@ -22,11 +21,9 @@ def get_planes(clip: vs.VideoNode, planes: int | Sequence[int] | None = None) ->
     elif isinstance(planes, int):
         planes = [planes]
     else:
-        if not isinstance(planes, Sequence):
-            return [planes] * clip.format.num_planes
+        planes = list(planes) + [planes[-1]] * (clip.format.num_planes - len(planes))
 
-        x = cast(Sequence[int], planes)
-        return list(planes) + [planes[-1]] * (clip.format.num_planes - len(planes))
+    return planes
 
 
 def pad_reflect(clip: vs.VideoNode, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> vs.VideoNode:
