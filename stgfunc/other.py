@@ -9,6 +9,7 @@ from vsmask.types import ensure_format as _ensure_format
 from vsutil import Dither
 from vsutil import Range as CRange
 from vsutil import depth, get_peak_value, scale_value, get_neutral_value
+from vsrgtools import removegrain, repair
 
 from .types import T
 from .utils import cround, get_prop, pad_reflect, get_planes
@@ -133,11 +134,6 @@ def edge_cleaner(
     clip: vs.VideoNode, strength: float = 10, rmode: int = 17,
     hot: bool = False, smode: int = 0, edgemask: EdgeDetect = PrewittStd()
 ) -> vs.VideoNode:
-    try:
-        from rgvs import removegrain, repair
-    except BaseException:
-        raise ImportError('edge_cleaner: you need rgvs from "https://github.com/Varde-s-Forks/RgToolsVS"!')
-
     clip = _ensure_format(clip)
 
     if clip.format.color_family not in {vs.YUV, vs.GRAY}:
