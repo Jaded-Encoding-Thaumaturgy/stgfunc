@@ -138,7 +138,7 @@ def expr(
 
     expr_string = ' '.join([str(x).strip() for x in expr_array_filtered])
 
-    planesl = get_planes(planes, firstclip)
+    planesl = get_planes(firstclip, planes)
 
     return expr_func(clips, [
         expr_string if x in planesl else ''

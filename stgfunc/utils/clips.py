@@ -1,26 +1,32 @@
 from __future__ import annotations
 
-from typing import List
+from typing import List, Sequence
 from vskernels import Point
 from fractions import Fraction
 from math import floor
 
 import vapoursynth as vs
 
-from .func import to_arr, disallow_variable_format
+from .func import disallow_variable_format
 from ..types import SingleOrArrOpt
 
 core = vs.core
 
 
 @disallow_variable_format
-def get_planes(_planes: SingleOrArrOpt[int], clip: vs.VideoNode) -> List[int]:
+def get_planes(clip: vs.VideoNode, planes: int | Sequence[int] | None = None) -> List[int]:
     assert clip.format
-    n_planes = clip.format.num_planes
 
-    planes = to_arr(range(n_planes) if _planes is None else _planes)
+    if planes is None:
+        planes = list(range(clip.format.num_planes))
+    elif isinstance(planes, int):
+        planes = [planes]
+    else:
+        if not isinstance(planes, Sequence):
+            return [planes] * clip.format.num_planes
 
-    return [p for p in planes if p < n_planes]
+        x = cast(Sequence[int], planes)
+        return list(planes) + [planes[-1]] * (clip.format.num_planes - len(planes))
 
 
 def pad_reflect(clip: vs.VideoNode, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> vs.VideoNode:
