@@ -48,8 +48,8 @@ def auto_deband(
     min_thr: int | float = 24, max_thr: int | float = 48, steps: int = 4,
     grain_thrs: Tuple[int, int, int] | None = None,
     debander: DebanderFN = f3kbilateral,  # type: ignore
-    ref_clip: vs.VideoNode | None = None, downsample_h: None | int = None,
-    chroma: bool = False, debug: Tuple[bool, bool] = (False, False),
+    ref: vs.VideoNode | None = None, downsample_h: None | int = None,
+    debug: Tuple[bool, bool] = (False, False),
     debander_args: Dict[str, Any] = {}, adptvgr_args: Dict[str, Any] = {},
     **cambi_kwargs: Any
 ) -> vs.VideoNode:
@@ -97,12 +97,10 @@ def auto_deband(
                                 Function should take `clip` and `threshold` parameters.
                                 Threshold is dynamically generated as per usual. Use your own mask.
                                 Defaults to None.
-        :param ref_clip:        Ref clips which gets used to compute CAMBI calculations.
+        :param ref:             Ref clips which gets used to compute CAMBI calculations.
                                 Defaults to None.
         :param downsample_h:    Decrease CAMBI CPU usage by downsampling input to desired resolution.
                                 Defaults to None.
-        :param chroma:          Whether to process chroma or not.
-                                Defaults to False.
         :param debug:           A tuple of booleans.
                                 Set first value to True to show relevant frame properties.
                                 Set second value to True to ouput CAMBI's masks.
@@ -137,7 +135,7 @@ def auto_deband(
 
     clip16 = depth(clip, 16, dither_type=Dither.ERROR_DIFFUSION)
 
-    ref = ref_clip or clip
+    ref = ref or clip
 
     cache_key = '_'.join(map(str, map(hash, {
         ref, frozenset(cambi_args.items()), frozenset(cambi_args.values()), downsample_h
