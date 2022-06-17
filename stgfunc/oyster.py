@@ -27,7 +27,7 @@ class Core(vs.Core):
         self.MSuper = self.core.mvsf.Super
         self.MAnalyze = self.core.mvsf.Analyze
         self.MRecalculate = self.core.mvsf.Recalculate
-        self.MDegrain = self.core.mvsf.Degrain1
+        self.MDegrain = self.core.mvsf.Degrain
         self.RGB2OPP = self.core.bm3d.RGB2OPP
         self.OPP2RGB = self.core.bm3d.OPP2RGB
         self.BMBasic = self.core.bm3d.VBasic

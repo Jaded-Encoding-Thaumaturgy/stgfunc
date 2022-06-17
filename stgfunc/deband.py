@@ -176,9 +176,9 @@ def auto_deband(
             ), expr_suffix=[ExprOp.SQRT, 2, ExprOp.LOG, ExprOp.MUL]
         )
 
-        banding_mask, graining_mask = map(
-            partial(depth, 16, dither_type=Dither.NONE), [banding_mask, graining_mask]
-        )
+        banding_mask, graining_mask = [
+            depth(clip, 16, dither_type=Dither.NONE) for clip in [banding_mask, graining_mask]
+        ]
 
         n_d = round(clip.height / 1080 * 10)
 
