@@ -1,7 +1,7 @@
 VapourSynth>=58
 lvsfunc>=0.4.2
-vsmask>=0.3.0
-vsutil>=0.6.0
+vsmask>=0.4.0
+vsutil>=0.7.0
+vsrgtools>=0.1.2
 vs-kernels>=1.0.2
 vs-debandshit>=0.4.4
-vs-rgtools>=0.1.1
