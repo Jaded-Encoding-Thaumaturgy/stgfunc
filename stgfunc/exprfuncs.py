@@ -4,11 +4,11 @@ import string
 from enum import Enum
 from itertools import cycle
 from math import ceil
-from typing import Any, Dict, Iterator, List, Sequence, SupportsFloat, Tuple, Callable
+from typing import Any, Callable, Dict, Iterator, List, Sequence, SupportsFloat, Tuple
 
 import vapoursynth as vs
 
-from .types import SingleOrArr, SingleOrArrOpt, SupportsString, StrList
+from .types import SingleOrArr, SingleOrArrOpt, StrList, SupportsString
 from .utils import flatten, get_planes, to_arr
 
 core = vs.core

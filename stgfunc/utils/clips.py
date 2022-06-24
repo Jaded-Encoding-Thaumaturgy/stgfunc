@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from typing import List, Sequence
-from vskernels import Point
 from fractions import Fraction
 from math import floor
+from typing import List, Sequence
 
 import vapoursynth as vs
-
+from vskernels import Point
 from vsutil import disallow_variable_format
 
 core = vs.core

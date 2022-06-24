@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import partial
 from itertools import cycle
-from typing import Any, Dict, SupportsFloat, Tuple, List
+from typing import Any, Dict, List, SupportsFloat, Tuple
 
 import vapoursynth as vs
 from debandshit import dumb3kdb, f3kbilateral

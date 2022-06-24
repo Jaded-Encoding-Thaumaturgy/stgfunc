@@ -15,8 +15,8 @@ from vsutil import (
 )
 
 from .easing import ExponentialEaseIn, F_Easing
-from .transitions import crossfade
 from .exprfuncs import ExprOp, expr
+from .transitions import crossfade
 from .utils import get_color_range, get_prop
 
 core = vs.core

@@ -4,7 +4,7 @@ from enum import Enum, IntEnum
 from fractions import Fraction
 from functools import partial
 from math import ceil
-from typing import NamedTuple, List, Tuple, cast
+from typing import List, NamedTuple, Tuple, cast
 
 import lvsfunc as lvf
 import vapoursynth as vs
