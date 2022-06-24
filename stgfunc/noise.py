@@ -4,11 +4,14 @@ from functools import partial
 from typing import Callable, List, Sequence
 
 import vapoursynth as vs
-from vsutil import depth, fallback, get_depth, get_neutral_value, get_peak_value, scale_value, split
+from vsutil import (
+    depth, disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value,
+    get_peak_value, scale_value, split
+)
 
 from .mask import adg_mask
 from .types import Grainer
-from .utils import disallow_variable_format, disallow_variable_resolution, mod4
+from .utils import mod4
 
 core = vs.core
 
