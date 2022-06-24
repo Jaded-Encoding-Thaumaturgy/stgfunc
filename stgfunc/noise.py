@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import List, Callable, Sequence
+from typing import Callable, List, Sequence
 
 import vapoursynth as vs
 from vsutil import depth, fallback, get_depth, get_neutral_value, get_peak_value, scale_value, split
 
+from .mask import adg_mask
 from .types import Grainer
 from .utils import disallow_variable_format, disallow_variable_resolution, mod4
 
@@ -62,7 +63,7 @@ def adaptive_grain(
     :returns: Masked grained clip.
     """
 
-    mask = clip.std.PlaneStats().adg.Mask(luma_scaling)
+    mask = adg_mask(clip, luma_scaling)
 
     # Should we use this?
     # if temporal_average:
