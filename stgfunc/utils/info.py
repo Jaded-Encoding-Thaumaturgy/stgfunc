@@ -4,9 +4,7 @@ from __future__ import annotations
 from typing import Tuple
 
 import vapoursynth as vs
-from vsutil import depth, get_depth
-
-from .func import disallow_variable_format
+from vsutil import depth, disallow_variable_format, get_depth
 
 
 @disallow_variable_format

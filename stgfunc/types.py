@@ -2,13 +2,12 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from enum import IntEnum, auto
-from typing import Any, Callable, List, NamedTuple, Protocol, SupportsFloat, TypeVar, Union, runtime_checkable
+from typing import Any, List, NamedTuple, Protocol, SupportsFloat, TypeVar, Union, runtime_checkable
 
 import vapoursynth as vs
 
 T = TypeVar('T')
 R = TypeVar('R')
-F = TypeVar('F', bound=Callable[..., Any])
 
 SingleOrArr = Union[T, List[T]]
 SingleOrArrOpt = Union[SingleOrArr[T], None]

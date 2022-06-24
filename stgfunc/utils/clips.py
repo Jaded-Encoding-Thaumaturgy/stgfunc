@@ -7,7 +7,7 @@ from math import floor
 
 import vapoursynth as vs
 
-from .func import disallow_variable_format
+from vsutil import disallow_variable_format
 
 core = vs.core
 

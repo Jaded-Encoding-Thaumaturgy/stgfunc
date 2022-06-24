@@ -9,12 +9,15 @@ import vapoursynth as vs
 from lvsfunc.types import Range, VSFunction
 from lvsfunc.util import normalize_ranges
 from vskernels import BSpline, Catrom, Point
-from vsutil import fallback, get_depth, get_neutral_value, get_peak_value, get_subsampling, insert_clip, scale_value
+from vsutil import (
+    disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value, get_peak_value,
+    get_subsampling, insert_clip, scale_value
+)
 
 from .easing import ExponentialEaseIn, F_Easing
 from .transitions import crossfade
 from .exprfuncs import ExprOp, expr
-from .utils import get_color_range, get_prop, disallow_variable_format, disallow_variable_resolution
+from .utils import get_color_range, get_prop
 
 core = vs.core
 

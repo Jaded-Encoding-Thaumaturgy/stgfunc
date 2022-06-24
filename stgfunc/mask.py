@@ -7,12 +7,12 @@ from typing import List, Optional, Tuple
 import lvsfunc as lvf
 import vapoursynth as vs
 from lvsfunc.types import VSFunction, Range
-from vsutil import depth, get_peak_value, get_y, iterate, get_depth
+from vsutil import depth, get_depth, get_peak_value, get_y, iterate, disallow_variable_format
 
 from .misc import source as stgsource
 from .exprfuncs import ExprOp, combine
-from .utils import expect_bits, disallow_variable_format
 from .types import MaskCredit
+from .utils import expect_bits
 
 core = vs.core
 
