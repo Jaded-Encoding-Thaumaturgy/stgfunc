@@ -171,7 +171,7 @@ class Override(NamedTuple):
     override_mode: WeightMode = WeightMode.INTERPOLATE
 
 
-@disallow_variable_format()
+@disallow_variable_format
 def auto_balance(
     clip: vs.VideoNode, target_max: SupportsFloat | None = None, relative_sat: float = 1.0,
     range_in: vs.ColorRange = vs.RANGE_LIMITED, frame_overrides: Override | Sequence[Override] = [],
@@ -229,7 +229,7 @@ def auto_balance(
         override: Tuple[range, float, WeightMode] | None = next((x for x in over_mapped if n in x[0]), None)
 
         psvalues: Any = np.asarray([
-            _weighted(target, get_prop(frame.props, 'PlaneStatsMax', SupportsFloat), zero) for frame in f
+            _weighted(target, get_prop(frame.props, 'PlaneStatsMax', float), zero) for frame in f
         ])
 
         middle_idx = psvalues.size // 2

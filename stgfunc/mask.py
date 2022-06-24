@@ -143,7 +143,7 @@ def getCreditMask(
 
     bits, credit_mask = expect_bits(ed_mask)
     credit_mask = iterate(credit_mask, core.std.Minimum, 6)
-    credit_mask = iterate(credit_mask, lambda x: x.std.Minimum().std.Maximum(), 8)
+    credit_mask = iterate(credit_mask, lambda x: core.std.Minimum(x).std.Maximum(), 8)
     if expand:
         credit_mask = iterate(credit_mask, core.std.Maximum, expand)
     credit_mask = credit_mask.std.Inflate().std.Inflate().std.Inflate()
