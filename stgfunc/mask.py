@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple
 import lvsfunc as lvf
 import vapoursynth as vs
 from lvsfunc.types import Range, VSFunction
+from vsmask.edge import Kirsch
 from vsutil import depth, get_depth, get_peak_value, get_y, iterate, disallow_variable_format
 
 from .exprfuncs import ExprOp, combine
@@ -112,10 +113,8 @@ def tcanny(clip: vs.VideoNode, thr: float) -> vs.VideoNode:
 
 
 def linemask(clip_y: vs.VideoNode) -> vs.VideoNode:
-    from vsmask.edge import Kirsch
-
     return combine([
-        Kirsch().get_mask(clip_y),
+        Kirsch().edgemask(clip_y),
         tcanny(clip_y, 0.000125),
         tcanny(clip_y, 0.0025),
         tcanny(clip_y, 0.0055),
