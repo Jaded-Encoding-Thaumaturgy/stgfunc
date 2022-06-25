@@ -92,12 +92,31 @@ def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[NormalClipF
     return mapfunc(maskclip) if mapfunc else maskclip.std.Binarize()
 
 
+) -> vs.VideoNode:
+    from lvsfunc import scale_thresh, range_mask
+
+    brz_a = scale_thresh(brz_a, clip)
+    brz_b = scale_thresh(brz_b, clip)
+
+    y = get_y(clip)
+
+    blur = y.bilateral.Gaussian(sigma) if sigma else y
+
+    mask_a = range_mask(blur, rad=rad).std.Binarize(brz_a)
+
+    mask_b = PrewittTCanny().edgemask(blur).std.Binarize(brz_b)
+
+    mask = core.akarin.Expr([mask_a, mask_b], 'x y max')
+
+    return removegrain(removegrain(mask, 22), 11).std.Limiter()
+
+
 def generate_detail_mask(clip: vs.VideoNode, thr: float = 0.015) -> vs.VideoNode:
-    general_mask = lvf.mask.detail_mask(clip, rad=1, brz_a=1, brz_b=24.3 * thr)
+    general_mask = simple_detail_mask(clip, rad=1, brz_a=1, brz_b=24.3 * thr)
 
     return combine([
         combine([
-            lvf.mask.detail_mask(clip, brz_a=1, brz_b=2 * thr),
+            simple_detail_mask(clip, brz_a=1, brz_b=2 * thr),
             iterate(general_mask, core.std.Maximum, 3).std.Maximum().std.Inflate()
         ], ExprOp.MIN), general_mask.std.Maximum()
     ], ExprOp.MIN)
