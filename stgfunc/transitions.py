@@ -8,12 +8,12 @@ from typing import List, NamedTuple, Tuple, cast
 
 import lvsfunc as lvf
 import vapoursynth as vs
-from lvsfunc.types import Range
 from lvsfunc.util import clamp_values, normalize_ranges
 from vskernels import Catrom, Kernel
 from vsutil import disallow_variable_format, insert_clip
 
 from .easing import F_Easing, Linear, OnAxis
+from .types import Range
 from .utils import change_fps, checkSimilarClips
 
 core = vs.core

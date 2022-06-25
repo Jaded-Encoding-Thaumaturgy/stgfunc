@@ -6,13 +6,12 @@ from typing import List, Optional, Tuple
 
 import lvsfunc as lvf
 import vapoursynth as vs
-from lvsfunc.types import Range, VSFunction
 from vsmask.edge import Kirsch
 from vsutil import depth, get_depth, get_peak_value, get_y, iterate, disallow_variable_format
 
 from .exprfuncs import ExprOp, combine
 from .misc import source as stgsource
-from .types import MaskCredit
+from .types import MaskCredit, NormalClipFN, Range
 from .utils import expect_bits
 
 core = vs.core
@@ -73,7 +72,7 @@ def to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
 
 def manual_masking(
     clip: vs.VideoNode, src: vs.VideoNode, path: str,
-    mapfunc: Optional[VSFunction] = None
+    mapfunc: Optional[NormalClipFN] = None
 ) -> vs.VideoNode:
     manual_masks = perform_masks_credit(Path(path))
 
@@ -85,7 +84,7 @@ def manual_masking(
     return clip
 
 
-def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[VSFunction] = None) -> vs.VideoNode:
+def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[NormalClipFN] = None) -> vs.VideoNode:
     mask = MaskCredit(stgsource(path), 0, 0)
 
     maskclip = to_gray(mask.mask, clip)

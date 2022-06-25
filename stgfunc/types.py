@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import abstractmethod
 from enum import IntEnum, auto
-from typing import Any, List, NamedTuple, Protocol, SupportsFloat, TypeVar, Union, runtime_checkable
+from typing import Any, List, NamedTuple, Protocol, SupportsFloat, Tuple, TypeVar, Union, runtime_checkable
 
 import vapoursynth as vs
 
@@ -11,6 +11,14 @@ R = TypeVar('R')
 
 SingleOrArr = Union[T, List[T]]
 SingleOrArrOpt = Union[SingleOrArr[T], None]
+
+
+Range = Union[int | None, Tuple[int | None, int | None]]
+
+
+class NormalClipFN(Protocol):
+    def __call__(self, clip: vs.VideoNode, *args: Any, **kwargs: Any) -> vs.VideoNode:
+        ...
 
 
 class DebanderFN(Protocol):

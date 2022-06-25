@@ -6,7 +6,6 @@ from math import cos, degrees, floor, pi, sin
 from typing import Any, Dict, List, NamedTuple, Sequence, SupportsFloat, Tuple
 
 import vapoursynth as vs
-from lvsfunc.types import Range, VSFunction
 from lvsfunc.util import normalize_ranges
 from vskernels import BSpline, Catrom, Point
 from vsutil import (
@@ -17,6 +16,7 @@ from vsutil import (
 from .easing import ExponentialEaseIn, F_Easing
 from .exprfuncs import ExprOp, expr
 from .transitions import crossfade
+from .types import NormalClipFN, Range
 from .utils import get_color_range, get_prop
 
 core = vs.core
@@ -30,7 +30,7 @@ def tweak_clip(
         clip: vs.VideoNode, cont: float = 1.0, sat: float = 1.0,
         bright: float = 0.0, hue: float = 0.0, relative_sat: float | None = None,
         range_in: vs.ColorRange | None = None, range_out: vs.ColorRange | None = None,
-        clamp: bool = True, pre: vs.VideoNode | VSFunction | None = None, post: VSFunction | None = None
+        clamp: bool = True, pre: vs.VideoNode | NormalClipFN | None = None, post: NormalClipFN | None = None
 ) -> vs.VideoNode:
     assert clip.format
 
