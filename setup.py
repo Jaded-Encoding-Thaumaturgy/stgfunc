@@ -1,31 +1,42 @@
 #!/usr/bin/env python3
 
 import setuptools
+from pathlib import Path
 
-with open("README.md") as fh:
-    long_description = fh.read()
+package_name = 'stgfunc'
 
-with open("requirements.txt") as fh:
-    install_requires = fh.read()
+exec(Path(f'{package_name}/_metadata.py').read_text(), meta := dict[str, str]())
+
+readme = Path('README.md').read_text()
+requirements = Path('requirements.txt').read_text()
+
 
 setuptools.setup(
-    name="stgfunc",
-    version="0.1.3",
-    author="Setsugen no ao",
-    author_email="setsugen@setsugen.dev",
-    description="VapourSynth functions and utils",
-    long_description=long_description,
-    long_description_content_type="text/markdown",
-    packages=["stgfunc", "stgfunc.utils", "stgfunc.shaders"],
-    url="https://github.com/Setsugennoao/stgfunc",
-    package_data={
-        'stgfunc': ['py.typed', '*.json', 'shaders/*.glsl'],
+    name=package_name,
+    version=meta['__version__'],
+    author=meta['__author_name__'],
+    author_email=meta['__author_email__'],
+    maintainer=meta['__maintainer_name__'],
+    maintainer_email=meta['__maintainer_email__'],
+    description=meta['__doc__'],
+    long_description=readme,
+    long_description_content_type='text/markdown',
+    project_urls={
+        'Source Code': 'https://github.com/Setsugennoao/stgfunc',
+        'Documentation': 'https://stgfunc.setsugen.dev/en/latest/',
+        'Contact': 'http://fansub.setsugen.dev/discord',
     },
-    install_requires=install_requires,
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+    install_requires=requirements,
+    python_requires='>=3.10',
+    packages=[
+        package_name, f'{package_name}.utils', f'{package_name}.shaders'
     ],
-    python_requires='>=3.10'
+    package_data={
+        package_name: ['py.typed', '*.json', 'shaders/*.glsl']
+    },
+    classifiers=[
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+    ]
 )
