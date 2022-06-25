@@ -8,8 +8,6 @@ from pathlib import Path
 from typing import Any, BinaryIO, Callable, Dict, NamedTuple, cast
 
 import vapoursynth as vs
-from lvsfunc.progress import BarColumn, FPSColumn, Progress, TextColumn, TimeRemainingColumn
-from lvsfunc.render import clip_async_render
 
 from .types import T
 
@@ -113,19 +111,12 @@ class ExportDataset:
         self._output_images(dataset.hr)
 
     def _output_images(self, clip_dts: DatasetClip) -> None:
+        from lvsfunc import clip_async_render, get_render_progress
+
         if not (path := self.trainer.path_dataset_train.joinpath(clip_dts.res_type)).exists():
             path.mkdir(parents=True)
 
-        progress = Progress(
-            TextColumn('{task.description}'),
-            BarColumn(),
-            TextColumn('{task.completed}/{task.total}'),
-            TextColumn('{task.percentage:>3.02f}%'),
-            FPSColumn(),
-            TimeRemainingColumn()
-        )
-
-        with progress:
+        with get_render_progress() as progress:
             task = progress.add_task(
                 'Extracting frames...', total=clip_dts.clip.num_frames)
 
