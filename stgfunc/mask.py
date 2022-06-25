@@ -92,6 +92,8 @@ def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[NormalClipF
     return mapfunc(maskclip) if mapfunc else maskclip.std.Binarize()
 
 
+def simple_detail_mask(
+    clip: vs.VideoNode, sigma: float | None = None, rad: int = 3, brz_a: float = 0.025, brz_b: float = 0.045
 ) -> vs.VideoNode:
     from lvsfunc import scale_thresh, range_mask
 
@@ -111,7 +113,7 @@ def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[NormalClipF
     return removegrain(removegrain(mask, 22), 11).std.Limiter()
 
 
-def generate_detail_mask(clip: vs.VideoNode, thr: float = 0.015) -> vs.VideoNode:
+def multi_detail_mask(clip: vs.VideoNode, thr: float = 0.015) -> vs.VideoNode:
     general_mask = simple_detail_mask(clip, rad=1, brz_a=1, brz_b=24.3 * thr)
 
     return combine([
@@ -136,12 +138,12 @@ def linemask(clip_y: vs.VideoNode) -> vs.VideoNode:
         tcanny(clip_y, 0.000125),
         tcanny(clip_y, 0.0025),
         tcanny(clip_y, 0.0055),
-        generate_detail_mask(clip_y, 0.011),
-        generate_detail_mask(clip_y, 0.013)
+        multi_detail_mask(clip_y, 0.011),
+        multi_detail_mask(clip_y, 0.013)
     ], ExprOp.ADD)
 
 
-def getCreditMask(
+def credit_mask(
     clip: vs.VideoNode, ref: vs.VideoNode, thr: int,
     blur: Optional[float] = 1.65, prefilter: bool = True,
     expand: int = 8
