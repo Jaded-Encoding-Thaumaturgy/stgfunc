@@ -6,9 +6,8 @@ from functools import partial
 from math import ceil
 from typing import List, NamedTuple, Tuple, cast
 
-import lvsfunc as lvf
 import vapoursynth as vs
-from lvsfunc.util import clamp_values, normalize_ranges
+from vsrgtools.util import clamp
 from vskernels import Catrom, Kernel
 from vsutil import disallow_variable_format, insert_clip
 
@@ -38,9 +37,13 @@ def fade_freeze(
     clipa: vs.VideoNode, clipb: vs.VideoNode, invert: bool, start: int,
     end: int, function: F_Easing = Linear
 ) -> vs.VideoNode:
+    start_f, end_f = (start, end) if invert else (end, start)
+
+    length = end - start + 1
+
     return fade(
-        lvf.rfs(clipa, clipa[start if invert else end] * clipa.num_frames, (start, end)),
-        lvf.rfs(clipb, clipb[end if invert else start] * clipb.num_frames, (start, end)),
+        insert_clip(clipa, clipa[start_f] * length, start),
+        insert_clip(clipb, clipb[end_f] * length, start),
         invert, start, end, function
     )
 
@@ -54,11 +57,11 @@ def fade_out(clip: vs.VideoNode, start: int, end: int, function: F_Easing = Line
 
 
 def fade_in_freeze(clip: vs.VideoNode, start: int, end: int, function: F_Easing = Linear) -> vs.VideoNode:
-    return fade_in(lvf.rfs(clip, clip[end] * clip.num_frames, (start, end)), start, end, function)
+    return fade_in(insert_clip(clip, clip[end] * (end - start + 1), start), start, end, function)
 
 
 def fade_out_freeze(clip: vs.VideoNode, start: int, end: int, function: F_Easing = Linear) -> vs.VideoNode:
-    return fade_out(lvf.rfs(clip, clip[start] * clip.num_frames, (start, end)), start, end, function)
+    return fade_out(insert_clip(clip, clip[start] * (end - start + 1), start), start, end, function)
 
 
 def crossfade(
@@ -82,6 +85,8 @@ def fade_ranges(
     clip_a: vs.VideoNode, clip_b: vs.VideoNode, ranges: Range | List[Range],
     fade_length: int = 5, ease_func: F_Easing = Linear
 ) -> vs.VideoNode:
+    from lvsfunc.util import normalize_ranges
+
     nranges = normalize_ranges(clip_b, ranges)
     nranges = [(s - fade_length, e + fade_length) for s, e in nranges]
     nranges = normalize_ranges(clip_b, nranges)  # type: ignore
@@ -147,8 +152,8 @@ def panner(
     ease_x = pan_func.function_x(0, offset_x, clip_cfps.num_frames).ease
     ease_y = pan_func.function_y(0, offset_y, clip_cfps.num_frames).ease
 
-    clamp_x = partial(clamp_values, max_val=offset_x, min_val=0)
-    clamp_y = partial(clamp_values, max_val=offset_y, min_val=0)
+    clamp_x = partial(lambda x: int(clamp(x, min_val=0, max_val=offset_x)))
+    clamp_y = partial(lambda x: int(clamp(x, min_val=0, max_val=offset_y)))
 
     def _pan(n: int) -> vs.VideoNode:
         x_e, x_v = divmod(clamp_x(ease_x(n)), 1)

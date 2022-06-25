@@ -6,7 +6,6 @@ from math import cos, degrees, floor, pi, sin
 from typing import Any, Dict, List, NamedTuple, Sequence, SupportsFloat, Tuple
 
 import vapoursynth as vs
-from lvsfunc.util import normalize_ranges
 from vskernels import BSpline, Catrom, Point
 from vsutil import (
     disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value, get_peak_value,
@@ -181,6 +180,7 @@ def auto_balance(
     debug: bool = False, **range_kwargs: Any
 ) -> vs.VideoNode:
     import numpy as np
+    from lvsfunc.util import normalize_ranges
 
     ref_clip = fallback(ref, clip)
 

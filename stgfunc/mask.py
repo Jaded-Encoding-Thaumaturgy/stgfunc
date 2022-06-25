@@ -4,10 +4,10 @@ import os
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-import lvsfunc as lvf
 import vapoursynth as vs
-from vsmask.edge import Kirsch
-from vsutil import depth, get_depth, get_peak_value, get_y, iterate, disallow_variable_format
+from vsrgtools import removegrain
+from vsmask.edge import Kirsch, PrewittTCanny
+from vsutil import depth, disallow_variable_format, get_depth, get_peak_value, get_y, insert_clip, iterate
 
 from .exprfuncs import ExprOp, combine
 from .misc import source as stgsource
@@ -79,7 +79,9 @@ def manual_masking(
     for mask in manual_masks:
         maskclip = to_gray(mask.mask, src)
         maskclip = mapfunc(maskclip) if mapfunc else maskclip.std.Binarize()
-        clip = lvf.rfs(clip, core.std.MaskedMerge(clip, src, maskclip), [(mask.start_frame, mask.end_frame)])
+        insert = clip.std.MaskedMerge(src, maskclip)
+        insert = insert[mask.start_frame:mask.end_frame + 1]
+        clip = insert_clip(clip, insert, mask.start_frame)
 
     return clip
 
@@ -226,6 +228,8 @@ def replace_squaremask(
     ranges: Range | List[Range] | None = None,
     blur_sigma: int | None = None, invert: bool = False
 ) -> vs.VideoNode:
+    from lvsfunc import replace_ranges
+
     assert clipa.format
     assert clipb.format
 
@@ -242,12 +246,15 @@ def replace_squaremask(
 
     merge = clipa.std.MaskedMerge(clipb, mask)
 
-    return lvf.rfs(clipa, merge, ranges) if ranges else merge
+    return replace_ranges(clipa, merge, ranges) if ranges else merge
 
 
 def freeze_replace_mask(
     mask: vs.VideoNode, insert: vs.VideoNode,
     mask_params: Tuple[int, int, int, int], frame: int, frame_range: Tuple[int, int]
 ) -> vs.VideoNode:
+    start, end = frame_range
+
     masked_insert = replace_squaremask(mask[frame], insert[frame], mask_params)
-    return lvf.rfs(mask, masked_insert * mask.num_frames, frame_range)
+
+    return insert_clip(mask, masked_insert * (end - start + 1), start)
