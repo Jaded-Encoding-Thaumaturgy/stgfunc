@@ -12,6 +12,7 @@ from typing import Any, Optional, Tuple, cast
 
 import vapoursynth as vs
 import vsutil
+from vskernels import Bicubic
 
 from .utils import checkValue, to_arr
 
@@ -21,6 +22,13 @@ file_headers_data = None
 annoying_formats_exts = ['iso', 'vob']
 index_formats_mimes = ['video/d2v', 'video/dgi']
 file_headers_filename = path.join(path.dirname(path.abspath(__file__)), "__file_headers.json")
+
+
+class SetsuCubic(Bicubic):
+    """Bicubic b=-0.26470935063297507, c=0.7358829780174403"""
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(b=-0.26470935063297507, c=0.7358829780174403, **kwargs)
 
 
 def set_output(clip: vs.VideoNode, text: bool | int | str | Tuple[int, int] | Tuple[int, int, str] = True) -> None:
@@ -122,9 +130,9 @@ def source(
             if (extention == 'm2ts') or (mimeName in ['mpeg-tts', 'hevc', 'mpeg2', 'vc1']):
                 clip = core.lsmas.LWLibavSource(file, **index_args)
             elif (
-                mimeName in ['h264', 'h263', 'vp8', 'mpeg1', 'mpeg4', 'ffv1'] or  # noqa: W504
-                checkMimeExt('av1', 'ivf') or  # noqa: W504
-                checkMimeExt('vp9', 'mkv')
+                mimeName in ['h264', 'h263', 'vp8', 'mpeg1', 'mpeg4', 'ffv1']  # noqa: W504
+                or checkMimeExt('av1', 'ivf')  # noqa: W504
+                or checkMimeExt('vp9', 'mkv')
             ):
                 clip = core.ffms2.Source(file, **index_args)
             elif mimeName == 'mpeg1':
