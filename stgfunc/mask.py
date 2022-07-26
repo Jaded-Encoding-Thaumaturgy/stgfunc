@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import List, Tuple
 
 import vapoursynth as vs
 from vsexprtools import ExprOp, combine
@@ -50,7 +49,7 @@ def adg_mask(clip: vs.VideoNode, luma_scaling: float = 8.0, relative: bool = Fal
     )
 
 
-def perform_masks_credit(path: Path) -> List[MaskCredit]:
+def perform_masks_credit(path: Path) -> list[MaskCredit]:
     if not os.path.isdir(path):
         raise ValueError("perform_mask_credit: 'path' must be an existing path!")
 
@@ -177,8 +176,8 @@ def credit_mask(
 # Stolen from Light by yours truly <3
 def detail_mask(
     clip: vs.VideoNode,
-    sigma: float = 1.0, rxsigma: List[int] = [50, 200, 350],
-    pf_sigma: float | None = 1.0, brz: Tuple[int, int] = (2500, 4500),
+    sigma: float = 1.0, rxsigma: list[int] = [50, 200, 350],
+    pf_sigma: float | None = 1.0, brz: tuple[int, int] = (2500, 4500),
     rg_mode: int = 17
 ) -> vs.VideoNode:
     bits, clip = expect_bits(clip)
@@ -225,8 +224,8 @@ def squaremask(clip: vs.VideoNode, width: int, height: int, offset_x: int, offse
 
 @disallow_variable_format
 def replace_squaremask(
-    clipa: vs.VideoNode, clipb: vs.VideoNode, mask_params: Tuple[int, int, int, int],
-    ranges: Range | List[Range] | None = None,
+    clipa: vs.VideoNode, clipb: vs.VideoNode, mask_params: tuple[int, int, int, int],
+    ranges: Range | list[Range] | None = None,
     blur_sigma: int | None = None, invert: bool = False
 ) -> vs.VideoNode:
     from lvsfunc import replace_ranges
@@ -252,7 +251,7 @@ def replace_squaremask(
 
 def freeze_replace_mask(
     mask: vs.VideoNode, insert: vs.VideoNode,
-    mask_params: Tuple[int, int, int, int], frame: int, frame_range: Tuple[int, int]
+    mask_params: tuple[int, int, int, int], frame: int, frame_range: tuple[int, int]
 ) -> vs.VideoNode:
     start, end = frame_range
 

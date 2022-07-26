@@ -5,7 +5,7 @@ import os
 import random
 import subprocess
 from pathlib import Path
-from typing import Any, BinaryIO, Callable, Dict, NamedTuple, cast
+from typing import Any, BinaryIO, Callable, NamedTuple, cast
 
 import vapoursynth as vs
 
@@ -182,8 +182,8 @@ class TraiNNing:
     def __init__(
         self, lr_clip: vs.VideoNode, hr_clip: vs.VideoNode,
         dataset_path: Path, is_train: bool = True,
-        props_lr: Dict[str, int] = PROPS_LR,
-        props_hr: Dict[str, int] = PROPS_HR,
+        props_lr: dict[str, int] = PROPS_LR,
+        props_hr: dict[str, int] = PROPS_HR,
     ):
         self.props_lr = props_lr
         self.props_hr = props_hr

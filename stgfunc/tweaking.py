@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import IntEnum
 from itertools import cycle
 from math import cos, degrees, floor, pi, sin
-from typing import Any, Dict, List, NamedTuple, Sequence, SupportsFloat, Tuple
+from typing import Any, NamedTuple, Sequence, SupportsFloat
 
 import vapoursynth as vs
 from vsexprtools import ExprOp, expr
@@ -39,7 +39,7 @@ def tweak_clip(
     range_in = fallback(range_in, get_color_range(clip))
     range_out = fallback(range_out, range_in)
 
-    sv_args_out: Dict[str, Any] = dict(
+    sv_args_out = dict[str, Any](
         input_depth=8, output_depth=bits, range_in=1 - range_in, range=1 - range_out, scale_offsets=True
     )
 
@@ -67,8 +67,8 @@ def tweak_clip(
 
     clips = [pre_clip]
 
-    yexpr: List[Any] = ['x']
-    cexpr: List[Any] = ['x']
+    yexpr = list[Any](['x'])
+    cexpr = list[Any](['x'])
 
     if (hue != 0.0 or sat != 1.0) and clip.format.color_family != vs.GRAY:
         hue *= pi / degrees(pi)
@@ -118,7 +118,7 @@ class Tweak(NamedTuple):
 
 
 @disallow_variable_format(only_first=True)
-def multi_tweak(clip: vs.VideoNode, tweaks: List[Tweak], debug: bool = False, **tkargs: Dict[str, Any]) -> vs.VideoNode:
+def multi_tweak(clip: vs.VideoNode, tweaks: list[Tweak], debug: bool = False, **tkargs: dict[str, Any]) -> vs.VideoNode:
     if len(tweaks) < 2:
         raise ValueError("multi_tweak: 'At least two tweaks need to be passed!'")
 
@@ -207,7 +207,7 @@ def auto_balance(
 
     range_kwargs.update({'range_in': range_in})
 
-    over_mapped: List[Tuple[range, float, WeightMode]] = []
+    over_mapped = list[tuple[range, float, WeightMode]]()
 
     if frame_overrides:
         frame_overrides = [frame_overrides] if isinstance(frame_overrides, Override) else list(frame_overrides)
@@ -227,7 +227,7 @@ def auto_balance(
         return max(1, x - z) / max(1, y - z)
 
     def _autobalance(n: int, f: Sequence[vs.VideoFrame]) -> vs.VideoNode:
-        override: Tuple[range, float, WeightMode] | None = next((x for x in over_mapped if n in x[0]), None)
+        override: tuple[range, float, WeightMode] | None = next((x for x in over_mapped if n in x[0]), None)
 
         psvalues: Any = np.asarray([
             _weighted(target, get_prop(frame.props, 'PlaneStatsMax', float), zero) for frame in f

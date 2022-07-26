@@ -3,7 +3,7 @@ from __future__ import annotations
 import ast
 import inspect
 import re
-from typing import Dict, Iterator
+from typing import Iterator
 
 import vapoursynth as vs
 
@@ -16,7 +16,7 @@ def remove_chars(string: str, chars: str = '') -> str:
     return string.translate({ord(char): None for char in chars})
 
 
-def destructure(dict_: Dict[str, T], ignore_no_key: bool = False) -> T | Iterator[T]:
+def destructure(dict_: dict[str, T], ignore_no_key: bool = False) -> T | Iterator[T]:
     if not isinstance(dict_, object):
         raise TypeError(f"destructure: {dict_} is not an object!")
 

@@ -4,7 +4,7 @@ from enum import Enum, IntEnum
 from fractions import Fraction
 from functools import partial
 from math import ceil
-from typing import List, NamedTuple, Tuple, cast
+from typing import NamedTuple, cast
 
 import vapoursynth as vs
 from vsexprtools.util import clamp
@@ -66,8 +66,10 @@ def fade_out_freeze(clip: vs.VideoNode, start: int, end: int, function: F_Easing
 
 def crossfade(
         clipa: vs.VideoNode, clipb: vs.VideoNode, function: F_Easing,
-        debug: bool | int | Tuple[int, int] = False
+        debug: bool | int | tuple[int, int] = False
 ) -> vs.VideoNode:
+    assert clipa.format and clipb.format
+
     if not clipa.height == clipb.height and clipa.width == clipb.width and clipa.format.id == clipb.format.id:
         raise ValueError('crossfade: Both clips must have the same length, dimensions and format.')
 
@@ -82,7 +84,7 @@ def crossfade(
 
 
 def fade_ranges(
-    clip_a: vs.VideoNode, clip_b: vs.VideoNode, ranges: Range | List[Range],
+    clip_a: vs.VideoNode, clip_b: vs.VideoNode, ranges: Range | list[Range],
     fade_length: int = 5, ease_func: F_Easing = Linear
 ) -> vs.VideoNode:
     from lvsfunc.util import normalize_ranges

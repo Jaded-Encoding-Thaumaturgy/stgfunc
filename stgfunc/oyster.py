@@ -1,8 +1,9 @@
 # type: ignore
 
-from typing import Literal
-import vapoursynth as vs
 import math
+from typing import Literal
+
+import vapoursynth as vs
 
 fmtc_args = dict(fulls=True, fulld=True)
 msuper_args = dict(hpad=0, vpad=0, sharp=2, levels=0)
@@ -421,12 +422,12 @@ def Basic(src, super=None, radius=6, pel=4, sad=2000.0, short_time=False):
     if not isinstance(super, vs.VideoNode) and super is not None:
         raise TypeError("Oyster.Basic: super has to be a video clip or None!")
     elif super is not None:
-        if (
-            super.format.sample_type != vs.FLOAT  # noqa: W504
-            or super.format.bits_per_sample < 32  # noqa: W504
-            or super.format.subsampling_w > 0  # noqa: W504
-            or super.format.subsampling_h > 0
-        ):
+        if any([
+            super.format.sample_type != vs.FLOAT,
+            super.format.bits_per_sample < 32,
+            super.format.subsampling_w > 0,
+            super.format.subsampling_h > 0
+        ]):
             raise RuntimeError("Oyster.Basic: corrupted super clip!")
     if not isinstance(radius, int):
         raise TypeError("Oyster.Basic: radius has to be an integer!")

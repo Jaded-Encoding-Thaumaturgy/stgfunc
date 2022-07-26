@@ -8,7 +8,7 @@ from os import R_OK, access, path
 from pathlib import Path
 from shutil import which
 from subprocess import check_output
-from typing import Any, Tuple, cast
+from typing import Any, cast
 
 import vapoursynth as vs
 import vsutil
@@ -32,7 +32,7 @@ class SetsuCubic(Bicubic):
         super().__init__(b=-0.26470935063297507, c=0.7358829780174403, **kwargs)
 
 
-def set_output(clip: vs.VideoNode, text: bool | int | str | Tuple[int, int] | Tuple[int, int, str] = True) -> None:
+def set_output(clip: vs.VideoNode, text: bool | int | str | tuple[int, int] | tuple[int, int, str] = True) -> None:
     index = len(vs.get_outputs())
 
     ref_id = str(id(clip))
@@ -162,7 +162,7 @@ def source(
     return clip
 
 
-def getMimeType(filename: str, /) -> Tuple[str | None, ...]:
+def getMimeType(filename: str, /) -> tuple[str | None, ...]:
     info = getInfoFromFileHeaders(filename)
 
     if info is None:
@@ -192,7 +192,7 @@ def getInfoFFProbe(filename: str, audio: bool = False, /) -> Any:
         return None
 
 
-def getInfoFromFileHeaders(filename: str, /) -> Tuple[str, ...] | None:
+def getInfoFromFileHeaders(filename: str, /) -> tuple[str, ...] | None:
     try:
         with open(filename, "rb") as file:
             ftype, fmime = get_mime_from_file_header(cast(bytearray, file.read(128)))
@@ -206,7 +206,7 @@ def getInfoFromFileHeaders(filename: str, /) -> Tuple[str, ...] | None:
         return None
 
 
-def get_mime_from_file_header(fbytes: bytearray) -> Tuple[str | None, str | None]:
+def get_mime_from_file_header(fbytes: bytearray) -> tuple[str | None, str | None]:
     global file_headers_data
 
     if file_headers_data is None:

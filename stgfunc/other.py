@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Iterable, List, Protocol, Sequence, Tuple
+from typing import Callable, Iterable, Protocol, Sequence
 
 import vapoursynth as vs
 from vsexprtools import ExprOp, combine
@@ -21,7 +21,7 @@ class _CompFunction(Protocol):
 def bestframeselect(
     clips: Sequence[vs.VideoNode], ref: vs.VideoNode,
     stat_func: Callable[[vs.VideoNode, vs.VideoNode], vs.VideoNode] = core.std.PlaneStats,
-    prop: str = 'PlaneStatsDiff', comp_func: _CompFunction = max, debug: bool | Tuple[bool, int] = False
+    prop: str = 'PlaneStatsDiff', comp_func: _CompFunction = max, debug: bool | tuple[bool, int] = False
 ) -> vs.VideoNode:
     """
     Rewritten from https://github.com/po5/notvlc/blob/master/notvlc.py#L23.
@@ -38,7 +38,7 @@ def bestframeselect(
     indices = list(range(len(diffs)))
     do_debug, alignment = debug if isinstance(debug, tuple) else (debug, 7)
 
-    def _select(n: int, f: List[vs.VideoFrame]) -> vs.VideoNode:
+    def _select(n: int, f: list[vs.VideoFrame]) -> vs.VideoNode:
         scores = [
             get_prop(diff.props, prop, float) for diff in f
         ]
@@ -76,7 +76,7 @@ def median_plane_value(
     norm_planes = normalise_planes(clip, planes)
 
     if single_out:
-        def _median_pvalue_modify_frame(f: List[vs.VideoFrame], n: int) -> vs.VideoFrame:
+        def _median_pvalue_modify_frame(f: list[vs.VideoFrame], n: int) -> vs.VideoFrame:
             fdst = f[1].copy()
 
             max_val = 0
@@ -91,7 +91,7 @@ def median_plane_value(
 
             return fdst
     else:
-        def _median_pvalue_modify_frame(f: List[vs.VideoFrame], n: int) -> vs.VideoFrame:
+        def _median_pvalue_modify_frame(f: list[vs.VideoFrame], n: int) -> vs.VideoFrame:
             fdst = f[1].copy()
 
             for plane in norm_planes:
@@ -124,7 +124,7 @@ def median_plane_value(
     return outclip.resize.Point(clip.width, clip.height)
 
 
-def weighted_merge(*weighted_clips: Tuple[vs.VideoNode, float]) -> vs.VideoNode:
+def weighted_merge(*weighted_clips: tuple[vs.VideoNode, float]) -> vs.VideoNode:
     assert len(weighted_clips) <= len(EXPR_VARS), ValueError("weighted_merge: Too many clips!")
 
     clips, weights = zip(*weighted_clips)

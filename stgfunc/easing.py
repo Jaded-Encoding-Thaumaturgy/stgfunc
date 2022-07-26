@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from math import cos, pi, pow, sin, sqrt
-from typing import Tuple, Type
+from typing import Type
 
 
 class EasingBaseMeta(ABC):
-    limit: Tuple[int, int] = (0, 1)
+    limit: tuple[int, int] = (0, 1)
 
     def __init__(self, start: int = 0, end: int = 1, duration: int = 1) -> None:
         self.start = start

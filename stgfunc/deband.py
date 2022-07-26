@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import partial
 from itertools import cycle
-from typing import Any, Dict, List, SupportsFloat, Tuple
+from typing import Any, SupportsFloat
 
 import vapoursynth as vs
 from debandshit import dumb3kdb, f3kbilateral
@@ -24,12 +24,12 @@ core = vs.core
 
 def masked_f3kdb(
     clip: vs.VideoNode, rad: int = 16, threshold: SingleOrArr[int] = 24,
-    grain: SingleOrArr[int] = [12, 0], mask_args: Dict[str, Any] = {}
+    grain: SingleOrArr[int] = [12, 0], mask_args: dict[str, Any] = {}
 ) -> vs.VideoNode:
     bits, clip = expect_bits(clip)
     clip = depth(clip, 16)
 
-    mask_kwargs: Dict[str, Any] = dict(brz=(1000, 2750)) | mask_args
+    mask_kwargs = dict[str, Any](brz=(1000, 2750)) | mask_args
 
     deband_mask = detail_mask(clip, **mask_kwargs)
 
@@ -39,9 +39,7 @@ def masked_f3kdb(
     return deband_masked if bits == 16 else depth(deband_masked, bits)
 
 
-__auto_deband_cache: Dict[
-    str, Tuple[vs.VideoNode, List[vs.VideoNode], vs.VideoNode, vs.VideoNode]
-] = {}
+__auto_deband_cache = dict[str, tuple[vs.VideoNode, list[vs.VideoNode], vs.VideoNode, vs.VideoNode]]()
 
 
 @disallow_variable_format(only_first=True)
@@ -49,11 +47,11 @@ __auto_deband_cache: Dict[
 def auto_deband(
     clip: vs.VideoNode, cambi_thr: float = 12.0, cambi_scale: float = 1.2,
     min_thr: int | float = 24, max_thr: int | float = 48, steps: int = 4,
-    grain_thrs: Tuple[int, int, int] | None = None,
+    grain_thrs: tuple[int, int, int] | None = None,
     debander: DebanderFN = f3kbilateral,  # type: ignore
     ref: vs.VideoNode | None = None, downsample_h: None | int = None,
-    debug: Tuple[bool, bool] = (False, False),
-    debander_args: Dict[str, Any] = {}, adptvgr_args: Dict[str, Any] = {},
+    debug: tuple[bool, bool] = (False, False),
+    debander_args: dict[str, Any] = {}, adptvgr_args: dict[str, Any] = {},
     **cambi_kwargs: Any
 ) -> vs.VideoNode:
     """

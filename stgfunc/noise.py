@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import partial
-from typing import Any, Callable, List, Sequence
+from typing import Any, Callable, Sequence
 
 import vapoursynth as vs
 from vsexprtools.util import mod4
@@ -26,7 +26,7 @@ GrainerFuncGenerator = Callable[[float, float, int, bool], GrainerFunc]
 @disallow_variable_format
 @disallow_variable_resolution
 def adaptive_grain(
-    clip: vs.VideoNode, strength: float | List[float] = 0.25, size: float = 1, sharp: int = 50, static: bool = False,
+    clip: vs.VideoNode, strength: float | list[float] = 0.25, size: float = 1, sharp: int = 50, static: bool = False,
     luma_scaling: float = 12, grainer: Grainer | GrainerFuncGenerator | str | None = Grainer.AddGrain,
     fade_edges: bool = True, tv_range: bool = True, lo: int | None = None, hi: int | None = None,
     protect_neutral: bool = True, seed: int = -1, show_mask: bool = False, temporal_average: int = 0, **kwargs: Any
@@ -94,7 +94,7 @@ def adaptive_grain(
 @disallow_variable_resolution
 def sizedgrain(
     clip: vs.VideoNode,
-    strength: float | List[float] = 0.25, size: float = 1, sharp: int = 50,
+    strength: float | list[float] = 0.25, size: float = 1, sharp: int = 50,
     static: bool = False, grainer: Grainer | GrainerFuncGenerator | str | None = Grainer.AddGrain,
     fade_edges: bool = True, tv_range: bool = True,
     lo: int | Sequence[int] | None = None, hi: int | Sequence[int] | None = None,
@@ -146,7 +146,7 @@ def sizedgrain(
     b = sharp / -50 + 1
     c = (1 - b) / 2
 
-    if not isinstance(strength, List):
+    if not isinstance(strength, list):
         strength = [strength, .5 * strength]
     elif len(strength) > 2:
         raise ValueError('sizedgrain: Only 2 strength values are supported!')
