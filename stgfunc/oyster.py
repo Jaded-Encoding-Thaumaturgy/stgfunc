@@ -1,6 +1,6 @@
 # type: ignore
 
-from typing import Literal, Optional, Union
+from typing import Literal
 import vapoursynth as vs
 import math
 
@@ -134,7 +134,7 @@ class Core(vs.Core):
 
 class internal:
     @staticmethod
-    def super(core: Core, src: vs.VideoNode, pel: Union[Literal[2], Literal[4]]):
+    def super(core: Core, src: vs.VideoNode, pel: Literal[2, 4]):
         src = core.Pad(src, 128, 128, 128, 128)
         clip = core.Transpose(core.NNEDI(core.Transpose(core.NNEDI(src, **nnedi_args)), **nnedi_args))
         if pel == 4:
@@ -144,7 +144,7 @@ class internal:
     @staticmethod
     def basic(
         core: Core, src: vs.VideoNode, super: SuperClip, radius: int,
-        pel: Union[Literal[2], Literal[4]], sad: int, short_time: bool, color: bool
+        pel: Literal[2, 4], sad: int, short_time: bool, color: bool
     ):
         plane = 4 if color else 0
         src = core.Pad(src, 128, 128, 128, 128)
@@ -292,7 +292,7 @@ class internal:
         strength += [h * math.pow(c1 * h, c2) * math.log(1.0 + 1.0 / math.pow(c1 * h, c2))]
         strength += [None]
 
-        def loop(flt: Optional[vs.VideoNode], init: vs.VideoNode, src: vs.VideoNode, n: int) -> vs.VideoNode:
+        def loop(flt: vs.VideoNode | None, init: vs.VideoNode, src: vs.VideoNode, n: int) -> vs.VideoNode:
             strength[2] = n * strength[0] / 4 + strength[1] * (1 - n / 4)
             window = int(32 / math.pow(2, n))
             flt = init if n == 4 else flt
@@ -422,10 +422,10 @@ def Basic(src, super=None, radius=6, pel=4, sad=2000.0, short_time=False):
         raise TypeError("Oyster.Basic: super has to be a video clip or None!")
     elif super is not None:
         if (
-            super.format.sample_type != vs.FLOAT or  # noqa: W504
-            super.format.bits_per_sample < 32 or  # noqa: W504
-            super.format.subsampling_w > 0 or  # noqa: W504
-            super.format.subsampling_h > 0
+            super.format.sample_type != vs.FLOAT  # noqa: W504
+            or super.format.bits_per_sample < 32  # noqa: W504
+            or super.format.subsampling_w > 0  # noqa: W504
+            or super.format.subsampling_h > 0
         ):
             raise RuntimeError("Oyster.Basic: corrupted super clip!")
     if not isinstance(radius, int):

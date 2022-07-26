@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import vapoursynth as vs
 from vsexprtools import ExprOp, combine
@@ -73,7 +73,7 @@ def to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
 
 def manual_masking(
     clip: vs.VideoNode, src: vs.VideoNode, path: str,
-    mapfunc: Optional[VSFunction] = None
+    mapfunc: VSFunction | None = None
 ) -> vs.VideoNode:
     manual_masks = perform_masks_credit(Path(path))
 
@@ -87,7 +87,7 @@ def manual_masking(
     return clip
 
 
-def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[VSFunction] = None) -> vs.VideoNode:
+def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: VSFunction | None = None) -> vs.VideoNode:
     mask = MaskCredit(stgsource(path), 0, 0)
 
     maskclip = to_gray(mask.mask, clip)
@@ -148,7 +148,7 @@ def linemask(clip_y: vs.VideoNode) -> vs.VideoNode:
 
 def credit_mask(
     clip: vs.VideoNode, ref: vs.VideoNode, thr: int,
-    blur: Optional[float] = 1.65, prefilter: bool = True,
+    blur: float | None = 1.65, prefilter: bool = True,
     expand: int = 8
 ) -> vs.VideoNode:
     from vardefunc.mask import Difference
@@ -178,7 +178,7 @@ def credit_mask(
 def detail_mask(
     clip: vs.VideoNode,
     sigma: float = 1.0, rxsigma: List[int] = [50, 200, 350],
-    pf_sigma: Optional[float] = 1.0, brz: Tuple[int, int] = (2500, 4500),
+    pf_sigma: float | None = 1.0, brz: Tuple[int, int] = (2500, 4500),
     rg_mode: int = 17
 ) -> vs.VideoNode:
     bits, clip = expect_bits(clip)

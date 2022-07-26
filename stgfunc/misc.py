@@ -8,7 +8,7 @@ from os import R_OK, access, path
 from pathlib import Path
 from shutil import which
 from subprocess import check_output
-from typing import Any, Optional, Tuple, cast
+from typing import Any, Tuple, cast
 
 import vapoursynth as vs
 import vsutil
@@ -72,8 +72,8 @@ def set_output(clip: vs.VideoNode, text: bool | int | str | Tuple[int, int] | Tu
 
 
 def source(
-    file: str | Path, depth: Optional[int] = None, ref: Optional[vs.VideoNode] = None,
-    force_lsmas: bool = False, matrix_prop: Optional[int] = None, **index_args: Any
+    file: str | Path, depth: int | None = None, ref: vs.VideoNode | None = None,
+    force_lsmas: bool = False, matrix_prop: int | None = None, **index_args: Any
 ) -> vs.VideoNode:
     """
     Generic clip import function.
@@ -162,7 +162,7 @@ def source(
     return clip
 
 
-def getMimeType(filename: str, /) -> Tuple[Optional[str], ...]:
+def getMimeType(filename: str, /) -> Tuple[str | None, ...]:
     info = getInfoFromFileHeaders(filename)
 
     if info is None:
@@ -192,7 +192,7 @@ def getInfoFFProbe(filename: str, audio: bool = False, /) -> Any:
         return None
 
 
-def getInfoFromFileHeaders(filename: str, /) -> Optional[Tuple[str, ...]]:
+def getInfoFromFileHeaders(filename: str, /) -> Tuple[str, ...] | None:
     try:
         with open(filename, "rb") as file:
             ftype, fmime = get_mime_from_file_header(cast(bytearray, file.read(128)))

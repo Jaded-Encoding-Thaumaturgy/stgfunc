@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import IntEnum, auto
-from typing import Any, NamedTuple, Protocol, SupportsFloat, Tuple, TypeVar, Union
+from typing import Any, NamedTuple, Protocol, SupportsFloat, Tuple, TypeAlias, TypeVar
 
 import vapoursynth as vs
 from vsexprtools.types import SingleOrArr
@@ -10,7 +10,7 @@ T = TypeVar('T')
 R = TypeVar('R')
 
 
-Range = Union[int | None, Tuple[int | None, int | None]]
+Range: TypeAlias = int | Tuple[int | None, int | None] | None
 
 
 class DebanderFN(Protocol):
