@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import Callable, Iterable, List, Protocol, Sequence, Tuple
 
 import vapoursynth as vs
+from vsexprtools import ExprOp, combine
+from vsexprtools.util import EXPR_VARS
 from vsutil import get_neutral_value
 
 from .types import T
@@ -120,3 +122,11 @@ def median_plane_value(
     outclip = blankclip.std.ModifyFrame([clip, blankclip], _median_pvalue_modify_frame)
 
     return outclip.resize.Point(clip.width, clip.height)
+
+
+def weighted_merge(*weighted_clips: Tuple[vs.VideoNode, float]) -> vs.VideoNode:
+    assert len(weighted_clips) <= len(EXPR_VARS), ValueError("weighted_merge: Too many clips!")
+
+    clips, weights = zip(*weighted_clips)
+
+    return combine(clips, ExprOp.ADD, zip(weights, ExprOp.MUL), expr_suffix=[sum(weights), ExprOp.DIV])
