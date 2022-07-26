@@ -12,9 +12,10 @@ from typing import Any, Optional, Tuple, cast
 
 import vapoursynth as vs
 import vsutil
+from vsexprtools.util import to_arr
 from vskernels import Bicubic
 
-from .utils import checkValue, to_arr
+from .utils import checkValue
 
 core = vs.core
 
@@ -35,7 +36,7 @@ def set_output(clip: vs.VideoNode, text: bool | int | str | Tuple[int, int] | Tu
     index = len(vs.get_outputs())
 
     ref_id = str(id(clip))
-    arr = to_arr(text)
+    arr = to_arr(text)  # type: ignore
 
     if any([isinstance(x, str) for x in arr]):
         ref_name = arr[-1]
@@ -130,9 +131,9 @@ def source(
             if (extention == 'm2ts') or (mimeName in ['mpeg-tts', 'hevc', 'mpeg2', 'vc1']):
                 clip = core.lsmas.LWLibavSource(file, **index_args)
             elif (
-                mimeName in ['h264', 'h263', 'vp8', 'mpeg1', 'mpeg4', 'ffv1']  # noqa: W504
-                or checkMimeExt('av1', 'ivf')  # noqa: W504
-                or checkMimeExt('vp9', 'mkv')
+                mimeName in [
+                    'h264', 'h263', 'vp8', 'mpeg1', 'mpeg4', 'ffv1'
+                ] or checkMimeExt('av1', 'ivf') or checkMimeExt('vp9', 'mkv')
             ):
                 clip = core.ffms2.Source(file, **index_args)
             elif mimeName == 'mpeg1':

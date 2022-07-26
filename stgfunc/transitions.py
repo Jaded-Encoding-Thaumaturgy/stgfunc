@@ -13,7 +13,7 @@ from vsutil import disallow_variable_format, insert_clip
 
 from .easing import F_Easing, Linear, OnAxis
 from .types import Range
-from .utils import change_fps, checkSimilarClips
+from .utils import change_fps
 
 core = vs.core
 
@@ -68,7 +68,7 @@ def crossfade(
         clipa: vs.VideoNode, clipb: vs.VideoNode, function: F_Easing,
         debug: bool | int | Tuple[int, int] = False
 ) -> vs.VideoNode:
-    if not checkSimilarClips(clipa, clipb):
+    if not clipa.height == clipb.height and clipa.width == clipb.width and clipa.format.id == clipb.format.id:
         raise ValueError('crossfade: Both clips must have the same length, dimensions and format.')
 
     ease_function = function(0, 1, clipa.num_frames)

@@ -4,11 +4,11 @@ from typing import Callable, Iterable, List, Protocol, Sequence, Tuple
 
 import vapoursynth as vs
 from vsexprtools import ExprOp, combine
-from vsexprtools.util import EXPR_VARS
+from vsexprtools.util import EXPR_VARS, normalise_planes
 from vsutil import get_neutral_value
 
 from .types import T
-from .utils import get_planes, get_prop
+from .utils import get_prop
 
 core = vs.core
 
@@ -73,7 +73,7 @@ def median_plane_value(
 
     npp = cupy if do_cuda and cuda_available and clip.height > 720 and clip.width > 1024 else np
 
-    norm_planes = get_planes(clip, planes)
+    norm_planes = normalise_planes(clip, planes)
 
     if single_out:
         def _median_pvalue_modify_frame(f: List[vs.VideoFrame], n: int) -> vs.VideoFrame:

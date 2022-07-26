@@ -14,9 +14,3 @@ def expect_bits(clip: vs.VideoNode, expected_depth: int = 16) -> Tuple[int, vs.V
 def checkValue(condition: bool, error_message: str) -> None:
     if condition:
         raise ValueError(error_message)
-
-
-@disallow_variable_format
-def checkSimilarClips(clipa: vs.VideoNode, clipb: vs.VideoNode) -> bool:
-    assert clipa.format and clipb.format
-    return clipa.height == clipb.height and clipa.width == clipb.width and clipa.format.id == clipb.format.id

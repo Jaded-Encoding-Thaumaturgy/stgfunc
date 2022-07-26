@@ -5,13 +5,14 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 import vapoursynth as vs
-from vsrgtools import removegrain
+from vsexprtools import ExprOp, combine
+from vsexprtools.types import VSFunction
 from vsmask.edge import Kirsch, PrewittTCanny
+from vsrgtools import removegrain
 from vsutil import depth, disallow_variable_format, get_depth, get_peak_value, get_y, insert_clip, iterate
 
-from .exprfuncs import ExprOp, combine
 from .misc import source as stgsource
-from .types import MaskCredit, NormalClipFN, Range
+from .types import MaskCredit, Range
 from .utils import expect_bits
 
 core = vs.core
@@ -72,7 +73,7 @@ def to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
 
 def manual_masking(
     clip: vs.VideoNode, src: vs.VideoNode, path: str,
-    mapfunc: Optional[NormalClipFN] = None
+    mapfunc: Optional[VSFunction] = None
 ) -> vs.VideoNode:
     manual_masks = perform_masks_credit(Path(path))
 
@@ -86,7 +87,7 @@ def manual_masking(
     return clip
 
 
-def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[NormalClipFN] = None) -> vs.VideoNode:
+def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[VSFunction] = None) -> vs.VideoNode:
     mask = MaskCredit(stgsource(path), 0, 0)
 
     maskclip = to_gray(mask.mask, clip)
@@ -97,7 +98,7 @@ def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: Optional[NormalClipF
 def simple_detail_mask(
     clip: vs.VideoNode, sigma: float | None = None, rad: int = 3, brz_a: float = 0.025, brz_b: float = 0.045
 ) -> vs.VideoNode:
-    from lvsfunc import scale_thresh, range_mask
+    from lvsfunc import range_mask, scale_thresh
 
     brz_a = scale_thresh(brz_a, clip)
     brz_b = scale_thresh(brz_b, clip)

@@ -4,6 +4,7 @@ from functools import partial
 from typing import Any, Callable, List, Sequence
 
 import vapoursynth as vs
+from vsexprtools.util import mod4
 from vsutil import (
     depth, disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value,
     get_peak_value, scale_value, split
@@ -11,7 +12,6 @@ from vsutil import (
 
 from .mask import adg_mask
 from .types import Grainer
-from .utils import mod4
 
 core = vs.core
 

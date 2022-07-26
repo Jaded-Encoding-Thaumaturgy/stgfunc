@@ -6,6 +6,8 @@ from math import cos, degrees, floor, pi, sin
 from typing import Any, Dict, List, NamedTuple, Sequence, SupportsFloat, Tuple
 
 import vapoursynth as vs
+from vsexprtools import ExprOp, expr
+from vsexprtools.types import StrList, VSFunction
 from vskernels import BSpline, Catrom, Point
 from vsutil import (
     disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value, get_peak_value,
@@ -13,9 +15,8 @@ from vsutil import (
 )
 
 from .easing import ExponentialEaseIn, F_Easing
-from .exprfuncs import ExprOp, expr
 from .transitions import crossfade
-from .types import NormalClipFN, Range
+from .types import Range
 from .utils import get_color_range, get_prop
 
 core = vs.core
@@ -29,7 +30,7 @@ def tweak_clip(
         clip: vs.VideoNode, cont: float = 1.0, sat: float = 1.0,
         bright: float = 0.0, hue: float = 0.0, relative_sat: float | None = None,
         range_in: vs.ColorRange | None = None, range_out: vs.ColorRange | None = None,
-        clamp: bool = True, pre: vs.VideoNode | NormalClipFN | None = None, post: NormalClipFN | None = None
+        clamp: bool = True, pre: vs.VideoNode | VSFunction | None = None, post: VSFunction | None = None
 ) -> vs.VideoNode:
     assert clip.format
 
@@ -85,7 +86,7 @@ def tweak_clip(
         cexpr.extend([chroma_center, ExprOp.ADD])
 
         if clamp and range_out:
-            cexpr.extend(ExprOp.clamp(chroma_min, chroma_max))
+            cexpr.extend(StrList([chroma_min, ExprOp.MAX, chroma_max, ExprOp.MIN]))
 
     if bright != 0 or cont != 1:
         if luma_min > 0:
@@ -98,7 +99,7 @@ def tweak_clip(
             yexpr.extend([luma_min, bright, ExprOp.ADD * 2])
 
         if clamp and range_out:
-            yexpr.extend(ExprOp.clamp(luma_min, luma_max))
+            yexpr.extend(StrList([luma_min, ExprOp.MAX, luma_max, ExprOp.MIN]))
 
     tclip = core.std.ShufflePlanes([
         expr(clips, yexpr, 0), expr(clips, cexpr, [1, 2])
