@@ -7,7 +7,7 @@ from math import ceil
 from typing import List, NamedTuple, Tuple, cast
 
 import vapoursynth as vs
-from vsrgtools.util import clamp
+from vsexprtools.util import clamp
 from vskernels import Catrom, Kernel
 from vsutil import disallow_variable_format, insert_clip
 

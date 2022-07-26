@@ -11,12 +11,6 @@ def expect_bits(clip: vs.VideoNode, expected_depth: int = 16) -> Tuple[int, vs.V
     return (bits := get_depth(clip)), depth(clip, expected_depth) if bits != expected_depth else clip
 
 
-@disallow_variable_format
-def isGray(clip: vs.VideoNode) -> bool:
-    assert clip.format
-    return clip.format.color_family == vs.GRAY
-
-
 def checkValue(condition: bool, error_message: str) -> None:
     if condition:
         raise ValueError(error_message)

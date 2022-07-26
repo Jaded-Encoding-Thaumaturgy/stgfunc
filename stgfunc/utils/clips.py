@@ -2,33 +2,10 @@ from __future__ import annotations
 
 from fractions import Fraction
 from math import floor
-from typing import List, Sequence
 
 import vapoursynth as vs
-from vskernels import Point
-from vsutil import disallow_variable_format
 
 core = vs.core
-
-
-@disallow_variable_format
-def get_planes(clip: vs.VideoNode, planes: int | Sequence[int] | None = None) -> List[int]:
-    assert clip.format
-
-    if planes is None:
-        planes = list(range(clip.format.num_planes))
-    elif isinstance(planes, int):
-        planes = [planes]
-    else:
-        planes = list(planes) + [planes[-1]] * (clip.format.num_planes - len(planes))
-
-    return planes
-
-
-def pad_reflect(clip: vs.VideoNode, left: int = 0, right: int = 0, top: int = 0, bottom: int = 0) -> vs.VideoNode:
-    d_width, d_height = clip.width + left + right, clip.height + top + bottom
-
-    return Point(src_width=d_width, src_height=d_height).scale(clip, d_width, d_height, (-top, -left))
 
 
 def change_fps(clip: vs.VideoNode, fps: Fraction) -> vs.VideoNode:

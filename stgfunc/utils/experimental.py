@@ -8,9 +8,12 @@ from typing import Dict, Iterator
 import vapoursynth as vs
 
 from ..types import T
-from .func import remove_chars
 
 core = vs.core
+
+
+def remove_chars(string: str, chars: str = '') -> str:
+    return string.translate({ord(char): None for char in chars})
 
 
 def destructure(dict_: Dict[str, T], ignore_no_key: bool = False) -> T | Iterator[T]:
