@@ -15,8 +15,6 @@ import vsutil
 from vsexprtools.util import to_arr
 from vskernels import Bicubic
 
-from .utils import checkValue
-
 core = vs.core
 
 file_headers_data = None
@@ -30,6 +28,11 @@ class SetsuCubic(Bicubic):
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(b=-0.26470935063297507, c=0.7358829780174403, **kwargs)
+
+
+def checkValue(condition: bool, error_message: str) -> None:
+    if condition:
+        raise ValueError(error_message)
 
 
 def set_output(clip: vs.VideoNode, text: bool | int | str | tuple[int, int] | tuple[int, int, str] = True) -> None:

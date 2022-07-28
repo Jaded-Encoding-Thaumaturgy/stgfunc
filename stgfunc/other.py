@@ -5,10 +5,10 @@ from typing import Callable, Iterable, Protocol, Sequence
 import vapoursynth as vs
 from vsexprtools import ExprOp, combine
 from vsexprtools.util import EXPR_VARS, normalise_planes
+from vskernels import get_prop
 from vsutil import get_neutral_value
 
 from .types import T
-from .utils import get_prop
 
 core = vs.core
 

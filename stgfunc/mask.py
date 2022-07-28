@@ -6,13 +6,13 @@ from pathlib import Path
 import vapoursynth as vs
 from vsexprtools import ExprOp, combine
 from vsexprtools.types import VSFunction
-from vsmask.edge import Kirsch, PrewittTCanny
-from vsrgtools import removegrain
+from vsexprtools.util import expect_bits
+from vsmask.edge import Kirsch
+from vsscale.mask import multi_detail_mask
 from vsutil import depth, disallow_variable_format, get_depth, get_peak_value, get_y, insert_clip, iterate
 
 from .misc import source as stgsource
 from .types import MaskCredit, Range
-from .utils import expect_bits
 
 core = vs.core
 
@@ -94,38 +94,6 @@ def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: VSFunction | None = 
     return mapfunc(maskclip) if mapfunc else maskclip.std.Binarize()
 
 
-def simple_detail_mask(
-    clip: vs.VideoNode, sigma: float | None = None, rad: int = 3, brz_a: float = 0.025, brz_b: float = 0.045
-) -> vs.VideoNode:
-    from lvsfunc import range_mask, scale_thresh
-
-    brz_a = scale_thresh(brz_a, clip)
-    brz_b = scale_thresh(brz_b, clip)
-
-    y = get_y(clip)
-
-    blur = y.bilateral.Gaussian(sigma) if sigma else y
-
-    mask_a = range_mask(blur, rad=rad).std.Binarize(brz_a)
-
-    mask_b = PrewittTCanny().edgemask(blur).std.Binarize(brz_b)
-
-    mask = core.akarin.Expr([mask_a, mask_b], 'x y max')
-
-    return removegrain(removegrain(mask, 22), 11).std.Limiter()
-
-
-def multi_detail_mask(clip: vs.VideoNode, thr: float = 0.015) -> vs.VideoNode:
-    general_mask = simple_detail_mask(clip, rad=1, brz_a=1, brz_b=24.3 * thr)
-
-    return combine([
-        combine([
-            simple_detail_mask(clip, brz_a=1, brz_b=2 * thr),
-            iterate(general_mask, core.std.Maximum, 3).std.Maximum().std.Inflate()
-        ], ExprOp.MIN), general_mask.std.Maximum()
-    ], ExprOp.MIN)
-
-
 def tcanny(clip: vs.VideoNode, thr: float) -> vs.VideoNode:
     msrcp = clip.bilateral.Gaussian(1).retinex.MSRCP([50, 200, 350], None, thr)
 
@@ -143,34 +111,6 @@ def linemask(clip_y: vs.VideoNode) -> vs.VideoNode:
         multi_detail_mask(clip_y, 0.011),
         multi_detail_mask(clip_y, 0.013)
     ], ExprOp.ADD)
-
-
-def credit_mask(
-    clip: vs.VideoNode, ref: vs.VideoNode, thr: int,
-    blur: float | None = 1.65, prefilter: bool = True,
-    expand: int = 8
-) -> vs.VideoNode:
-    from vardefunc.mask import Difference
-
-    if blur is None or blur <= 0:
-        blur_src, blur_ref = clip, ref
-    else:
-        blur_src = clip.bilateral.Gaussian(blur)
-        blur_ref = ref.bilateral.Gaussian(blur)
-
-    ed_mask = Difference().creditless(
-        blur_src[0] + blur_src, blur_src, blur_ref,
-        start_frame=0, thr=thr, prefilter=prefilter
-    )
-
-    bits, credit_mask = expect_bits(ed_mask)
-    credit_mask = iterate(credit_mask, core.std.Minimum, 6)
-    credit_mask = iterate(credit_mask, lambda x: core.std.Minimum(x).std.Maximum(), 8)
-    if expand:
-        credit_mask = iterate(credit_mask, core.std.Maximum, expand)
-    credit_mask = credit_mask.std.Inflate().std.Inflate().std.Inflate()
-
-    return credit_mask if bits == 16 else depth(credit_mask, bits)
 
 
 # Stolen from Light by yours truly <3

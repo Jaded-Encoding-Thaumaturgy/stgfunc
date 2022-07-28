@@ -8,7 +8,8 @@ import vapoursynth as vs
 from debandshit import dumb3kdb, f3kbilateral
 from vsexprtools import ExprOp, combine
 from vsexprtools.types import SingleOrArr
-from vskernels import Catrom, Lanczos
+from vsexprtools.util import expect_bits
+from vskernels import Catrom, Lanczos, get_prop
 from vsutil import (
     Dither, depth, disallow_variable_format, disallow_variable_resolution, get_depth, get_w, get_y, iterate, join
 )
@@ -17,7 +18,6 @@ from .mask import detail_mask
 from .misc import set_output
 from .noise import adaptive_grain
 from .types import DebanderFN
-from .utils import expect_bits, get_prop
 
 core = vs.core
 
@@ -235,7 +235,7 @@ def auto_deband(
     def _select_deband(n: int, f: vs.VideoFrame) -> vs.VideoNode:
         nonlocal thresholds, props_clip, deband_clips
 
-        cambi_val = get_prop(f.props, 'CAMBI', float, 0.0)
+        cambi_val = get_prop(f.props, 'CAMBI', float, None, 0.0)
 
         score = cambi_val * cambi_scale if cambi_val >= cambi_thr else 0
 

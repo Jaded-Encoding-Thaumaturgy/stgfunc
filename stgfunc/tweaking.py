@@ -8,7 +8,7 @@ from typing import Any, NamedTuple, Sequence, SupportsFloat
 import vapoursynth as vs
 from vsexprtools import ExprOp, expr
 from vsexprtools.types import StrList, VSFunction
-from vskernels import BSpline, Catrom, Point
+from vskernels import BSpline, Catrom, Point, get_prop
 from vsutil import (
     disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value, get_peak_value,
     get_subsampling, insert_clip, scale_value
@@ -17,7 +17,6 @@ from vsutil import (
 from .easing import ExponentialEaseIn, F_Easing
 from .transitions import crossfade
 from .types import Range
-from .utils import get_color_range, get_prop
 
 core = vs.core
 
@@ -36,7 +35,7 @@ def tweak_clip(
 
     bits = get_depth(clip)
 
-    range_in = fallback(range_in, get_color_range(clip))
+    range_in = fallback(range_in, get_prop(clip, '_ColorRange', int, vs.ColorRange, vs.RANGE_LIMITED))
     range_out = fallback(range_out, range_in)
 
     sv_args_out = dict[str, Any](

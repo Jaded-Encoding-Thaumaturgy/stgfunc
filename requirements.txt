@@ -5,4 +5,5 @@ vsrgtools>=0.1.8
 vsexprtools>=0.0.2
 vskernels>=1.1.0
 vsdehalo>=0.1.4
+vsscale>=0.0.1
 vs-debandshit>=0.4.4
