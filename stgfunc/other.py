@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Callable, Iterable, Protocol, Sequence
+from typing import Any, Callable, Iterable, List, Protocol, Sequence
 
 import vapoursynth as vs
+from vsaa import PlanesT
 from vsexprtools import ExprOp, combine
 from vsexprtools.util import EXPR_VARS, normalise_planes
 from vskernels import get_prop
@@ -56,7 +57,7 @@ def bestframeselect(
 
 
 def median_plane_value(
-    clip: vs.VideoNode, planes: int | Sequence[int] | None = None, single_out: bool = False, cuda: bool | None = None
+    clip: vs.VideoNode, planes: PlanesT = None, single_out: bool = False, cuda: bool | None = None
 ) -> vs.VideoNode:
     import numpy as np
 
@@ -122,6 +123,82 @@ def median_plane_value(
     outclip = blankclip.std.ModifyFrame([clip, blankclip], _median_pvalue_modify_frame)
 
     return outclip.resize.Point(clip.width, clip.height)
+
+
+def mean_plane_value(
+    clip: vs.VideoNode, excl_values: List[float] | None = None, planes: PlanesT = None,
+    single_out: bool = False, cuda: bool | None = None, prop: str = '{plane}Mean'
+) -> vs.VideoNode:
+    import numpy as np
+
+    try:
+        import cupy
+        cuda_available = True
+    except ImportError:
+        cupy = None
+        cuda_available = False
+
+    assert clip.format
+
+    do_cuda = cuda_available if cuda is None else cuda
+
+    npp = cupy if do_cuda and cuda_available and clip.height > 720 and clip.width > 1024 else np
+
+    norm_planes = normalise_planes(clip, planes)
+
+    n_planes = len(norm_planes)
+
+    color_fam_str = 'YUV' if clip.format.color_family == vs.YUV else 'RGB'
+
+    prop_name = prop.format(plane=color_fam_str)
+    plane_kwords = [prop.format(plane=plane) for plane in color_fam_str]
+
+    if excl_values is None:
+        def _get_mean(farr: Any) -> Any:
+            return float(cupy.mean(farr))
+    else:
+        excl_cut = excl_values[1:]
+
+        def _get_mean(farr: Any) -> Any:
+            cond = farr != excl_values[0]
+
+            for val in excl_cut:
+                cond = cond & (farr != val)
+
+            selected = farr[cond]
+
+            mean = cupy.mean(selected)
+
+            return float(mean)
+
+    if single_out:
+        def _mean_excl_modify_frame(f: vs.VideoFrame, n: int) -> vs.VideoFrame:
+            fdst = f.copy()
+
+            means = []
+
+            for plane in norm_planes:
+                farr = npp.asarray(f[plane])
+                farr = npp.reshape(farr, farr.shape[0] * farr.shape[1])
+
+                means.append(_get_mean(farr))
+
+            fdst.props.update(**{prop_name: sum(means) / n_planes})
+
+            return fdst
+    else:
+        def _mean_excl_modify_frame(f: vs.VideoFrame, n: int) -> vs.VideoFrame:
+            fdst = f.copy()
+
+            for plane in norm_planes:
+                farr = npp.asarray(f[plane])
+                farr = npp.reshape(farr, farr.shape[0] * farr.shape[1])
+
+                fdst.props.update(**{plane_kwords[plane]: _get_mean(farr)})
+
+            return fdst
+
+    return clip.std.ModifyFrame(clip, _mean_excl_modify_frame)
 
 
 def weighted_merge(*weighted_clips: tuple[vs.VideoNode, float]) -> vs.VideoNode:
