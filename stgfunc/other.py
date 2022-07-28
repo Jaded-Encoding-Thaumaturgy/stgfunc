@@ -3,9 +3,8 @@ from __future__ import annotations
 from typing import Any, Callable, Iterable, List, Protocol, Sequence
 
 import vapoursynth as vs
-from vsaa import PlanesT
 from vsexprtools import ExprOp, combine
-from vsexprtools.util import EXPR_VARS, normalise_planes
+from vsexprtools.util import EXPR_VARS, PlanesT, normalise_planes
 from vskernels import get_prop
 from vsutil import get_neutral_value
 
@@ -155,7 +154,7 @@ def mean_plane_value(
 
     if excl_values is None:
         def _get_mean(farr: Any) -> Any:
-            return float(cupy.mean(farr))
+            return float(npp.mean(farr))
     else:
         excl_cut = excl_values[1:]
 
@@ -167,7 +166,7 @@ def mean_plane_value(
 
             selected = farr[cond]
 
-            mean = cupy.mean(selected)
+            mean = npp.mean(selected)
 
             return float(mean)
 
