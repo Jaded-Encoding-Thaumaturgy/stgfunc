@@ -125,7 +125,7 @@ def median_plane_value(
 
 
 def mean_plane_value(
-    clip: vs.VideoNode, excl_values: List[float] | None = None, planes: PlanesT = None,
+    clip: vs.VideoNode, excl_values: List[float] | List[List[float]] | None = None, planes: PlanesT = None,
     single_out: bool = False, cuda: bool | None = None, prop: str = '{plane}Mean'
 ) -> vs.VideoNode:
     import numpy as np
@@ -152,16 +152,30 @@ def mean_plane_value(
     prop_name = prop.format(plane=color_fam_str)
     plane_kwords = [prop.format(plane=plane) for plane in color_fam_str]
 
-    if excl_values is None:
-        def _get_mean(farr: Any) -> Any:
+    if not excl_values:
+        def _get_mean(farr: Any, plane: int) -> Any:
             return float(npp.mean(farr))
-    else:
+    elif isinstance(excl_values[0], (int, float)):
         excl_cut = excl_values[1:]
 
-        def _get_mean(farr: Any) -> Any:
-            cond = farr != excl_values[0]
+        def _get_mean(farr: Any, plane: int) -> Any:
+            cond = farr != excl_values[0]  # type: ignore
 
             for val in excl_cut:
+                cond = cond & (farr != val)
+
+            selected = farr[cond]
+
+            mean = npp.mean(selected)
+
+            return float(mean)
+    else:
+        excl_cut = [excl[1:] for excl in excl_values]  # type: ignore
+
+        def _get_mean(farr: Any, plane: int) -> Any:
+            cond = farr != excl_values[plane][0]  # type: ignore
+
+            for val in excl_cut[plane]:  # type: ignore
                 cond = cond & (farr != val)
 
             selected = farr[cond]
@@ -180,7 +194,7 @@ def mean_plane_value(
                 farr = npp.asarray(f[plane])
                 farr = npp.reshape(farr, farr.shape[0] * farr.shape[1])
 
-                means.append(_get_mean(farr))
+                means.append(_get_mean(farr, plane))
 
             fdst.props.update(**{prop_name: sum(means) / n_planes})
 
@@ -193,7 +207,7 @@ def mean_plane_value(
                 farr = npp.asarray(f[plane])
                 farr = npp.reshape(farr, farr.shape[0] * farr.shape[1])
 
-                fdst.props.update(**{plane_kwords[plane]: _get_mean(farr)})
+                fdst.props.update(**{plane_kwords[plane]: _get_mean(farr, plane)})
 
             return fdst
 
