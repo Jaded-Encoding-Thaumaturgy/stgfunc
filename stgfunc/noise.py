@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import warnings
 from functools import partial
 from typing import Any, Callable, Sequence
 
 import vapoursynth as vs
-from vsexprtools.util import mod4
+from vsexprtools import aka_expr_available, expr_func, mod4, norm_expr_planes, normalise_seq
+from vskernels import BicubicAuto
 from vsutil import (
     depth, disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value,
     get_peak_value, scale_value, split
@@ -139,12 +141,9 @@ def sizedgrain(
     def scale_val8x(value: int, chroma: bool = False) -> float:
         return scale_value(value, 8, vdepth, scale_offsets=not tv_range, chroma=chroma)
 
-    neutral = [
-        get_neutral_value(clip), get_neutral_value(clip, True), get_neutral_value(clip, True)
-    ][:clip.format.num_planes]
+    neutral = [get_neutral_value(clip), get_neutral_value(clip, True)]
 
-    b = sharp / -50 + 1
-    c = (1 - b) / 2
+    scaler = BicubicAuto(sharp / -50 + 1)
 
     if not isinstance(strength, list):
         strength = [strength, .5 * strength]
@@ -182,15 +181,15 @@ def sizedgrain(
 
         sxa, sya = mod4((clip.width + sx) / 2), mod4((clip.height + sy) / 2)
 
-    blank = clip.std.BlankClip(sx, sy, color=neutral)
+    blank = clip.std.BlankClip(sx, sy, color=normalise_seq(neutral, clip.format.num_planes))
 
     grain = grainer_func(blank, **kwargs)
 
-    if not supports_size and size != 1 and (sx != clip.width or sy != clip.height):
+    if not supports_size and size != 1 and (sx, sy) != (clip.width, clip.height):
         if size > 1.5:
-            grain = grain.resize.Bicubic(sxa, sya, filter_param_a=b, filter_param_b=c)
+            grain = scaler.scale(grain, sxa, sya)
 
-        grain = grain.resize.Bicubic(clip.width, clip.height, filter_param_a=b, filter_param_b=c)
+        grain = scaler.scale(grain, clip.width, clip.height)
 
     if static is False and temporal_average > 0:
         grain = grain.std.Merge(grain.std.AverageFrames(weights=[1] * 3), weight=temporal_average / 100)
@@ -210,35 +209,32 @@ def sizedgrain(
         else:
             hivals = list(hi)
 
-        limit_expr = ['x y {mid} - abs - {low} < x y {mid} - abs + {high} > or x y {mid} - x + ?']
+        if aka_expr_available:
+            limit_expr = ['y {mid} - D! D@ abs DA! x DA@ - {low} < x DA@ + {high} > or x D@ x + ?']
+
+            limit_expr = ['x y {mid} - abs - {low} < x y {mid} - abs + {high} > or x y {mid} - x + ?']
 
         if clip.format.sample_type == vs.FLOAT:
-            limit_expr[1] = 'x y abs + {high} > x abs y - {low} < or x x y + ?'
+            limit_expr.append('x y abs + {high} > x abs y - {low} < or x x y + ?')
 
-        grained = core.std.Expr([clip, grain], [
-            expr.format(mid=mid, low=low, high=high)
-            for expr, mid, low, high in zip(limit_expr, neutral, lovals, hivals)
-        ])
+        grained = expr_func(
+            [clip, grain], norm_expr_planes(clip, limit_expr, None, mid=neutral, low=lovals, high=hivals)
+        )
 
         if protect_neutral and strength[1] > 0 and clip.format.color_family == vs.YUV:
             neutral_mask = clip.resize.Bicubic(format=clip.format.replace(subsampling_h=0, subsampling_w=0).id)
 
             # disable grain if neutral chroma
-            neutral_mask = core.std.Expr(
+            neutral_mask = expr_func(
                 split(neutral_mask), f'y {neutral[1]} = z {neutral[1]} = and {get_peak_value(clip)} 0 ?'
             )
 
             grained = grained.std.MaskedMerge(clip, neutral_mask, planes=[1, 2])
     else:
         if lo is not None or hi is not None:
-            print(
-                Warning("sizedgrain: setting lo and hi won't do anything when fade_edges=False")
-            )
+            warnings.warn("sizedgrain: setting lo and hi won't do anything with fade_edges=False", Warning)
 
-        if clip.format.sample_type == vs.INTEGER:
-            grained = clip.std.MergeDiff(grain)
-        else:
-            grained = core.std.Expr([clip, grained], [f'y {mid} - x +' for mid in neutral])
+        grained = clip.std.MergeDiff(grain)
 
     return grained
 
