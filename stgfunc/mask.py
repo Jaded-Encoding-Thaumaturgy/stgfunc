@@ -13,6 +13,16 @@ from vsutil import depth, disallow_variable_format, get_depth, get_peak_value, g
 from .misc import source as stgsource
 from .types import MaskCredit, Range
 
+__all__ = [
+    'adg_mask',
+    'perform_masks_credit',
+    'to_gray', 'manual_masking', 'get_manual_mask',
+    'tcanny', 'linemask',
+    'detail_mask',
+    'squaremask', 'replace_squaremask',
+    'freeze_replace_mask'
+]
+
 core = vs.core
 
 

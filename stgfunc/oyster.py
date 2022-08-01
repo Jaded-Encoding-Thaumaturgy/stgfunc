@@ -5,6 +5,11 @@ from typing import Literal
 
 import vapoursynth as vs
 
+__all__ = [
+    'Core',
+    'Super', 'Basic', 'Deringing', 'Destaircase', 'Deblocking'
+]
+
 fmtc_args = dict(fulls=True, fulld=True)
 msuper_args = dict(hpad=0, vpad=0, sharp=2, levels=0)
 manalyze_args = dict(search=3, truemotion=False, trymany=True, levels=0, badrange=-24, divide=0, dct=0)

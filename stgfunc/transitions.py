@@ -15,6 +15,14 @@ from .easing import F_Easing, Linear, OnAxis
 from .types import Range
 from .utils import change_fps
 
+__all__ = [
+    'fade', 'fade_freeze', 'fade_in', 'fade_out',
+    'fade_in_freeze', 'fade_out_freeze',
+    'crossfade', 'fade_ranges',
+    'PanDirection', 'PanFunction', 'PanFunctions',
+    'panner'
+]
+
 core = vs.core
 
 

@@ -17,6 +17,13 @@ from .easing import ExponentialEaseIn, F_Easing
 from .transitions import crossfade
 from .types import Range
 
+__all__ = [
+    'Tweak',
+    'tweak_clip', 'multi_tweak',
+    'BalanceMode', 'WeightMode', 'Override',
+    'auto_balance', 'bbmod_fast'
+]
+
 core = vs.core
 
 catrom = Catrom()

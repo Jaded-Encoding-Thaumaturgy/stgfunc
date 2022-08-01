@@ -5,6 +5,10 @@ from math import floor
 
 import vapoursynth as vs
 
+__all__ = [
+    'change_fps'
+]
+
 core = vs.core
 
 

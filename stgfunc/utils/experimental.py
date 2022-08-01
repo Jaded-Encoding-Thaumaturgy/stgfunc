@@ -9,6 +9,10 @@ import vapoursynth as vs
 
 from ..types import T
 
+__all__ = [
+    'remove_chars', 'destructure'
+]
+
 core = vs.core
 
 

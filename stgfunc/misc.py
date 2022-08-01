@@ -15,6 +15,15 @@ import vsutil
 from vsexprtools import to_arr
 from vskernels import Bicubic
 
+__all__ = [
+    'SetsuCubic',
+    'source', 'src',
+    'set_output', 'output',
+    'x8_SHADERS', 'x16_SHADERS', 'x56_SHADERS',
+    'SSIM_DOWNSCALER_SHADERS', 'SSIM_SUPERSAMPLER_SHADERS'
+
+]
+
 core = vs.core
 
 file_headers_data = None

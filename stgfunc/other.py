@@ -7,6 +7,12 @@ from vsexprtools import EXPR_VARS, ComparatorFunc, ExprOp, PlanesT, combine, nor
 from vskernels import get_prop
 from vsutil import get_neutral_value
 
+__all__ = [
+    'bestframeselect',
+    'median_plane_value', 'mean_plane_value',
+    'weighted_merge'
+]
+
 core = vs.core
 
 

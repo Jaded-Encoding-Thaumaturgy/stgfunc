@@ -17,6 +17,11 @@ from .misc import set_output
 from .noise import adaptive_grain
 from .types import DebanderFN
 
+__all__ = [
+    'masked_f3kdb',
+    'auto_deband'
+]
+
 core = vs.core
 
 
