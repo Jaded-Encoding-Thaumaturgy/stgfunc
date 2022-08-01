@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from enum import IntEnum, auto
 from typing import Any, NamedTuple, Protocol, SupportsFloat, Tuple, TypeAlias, TypeVar
 
 import vapoursynth as vs
@@ -24,8 +23,3 @@ class MaskCredit(NamedTuple):
     mask: vs.VideoNode
     start_frame: int
     end_frame: int
-
-
-class Grainer(IntEnum):
-    AddGrain = auto()
-    AddNoise = auto()

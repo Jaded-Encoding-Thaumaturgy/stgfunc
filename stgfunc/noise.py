@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import warnings
+from enum import IntEnum, auto
 from functools import partial
 from typing import Any, Callable, Sequence
 
@@ -13,9 +14,13 @@ from vsutil import (
 )
 
 from .mask import adg_mask
-from .types import Grainer
 
 core = vs.core
+
+
+class Grainer(IntEnum):
+    AddGrain = auto()
+    AddNoise = auto()
 
 
 _grainer_str_map = {'addgrain': Grainer.AddGrain, 'addnoise': Grainer.AddNoise}

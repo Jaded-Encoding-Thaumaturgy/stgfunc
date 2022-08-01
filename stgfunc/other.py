@@ -1,26 +1,19 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Iterable, Protocol, Sequence
+from typing import Any, Callable, Sequence
 
 import vapoursynth as vs
-from vsexprtools import EXPR_VARS, ExprOp, PlanesT, combine, normalise_planes
+from vsexprtools import EXPR_VARS, ComparatorFunc, ExprOp, PlanesT, combine, normalise_planes
 from vskernels import get_prop
 from vsutil import get_neutral_value
 
-from .types import T
-
 core = vs.core
-
-
-class _CompFunction(Protocol):
-    def __call__(self, __iterable: Iterable[T], *, key: Callable[[T], float]) -> T:
-        ...
 
 
 def bestframeselect(
     clips: Sequence[vs.VideoNode], ref: vs.VideoNode,
     stat_func: Callable[[vs.VideoNode, vs.VideoNode], vs.VideoNode] = core.std.PlaneStats,
-    prop: str = 'PlaneStatsDiff', comp_func: _CompFunction = max, debug: bool | tuple[bool, int] = False
+    prop: str = 'PlaneStatsDiff', comp_func: ComparatorFunc = max, debug: bool | tuple[bool, int] = False
 ) -> vs.VideoNode:
     """
     Rewritten from https://github.com/po5/notvlc/blob/master/notvlc.py#L23.
