@@ -6,8 +6,7 @@ from math import cos, degrees, floor, pi, sin
 from typing import Any, NamedTuple, Sequence, SupportsFloat
 
 import vapoursynth as vs
-from vsexprtools import ExprOp, norm_expr
-from vsexprtools.types import StrList, VSFunction
+from vsexprtools import ExprOp, StrList, VSFunction, norm_expr
 from vskernels import BSpline, Catrom, Point, get_prop
 from vsutil import (
     disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value, get_peak_value,

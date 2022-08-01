@@ -12,7 +12,7 @@ from typing import Any, cast
 
 import vapoursynth as vs
 import vsutil
-from vsexprtools.util import to_arr
+from vsexprtools import to_arr
 from vskernels import Bicubic
 
 core = vs.core

@@ -6,9 +6,7 @@ from typing import Any, SupportsFloat
 
 import vapoursynth as vs
 from debandshit import dumb3kdb, f3kbilateral
-from vsexprtools import ExprOp, combine
-from vsexprtools.types import SingleOrArr
-from vsexprtools.util import expect_bits
+from vsexprtools import ExprOp, SingleOrArr, combine, expect_bits
 from vskernels import Catrom, Lanczos, get_prop
 from vsutil import (
     Dither, depth, disallow_variable_format, disallow_variable_resolution, get_depth, get_w, get_y, iterate, join

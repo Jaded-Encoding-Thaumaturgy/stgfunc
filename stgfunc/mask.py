@@ -4,12 +4,10 @@ import os
 from pathlib import Path
 
 import vapoursynth as vs
-from vsexprtools import ExprOp, combine
-from vsexprtools.types import VSFunction
-from vsexprtools.util import expect_bits
+from vsexprtools import ExprOp, VSFunction, combine, expect_bits
 from vsmask.edge import Kirsch
 from vsrgtools import box_blur, gauss_blur
-from vsscale.mask import multi_detail_mask
+from vsscale import multi_detail_mask
 from vsutil import depth, disallow_variable_format, get_depth, get_peak_value, get_y, insert_clip, iterate
 
 from .misc import source as stgsource

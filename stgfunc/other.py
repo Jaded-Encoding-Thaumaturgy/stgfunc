@@ -3,8 +3,7 @@ from __future__ import annotations
 from typing import Any, Callable, Iterable, List, Protocol, Sequence
 
 import vapoursynth as vs
-from vsexprtools import ExprOp, combine
-from vsexprtools.util import EXPR_VARS, PlanesT, normalise_planes
+from vsexprtools import EXPR_VARS, ExprOp, PlanesT, combine, normalise_planes
 from vskernels import get_prop
 from vsutil import get_neutral_value
 
