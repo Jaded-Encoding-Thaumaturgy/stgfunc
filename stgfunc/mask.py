@@ -180,9 +180,9 @@ def replace_squaremask(
         mask = mask.std.InvertMask()
 
     if isinstance(blur_sigma, int):
-        mask = gauss_blur(mask, blur_sigma)
-    elif isinstance(blur_sigma, float):
         mask = box_blur(mask, blur_sigma)
+    elif isinstance(blur_sigma, float):
+        mask = gauss_blur(mask, blur_sigma)
 
     merge = clipa.std.MaskedMerge(clipb, mask)
 
