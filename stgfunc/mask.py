@@ -5,9 +5,6 @@ from pathlib import Path
 
 import vapoursynth as vs
 from vsexprtools import ExprOp, VSFunction, combine, expect_bits
-from vsmask.edge import Kirsch
-from vsrgtools import box_blur, gauss_blur
-from vsscale import multi_detail_mask
 from vsutil import depth, disallow_variable_format, get_depth, get_peak_value, get_y, insert_clip, iterate
 
 from .misc import source as stgsource
@@ -112,6 +109,16 @@ def tcanny(clip: vs.VideoNode, thr: float) -> vs.VideoNode:
 
 
 def linemask(clip_y: vs.VideoNode) -> vs.VideoNode:
+    try:
+        from vsscale import multi_detail_mask
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('linemask: missing dependency `vsrgtools`')
+
+    try:
+        from vsmask.edge import Kirsch
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('linemask: missing dependency `vsmask`')
+
     return combine([
         Kirsch().edgemask(clip_y),
         tcanny(clip_y, 0.000125),
@@ -177,10 +184,17 @@ def replace_squaremask(
     ranges: Range | list[Range] | None = None,
     blur_sigma: float | None = None, invert: bool = False
 ) -> vs.VideoNode:
-    from lvsfunc import replace_ranges
+    try:
+        from lvsfunc import replace_ranges
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('replace_squaremask: missing dependency `lvsfunc`')
 
-    assert clipa.format
-    assert clipb.format
+    try:
+        from vsrgtools import box_blur, gauss_blur
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('replace_squaremask: missing dependency `vsrgtools`')
+
+    assert clipa.format and clipb.format
 
     mask = squaremask(clipb, *mask_params)
 

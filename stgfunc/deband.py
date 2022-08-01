@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from functools import partial
 from itertools import cycle
-from typing import Any, SupportsFloat
+from typing import Any, SupportsFloat, cast
 
 import vapoursynth as vs
-from debandshit import dumb3kdb, f3kbilateral
 from vsexprtools import ExprOp, SingleOrArr, combine, expect_bits
 from vskernels import Catrom, Lanczos, get_prop
 from vsutil import (
@@ -29,6 +28,11 @@ def masked_f3kdb(
     clip: vs.VideoNode, rad: int = 16, threshold: SingleOrArr[int] = 24,
     grain: SingleOrArr[int] = [12, 0], mask_args: dict[str, Any] = {}
 ) -> vs.VideoNode:
+    try:
+        from debandshit import dumb3kdb
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError('masked_f3kdb: missing dependency `debandshit`')
+
     bits, clip = expect_bits(clip)
     clip = depth(clip, 16)
 
@@ -51,7 +55,7 @@ def auto_deband(
     clip: vs.VideoNode, cambi_thr: float = 12.0, cambi_scale: float = 1.2,
     min_thr: int | float = 24, max_thr: int | float = 48, steps: int = 4,
     grain_thrs: tuple[int, int, int] | None = None,
-    debander: DebanderFN = f3kbilateral,  # type: ignore
+    debander: DebanderFN | None = None,  # type: ignore
     ref: vs.VideoNode | None = None, downsample_h: None | int = None,
     debug: tuple[bool, bool] = (False, False),
     debander_args: dict[str, Any] = {}, adptvgr_args: dict[str, Any] = {},
@@ -120,7 +124,16 @@ def auto_deband(
     try:
         from havsfunc import GrainFactory3
     except ModuleNotFoundError:
-        raise ModuleNotFoundError("auto_deband: 'missing dependency `havsfunc`'")
+        raise ModuleNotFoundError('auto_deband: missing dependency `havsfunc`')
+
+    if debander:
+        debander_func = debander
+    else:
+        try:
+            from debandshit import f3kbilateral
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError('auto_deband: missing dependency `debandshit`')
+        debander_func = cast(DebanderFN, f3kbilateral)
 
     global __auto_deband_cache
     assert clip.format
@@ -210,7 +223,7 @@ def auto_deband(
         return deband.std.MaskedMerge(grain, graining_mask)
 
     def _perform_deband(threshold: SupportsFloat) -> vs.VideoNode:
-        deband = debander(clip=clip16, threshold=threshold, **debander_args)
+        deband = debander_func(clip=clip16, threshold=threshold, **debander_args)
 
         deband = clip16.std.MaskedMerge(deband, banding_mask)
 
