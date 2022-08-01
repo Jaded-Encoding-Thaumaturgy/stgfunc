@@ -8,6 +8,7 @@ from vsexprtools import ExprOp, combine
 from vsexprtools.types import VSFunction
 from vsexprtools.util import expect_bits
 from vsmask.edge import Kirsch
+from vsrgtools import box_blur, gauss_blur
 from vsscale.mask import multi_detail_mask
 from vsutil import depth, disallow_variable_format, get_depth, get_peak_value, get_y, insert_clip, iterate
 
@@ -166,7 +167,7 @@ def squaremask(clip: vs.VideoNode, width: int, height: int, offset_x: int, offse
 def replace_squaremask(
     clipa: vs.VideoNode, clipb: vs.VideoNode, mask_params: tuple[int, int, int, int],
     ranges: Range | list[Range] | None = None,
-    blur_sigma: int | None = None, invert: bool = False
+    blur_sigma: float | None = None, invert: bool = False
 ) -> vs.VideoNode:
     from lvsfunc import replace_ranges
 
@@ -178,11 +179,10 @@ def replace_squaremask(
     if invert:
         mask = mask.std.InvertMask()
 
-    if blur_sigma is not None:
-        if clipa.format.bits_per_sample == 32:
-            mask = mask.bilateralgpu.Bilateral(blur_sigma)
-        else:
-            mask = mask.bilateral.Gaussian(blur_sigma)
+    if isinstance(blur_sigma, int):
+        mask = gauss_blur(mask, blur_sigma)
+    elif isinstance(blur_sigma, float):
+        mask = box_blur(mask, blur_sigma)
 
     merge = clipa.std.MaskedMerge(clipb, mask)
 
