@@ -6,7 +6,7 @@ from math import cos, degrees, floor, pi, sin
 from typing import Any, NamedTuple, Sequence, SupportsFloat
 
 import vapoursynth as vs
-from vsexprtools import ExprOp, expr
+from vsexprtools import ExprOp, norm_expr
 from vsexprtools.types import StrList, VSFunction
 from vskernels import BSpline, Catrom, Point, get_prop
 from vsutil import (
@@ -100,9 +100,7 @@ def tweak_clip(
         if clamp and range_out:
             yexpr.extend(StrList([luma_min, ExprOp.MAX, luma_max, ExprOp.MIN]))
 
-    tclip = core.std.ShufflePlanes([
-        expr(clips, yexpr, 0), expr(clips, cexpr, [1, 2])
-    ], [0, 1, 2], vs.YUV)
+    tclip = norm_expr(clips, (yexpr, cexpr))
 
     return post(tclip) if callable(post) else tclip
 
