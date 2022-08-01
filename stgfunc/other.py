@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Iterable, List, Protocol, Sequence
+from typing import Any, Callable, Iterable, Protocol, Sequence
 
 import vapoursynth as vs
 from vsexprtools import EXPR_VARS, ExprOp, PlanesT, combine, normalise_planes
@@ -124,7 +124,7 @@ def median_plane_value(
 
 
 def mean_plane_value(
-    clip: vs.VideoNode, excl_values: List[float] | List[List[float]] | None = None, planes: PlanesT = None,
+    clip: vs.VideoNode, excl_values: list[float] | list[list[float]] | None = None, planes: PlanesT = None,
     single_out: bool = False, cuda: bool | None = None, prop: str = '{plane}Mean'
 ) -> vs.VideoNode:
     import numpy as np

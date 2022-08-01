@@ -39,7 +39,7 @@ def set_output(clip: vs.VideoNode, text: bool | int | str | tuple[int, int] | tu
     index = len(vs.get_outputs())
 
     ref_id = str(id(clip))
-    arr = to_arr(text)  # type: ignore
+    arr = to_arr(text)
 
     if any([isinstance(x, str) for x in arr]):
         ref_name = arr[-1]
