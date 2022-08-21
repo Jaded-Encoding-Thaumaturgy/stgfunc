@@ -41,7 +41,7 @@ def adg_mask(clip: vs.VideoNode, luma_scaling: float = 8.0, relative: bool = Fal
 
     is_integer = y.format.sample_type == vs.INTEGER
 
-    x_string, aft_int = (f'x {peak} / ', f' {peak} *') if is_integer else ('x ', '')
+    x_string, aft_int = (f'x {peak} / ', f' {peak} * 0.5 +') if is_integer else ('x ', '')
 
     if relative:
         x_string += 'Y! Y@ 0.5 < x.PMin 0 max 0.5 / log Y@ * x.PMax 1.0 min 0.5 / log Y@ * ? '
