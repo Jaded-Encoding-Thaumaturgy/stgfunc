@@ -124,11 +124,13 @@ def median_plane_value(
 
 
 def mean_plane_value(
-    clip: vs.VideoNode, excl_values: list[float] | list[list[float]] | None = None, planes: PlanesT = None,
-    single_out: bool = False, prop: str = '{plane}Mean', cuda: bool | None = None
+    clip: vs.VideoNode, excl_values: Sequence[int | float] | Sequence[Sequence[int | float]] | None = None,
+    single_out: bool = False, prop: str | list[str] = '{plane}Mean', cuda: bool | None = None, planes: PlanesT = None
 ) -> vs.VideoNode:
     import numpy as np
     from numpy.typing import NDArray
+
+    assert clip.format
 
     try:
         import cupy
@@ -144,38 +146,53 @@ def mean_plane_value(
     npp = cupy if do_cuda and cuda_available and clip.height > 720 and clip.width > 1024 else np
 
     norm_planes = normalise_planes(clip, planes)
-
     n_planes = len(norm_planes)
 
     color_fam_str = 'YUV' if clip.format.color_family == vs.YUV else 'RGB'
 
-    prop_name = prop.format(plane=color_fam_str)
     plane_sizes = [plane.width * plane.height for plane in split(clip)]
-    plane_kwords = list(zip(norm_planes, [prop.format(plane=plane) for plane in color_fam_str]))
 
-    def to_float(farr: NDArray[Any], cond: NDArray[Any]) -> float:
-        return min(0, float(npp.mean(farr, where=cond)))
+    def to_float(farr: NDArray[Any]) -> float:
+        return float(np.nan_to_num(npp.mean(farr, dtype=npp.float64)))
+
+    if excl_values is not None:
+        excl_values = list(excl_values)  # type: ignore
 
     if not excl_values:
         def _get_arr_mean(farr: NDArray[Any], plane: int) -> float:
-            return min(0, float(npp.mean(farr)))
+            return to_float(farr)
     else:
-        if isinstance(excl_values[0], (int, float)):
-            excl_first = cast(float, excl_values[0])  # type: ignore
-            excl_cut = cast(list[float], excl_values[1:])
+        is_single = isinstance(excl_values[0], (int, float))
 
-            def _get_arr_mean(farr: NDArray[Any], plane: int) -> float:
-                cond = reduce(lambda cond, val: cond & (farr != val), excl_cut, farr != excl_first)
-
-                return to_float(farr, cond)
+        if is_single:
+            excl_sfirst, excl_scut = cast(float, excl_values[0]), cast(list[float], excl_values[1:])
         else:
-            excl_pfirst = cast(list[float], [arr[0] for arr in excl_values])  # type: ignore
-            excl_pcut = cast(list[list[float]], [arr[1:] for arr in excl_values])  # type: ignore
+            if len(excl_values) < clip.format.num_planes:
+                raise ValueError('mean_plane_value: you must specify an array of excluded values per each plane!')
 
+            excl_mfirst = cast(list[float], [arr[0] for arr in excl_values])  # type: ignore
+            excl_mcut = cast(list[list[float]], [arr[1:] for arr in excl_values])  # type: ignore
+
+        def _get_cond(farr: NDArray[Any], excl_cut: list[float], excl_first: float) -> Any:
+            return reduce(lambda cond, val: cond & (farr != val), excl_cut, farr != excl_first)
+
+        if is_single:
+            val_len = len(excl_values)
+
+            if val_len == 1:
+                def _get_arr_mean(farr: NDArray[Any], plane: int) -> float:
+                    return to_float(farr[farr != excl_sfirst])
+            elif val_len == 2:
+                excl_ssecond = excl_values[1]
+
+                def _get_arr_mean(farr: NDArray[Any], plane: int) -> float:
+                    return to_float(farr[(farr != excl_sfirst) & (farr != excl_ssecond)])
+            else:
+                def _get_arr_mean(farr: NDArray[Any], plane: int) -> float:
+                    return to_float(farr[_get_cond(farr, excl_scut, excl_sfirst)])
+        else:
             def _get_arr_mean(farr: NDArray[Any], plane: int) -> float:
-                cond = reduce(lambda cond, val: cond & (farr != val), excl_pcut[plane], farr != excl_pfirst[plane])
-
-                return to_float(farr, cond)
+                return to_float(farr[_get_cond(farr, excl_mcut[plane], excl_mfirst[plane])])
 
     def _get_mean(f: vs.VideoFrame, plane: int) -> float:
         return _get_arr_mean(
@@ -186,26 +203,26 @@ def mean_plane_value(
         )
 
     if single_out:
+        if isinstance(prop, list):
+            raise ValueError('mean_plane_value: with single_out=True, prop must be a string!')
+
+        prop_name = prop.format(plane=color_fam_str)
+
         def _mean_excl_modify_frame(f: vs.VideoFrame, n: int) -> vs.VideoFrame:
             fdst = f.copy()
-
-            fdst.props.update(**{
-                prop_name: sum(
-                    _get_mean(f, plane)
-                    for plane in norm_planes
-                ) / n_planes
-            })
-
+            fdst.props.update([(prop_name, sum(_get_mean(f, plane) for plane in norm_planes) / n_planes)])
             return fdst
     else:
+        if isinstance(prop, list):
+            prop_planes_name = prop
+        else:
+            prop_planes_name = [prop.format(plane=plane) for plane in color_fam_str]
+
+        plane_kwords = list(zip(norm_planes, prop_planes_name))
+
         def _mean_excl_modify_frame(f: vs.VideoFrame, n: int) -> vs.VideoFrame:
             fdst = f.copy()
-
-            fdst.props.update(**{
-                kword: _get_mean(f, plane)
-                for plane, kword in plane_kwords
-            })
-
+            fdst.props.update(**{kword: _get_mean(f, plane) for plane, kword in plane_kwords})
             return fdst
 
     return clip.std.ModifyFrame(clip, _mean_excl_modify_frame)
