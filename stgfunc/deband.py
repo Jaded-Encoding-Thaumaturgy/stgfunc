@@ -5,10 +5,11 @@ from itertools import cycle
 from typing import Any, SupportsFloat, cast
 
 import vapoursynth as vs
-from vsexprtools import ExprOp, SingleOrArr, combine, expect_bits
-from vskernels import Catrom, Lanczos, get_prop
-from vsutil import (
-    Dither, depth, disallow_variable_format, disallow_variable_resolution, get_depth, get_w, get_y, iterate, join
+from vsexprtools import ExprOp, combine
+from vskernels import Catrom, Lanczos
+from vstools import (
+    Dither, SingleOrArr, depth, disallow_variable_format, disallow_variable_resolution, expect_bits, get_depth,
+    get_prop, get_w, get_y, iterate, join
 )
 
 from .mask import detail_mask
@@ -33,8 +34,7 @@ def masked_f3kdb(
     except ModuleNotFoundError:
         raise ModuleNotFoundError('masked_f3kdb: missing dependency `debandshit`')
 
-    bits, clip = expect_bits(clip)
-    clip = depth(clip, 16)
+    clip, bits = expect_bits(clip, 16)
 
     mask_kwargs = dict[str, Any](brz=(1000, 2750)) | mask_args
 
@@ -55,7 +55,7 @@ def auto_deband(
     clip: vs.VideoNode, cambi_thr: float = 12.0, cambi_scale: float = 1.2,
     min_thr: int | float = 24, max_thr: int | float = 48, steps: int = 4,
     grain_thrs: tuple[int, int, int] | None = None,
-    debander: DebanderFN | None = None,  # type: ignore
+    debander: DebanderFN | None = None,
     ref: vs.VideoNode | None = None, downsample_h: None | int = None,
     debug: tuple[bool, bool] = (False, False),
     debander_args: dict[str, Any] = {}, adptvgr_args: dict[str, Any] = {},

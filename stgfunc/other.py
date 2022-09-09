@@ -4,9 +4,8 @@ from functools import reduce
 from typing import Any, Callable, Sequence, cast
 
 import vapoursynth as vs
-from vsexprtools import EXPR_VARS, ComparatorFunc, ExprOp, PlanesT, combine, normalise_planes
-from vskernels import get_prop
-from vsutil import get_neutral_value, split
+from vsexprtools import EXPR_VARS, ExprOp, combine
+from vstools import ComparatorFunc, PlanesT, get_neutral_value, get_prop, normalise_planes, split
 
 __all__ = [
     'bestframeselect',

@@ -4,8 +4,10 @@ import os
 from pathlib import Path
 
 import vapoursynth as vs
-from vsexprtools import ExprOp, VSFunction, combine, expect_bits
-from vsutil import depth, disallow_variable_format, get_depth, get_peak_value, get_y, insert_clip, iterate
+from vsexprtools import ExprOp, combine
+from vstools import (
+    VSFunction, depth, disallow_variable_format, expect_bits, get_depth, get_peak_value, get_y, insert_clip, iterate
+)
 
 from .misc import source as stgsource
 from .types import MaskCredit, Range
@@ -136,7 +138,7 @@ def detail_mask(
     pf_sigma: float | None = 1.0, brz: tuple[int, int] = (2500, 4500),
     rg_mode: int = 17
 ) -> vs.VideoNode:
-    bits, clip = expect_bits(clip)
+    clip, bits = expect_bits(clip)
 
     clip_y = get_y(clip)
 

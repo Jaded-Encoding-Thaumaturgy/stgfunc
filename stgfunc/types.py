@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, NamedTuple, Protocol, SupportsFloat, Tuple, TypeAlias, TypeVar
 
 import vapoursynth as vs
-from vsexprtools import SingleOrArr
+from vstools import SingleOrArr
 
 __all__ = [
     'T', 'R',

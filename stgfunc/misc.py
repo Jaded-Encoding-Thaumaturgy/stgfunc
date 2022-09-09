@@ -11,8 +11,7 @@ from subprocess import check_output
 from typing import Any, cast
 
 import vapoursynth as vs
-import vsutil
-from vsexprtools import to_arr
+from vstools import depth as vstools_depth, to_arr
 from vskernels import Bicubic
 
 __all__ = [
@@ -169,7 +168,7 @@ def source(
         clip = clip.std.SetFrameProp('_Matrix', intval=matrix_prop)
 
     if depth:
-        clip = vsutil.depth(clip, depth)
+        clip = vstools_depth(clip, depth)
 
     return clip
 

@@ -6,11 +6,11 @@ from functools import partial
 from typing import Any, Callable, Sequence
 
 import vapoursynth as vs
-from vsexprtools import aka_expr_available, expr_func, mod4, norm_expr_planes, normalise_seq
+from vsexprtools import aka_expr_available, expr_func, norm_expr_planes
 from vskernels import BicubicAuto
-from vsutil import (
+from vstools import (
     depth, disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value,
-    get_peak_value, scale_value, split
+    get_peak_value, mod4, normalise_seq, scale_value, split
 )
 
 from .mask import adg_mask
