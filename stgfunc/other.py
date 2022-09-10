@@ -5,7 +5,7 @@ from typing import Any, Callable, Sequence, cast
 
 import vapoursynth as vs
 from vsexprtools import EXPR_VARS, ExprOp, combine
-from vstools import ComparatorFunc, PlanesT, get_neutral_value, get_prop, normalise_planes, split
+from vstools import ComparatorFunc, PlanesT, get_neutral_value, get_prop, normalize_planes, split
 
 __all__ = [
     'bestframeselect',
@@ -71,7 +71,7 @@ def median_plane_value(
 
     npp = cupy if do_cuda and cuda_available and clip.height > 720 and clip.width > 1024 else np
 
-    norm_planes = normalise_planes(clip, planes)
+    norm_planes = normalize_planes(clip, planes)
 
     if single_out:
         def _median_pvalue_modify_frame(f: list[vs.VideoFrame], n: int) -> vs.VideoFrame:
@@ -144,7 +144,7 @@ def mean_plane_value(
 
     npp = cupy if do_cuda and cuda_available and clip.height > 720 and clip.width > 1024 else np
 
-    norm_planes = normalise_planes(clip, planes)
+    norm_planes = normalize_planes(clip, planes)
     n_planes = len(norm_planes)
 
     color_fam_str = 'YUV' if clip.format.color_family == vs.YUV else 'RGB'

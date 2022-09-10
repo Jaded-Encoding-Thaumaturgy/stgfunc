@@ -10,7 +10,7 @@ from vsexprtools import aka_expr_available, expr_func, norm_expr_planes
 from vskernels import BicubicAuto
 from vstools import (
     depth, disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value,
-    get_peak_value, mod4, normalise_seq, scale_value, split
+    get_peak_value, mod4, normalize_seq, scale_value, split
 )
 
 from .mask import adg_mask
@@ -193,7 +193,7 @@ def sizedgrain(
 
         sxa, sya = mod4((clip.width + sx) / 2), mod4((clip.height + sy) / 2)
 
-    blank = clip.std.BlankClip(sx, sy, color=normalise_seq(neutral, clip.format.num_planes))
+    blank = clip.std.BlankClip(sx, sy, color=normalize_seq(neutral, clip.format.num_planes))
 
     grain = grainer_func(blank, **kwargs)
 
