@@ -3,7 +3,8 @@
 import math
 from typing import Literal
 
-import vapoursynth as vs
+from vstools import vs, core
+
 
 __all__ = [
     'Core',
@@ -29,33 +30,32 @@ class BasicClip(vs.VideoNode):
 
 class Core(vs.Core):
     def __init__(self):
-        self.core = vs.core
-        self.MSuper = self.core.mvsf.Super
-        self.MAnalyze = self.core.mvsf.Analyze
-        self.MRecalculate = self.core.mvsf.Recalculate
-        self.MDegrain = self.core.mvsf.Degrain
-        self.RGB2OPP = self.core.bm3d.RGB2OPP
-        self.OPP2RGB = self.core.bm3d.OPP2RGB
-        self.BMBasic = self.core.bm3d.VBasic
-        self.BMFinal = self.core.bm3d.VFinal
-        self.Aggregate = self.core.bm3d.VAggregate
-        self.DFTTest = self.core.dfttest.DFTTest
-        self.KNLMeansCL = self.core.knlm.KNLMeansCL
-        self.NNEDI = self.core.nnedi3.nnedi3
-        self.Resample = self.core.fmtc.resample
-        self.Expr = self.core.std.Expr
-        self.MakeDiff = self.core.std.MakeDiff
-        self.MergeDiff = self.core.std.MergeDiff
-        self.Crop = self.core.std.CropRel
-        self.CropAbs = self.core.std.CropAbs
-        self.Transpose = self.core.std.Transpose
-        self.BlankClip = self.core.std.BlankClip
-        self.AddBorders = self.core.std.AddBorders
-        self.StackHorizontal = self.core.std.StackHorizontal
-        self.StackVertical = self.core.std.StackVertical
-        self.MaskedMerge = self.core.std.MaskedMerge
-        self.ShufflePlanes = self.core.std.ShufflePlanes
-        self.SetFieldBased = self.core.std.SetFieldBased
+        self.MSuper = core.proxied.mvsf.Super
+        self.MAnalyze = core.proxied.mvsf.Analyze
+        self.MRecalculate = core.proxied.mvsf.Recalculate
+        self.MDegrain = core.proxied.mvsf.Degrain
+        self.RGB2OPP = core.proxied.bm3d.RGB2OPP
+        self.OPP2RGB = core.proxied.bm3d.OPP2RGB
+        self.BMBasic = core.proxied.bm3d.VBasic
+        self.BMFinal = core.proxied.bm3d.VFinal
+        self.Aggregate = core.proxied.bm3d.VAggregate
+        self.DFTTest = core.proxied.dfttest.DFTTest
+        self.KNLMeansCL = core.proxied.knlm.KNLMeansCL
+        self.NNEDI = core.proxied.nnedi3.nnedi3
+        self.Resample = core.proxied.fmtc.resample
+        self.Expr = core.proxied.std.Expr
+        self.MakeDiff = core.proxied.std.MakeDiff
+        self.MergeDiff = core.proxied.std.MergeDiff
+        self.Crop = core.proxied.std.CropRel
+        self.CropAbs = core.proxied.std.CropAbs
+        self.Transpose = core.proxied.std.Transpose
+        self.BlankClip = core.proxied.std.BlankClip
+        self.AddBorders = core.proxied.std.AddBorders
+        self.StackHorizontal = core.proxied.std.StackHorizontal
+        self.StackVertical = core.proxied.std.StackVertical
+        self.MaskedMerge = core.proxied.std.MaskedMerge
+        self.ShufflePlanes = core.proxied.std.ShufflePlanes
+        self.SetFieldBased = core.proxied.std.SetFieldBased
 
     def delete(self):
         del self

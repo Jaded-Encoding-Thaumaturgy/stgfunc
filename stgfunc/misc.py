@@ -10,9 +10,8 @@ from shutil import which
 from subprocess import check_output
 from typing import Any, cast
 
-import vapoursynth as vs
-from vstools import depth as vstools_depth, to_arr
 from vskernels import Bicubic
+from vstools import core, depth_func, to_arr, vs
 
 __all__ = [
     'SetsuCubic',
@@ -22,8 +21,6 @@ __all__ = [
     'SSIM_DOWNSCALER_SHADERS', 'SSIM_SUPERSAMPLER_SHADERS'
 
 ]
-
-core = vs.core
 
 file_headers_data = None
 annoying_formats_exts = ['iso', 'vob']
@@ -168,7 +165,7 @@ def source(
         clip = clip.std.SetFrameProp('_Matrix', intval=matrix_prop)
 
     if depth:
-        clip = vstools_depth(clip, depth)
+        clip = depth_func(clip, depth)
 
     return clip
 

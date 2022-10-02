@@ -7,9 +7,7 @@ import subprocess
 from pathlib import Path
 from typing import Any, BinaryIO, Callable, NamedTuple, cast
 
-import vapoursynth as vs
-
-from .types import T
+from vstools import T, core, vs
 
 __all__ = [
     'PROPS_LR', 'PROPS_HR',
@@ -19,8 +17,6 @@ __all__ = [
     'PrepareDataset', 'ExportDataset',
     'TraiNNing'
 ]
-
-core = vs.core
 
 
 # Mostly code and base idea from LightArrowsEXE and Vardë,

@@ -5,17 +5,15 @@ from itertools import cycle
 from math import cos, degrees, floor, pi, sin
 from typing import Any, NamedTuple, Sequence, SupportsFloat
 
-import vapoursynth as vs
-from vsexprtools import ExprOp, StrList, norm_expr
+from vsexprtools import ExprOp, norm_expr
 from vskernels import BSpline, Catrom, Point
 from vstools import (
-    VSFunction, disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value,
-    get_peak_value, get_prop, get_subsampling, insert_clip, scale_value
+    FrameRangeN, StrList, VSFunction, core, disallow_variable_format, disallow_variable_resolution, fallback, get_depth,
+    get_neutral_value, get_peak_value, get_prop, get_subsampling, insert_clip, scale_value, vs
 )
 
 from .easing import ExponentialEaseIn, F_Easing
 from .transitions import crossfade
-from .types import Range
 
 __all__ = [
     'Tweak',
@@ -23,11 +21,6 @@ __all__ = [
     'BalanceMode', 'WeightMode', 'Override',
     'auto_balance', 'bbmod_fast'
 ]
-
-core = vs.core
-
-catrom = Catrom()
-bspline = BSpline()
 
 
 @disallow_variable_format()
@@ -169,7 +162,7 @@ class WeightMode(IntEnum):
 
 
 class Override(NamedTuple):
-    frame_range: Range
+    frame_range: FrameRangeN
     cont: SupportsFloat
     override_mode: WeightMode = WeightMode.INTERPOLATE
 
@@ -324,7 +317,7 @@ def bbmod_fast(
         raise ValueError("bbmod_fast: All sides have to be >= 0!")
 
     if get_subsampling(clip):
-        clip444 = catrom.resample(clip, clip.format.replace(subsampling_h=0, subsampling_w=0))
+        clip444 = Catrom.resample(clip, clip.format.replace(subsampling_h=0, subsampling_w=0))
     else:
         clip444 = clip
 
@@ -347,7 +340,7 @@ def bbmod_fast(
     ][:clip.format.num_planes]
 
     def _brescale(ref: vs.VideoNode) -> vs.VideoNode:
-        return bspline.scale(bspline.scale(ref, blur_width, ref.height), ref.width, ref.height)
+        return BSpline.scale(BSpline.scale(ref, blur_width, ref.height), ref.width, ref.height)
 
     def _bbmod(clip: vs.VideoNode, top: int, bottom: int) -> vs.VideoNode:
         originalRows = core.std.StackVertical([
@@ -384,4 +377,4 @@ def bbmod_fast(
     if scale > 1:
         fixed = Point().scale(fixed, clip.width, clip.height)
 
-    return catrom.resample(fixed, clip.format)
+    return Catrom.resample(fixed, clip.format)

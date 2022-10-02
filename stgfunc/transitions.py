@@ -6,13 +6,10 @@ from functools import partial
 from math import ceil
 from typing import NamedTuple, cast
 
-import vapoursynth as vs
 from vskernels import Catrom, Kernel
-from vstools import clamp, disallow_variable_format, insert_clip
+from vstools import FrameRangeN, FrameRangesN, change_fps, clamp, disallow_variable_format, insert_clip, vs
 
 from .easing import F_Easing, Linear, OnAxis
-from .types import Range
-from .utils import change_fps
 
 __all__ = [
     'fade', 'fade_freeze', 'fade_in', 'fade_out',
@@ -21,8 +18,6 @@ __all__ = [
     'PanDirection', 'PanFunction', 'PanFunctions',
     'panner'
 ]
-
-core = vs.core
 
 
 def fade(
@@ -91,7 +86,7 @@ def crossfade(
 
 
 def fade_ranges(
-    clip_a: vs.VideoNode, clip_b: vs.VideoNode, ranges: Range | list[Range],
+    clip_a: vs.VideoNode, clip_b: vs.VideoNode, ranges: FrameRangeN | FrameRangesN,
     fade_length: int = 5, ease_func: F_Easing = Linear
 ) -> vs.VideoNode:
     from lvsfunc.util import normalize_ranges

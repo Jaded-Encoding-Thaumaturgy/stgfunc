@@ -3,17 +3,14 @@ from __future__ import annotations
 from functools import reduce
 from typing import Any, Callable, Sequence, cast
 
-import vapoursynth as vs
 from vsexprtools import EXPR_VARS, ExprOp, combine
-from vstools import ComparatorFunc, PlanesT, get_neutral_value, get_prop, normalize_planes, split
+from vstools import ComparatorFunc, PlanesT, core, get_neutral_value, get_prop, normalize_planes, split, vs
 
 __all__ = [
     'bestframeselect',
     'median_plane_value', 'mean_plane_value',
     'weighted_merge'
 ]
-
-core = vs.core
 
 
 def bestframeselect(
@@ -114,7 +111,7 @@ def median_plane_value(
     nluma, nchroma = get_neutral_value(clip), get_neutral_value(clip, True)
 
     blankclip = clip.std.BlankClip(
-        1, 1, int(out_format), keep=True, color=[nluma, nchroma, nchroma][:out_format.num_planes]
+        1, 1, out_format.id, keep=True, color=[nluma, nchroma, nchroma][:out_format.num_planes]
     )
 
     outclip = blankclip.std.ModifyFrame([clip, blankclip], _median_pvalue_modify_frame)

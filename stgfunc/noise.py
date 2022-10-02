@@ -5,12 +5,11 @@ from enum import IntEnum, auto
 from functools import partial
 from typing import Any, Callable, Sequence
 
-import vapoursynth as vs
 from vsexprtools import aka_expr_available, expr_func, norm_expr_planes
 from vskernels import BicubicAuto
 from vstools import (
-    depth, disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value,
-    get_peak_value, mod4, normalize_seq, scale_value, split
+    core, depth, disallow_variable_format, disallow_variable_resolution, fallback, get_depth, get_neutral_value,
+    get_peak_value, mod4, normalize_seq, scale_value, split, vs
 )
 
 from .mask import adg_mask
@@ -21,8 +20,6 @@ __all__ = [
     'adaptive_grain', 'sizedgrain',
     'adaptivegrainmod', 'adptvgrnMod', 'sizedgrn'
 ]
-
-core = vs.core
 
 
 class Grainer(IntEnum):

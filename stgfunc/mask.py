@@ -3,14 +3,14 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import vapoursynth as vs
 from vsexprtools import ExprOp, combine
 from vstools import (
-    VSFunction, depth, disallow_variable_format, expect_bits, get_depth, get_peak_value, get_y, insert_clip, iterate
+    FrameRangeN, FrameRangesN, VSFunction, core, depth, disallow_variable_format, expect_bits, get_depth,
+    get_peak_value, get_y, insert_clip, iterate, vs
 )
 
 from .misc import source as stgsource
-from .types import MaskCredit, Range
+from .types import MaskCredit
 
 __all__ = [
     'adg_mask',
@@ -21,8 +21,6 @@ __all__ = [
     'squaremask', 'replace_squaremask',
     'freeze_replace_mask'
 ]
-
-core = vs.core
 
 
 @disallow_variable_format
@@ -75,7 +73,7 @@ def perform_masks_credit(path: Path) -> list[MaskCredit]:
 
 
 def to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
-    return core.std.AssumeFPS(clip, ref).resize.Point(format=vs.GRAY16)
+    return clip.std.AssumeFPS(ref).resize.Point(format=vs.GRAY16)
 
 
 def manual_masking(
@@ -170,7 +168,7 @@ def squaremask(clip: vs.VideoNode, width: int, height: int, offset_x: int, offse
 
     white = 1 if mask_format.sample_type == vs.FLOAT else (1 << bits) - 1
 
-    white_clip = core.std.BlankClip(clip, width, height, mask_format.id, 1, color=white, keep=True)
+    white_clip = clip.std.BlankClip(width, height, mask_format.id, 1, color=white, keep=True)
 
     padded = white_clip.std.AddBorders(
         offset_x, src_w - width - offset_x,
@@ -183,7 +181,7 @@ def squaremask(clip: vs.VideoNode, width: int, height: int, offset_x: int, offse
 @disallow_variable_format
 def replace_squaremask(
     clipa: vs.VideoNode, clipb: vs.VideoNode, mask_params: tuple[int, int, int, int],
-    ranges: Range | list[Range] | None = None,
+    ranges: FrameRangeN | FrameRangesN | None = None,
     blur_sigma: float | None = None, invert: bool = False
 ) -> vs.VideoNode:
     try:

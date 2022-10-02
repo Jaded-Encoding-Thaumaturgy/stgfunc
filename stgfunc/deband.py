@@ -4,12 +4,11 @@ from functools import partial
 from itertools import cycle
 from typing import Any, SupportsFloat, cast
 
-import vapoursynth as vs
 from vsexprtools import ExprOp, combine
 from vskernels import Catrom, Lanczos
 from vstools import (
-    Dither, SingleOrArr, depth, disallow_variable_format, disallow_variable_resolution, expect_bits, get_depth,
-    get_prop, get_w, get_y, iterate, join
+    DitherType, SingleOrArr, core, depth, disallow_variable_format, disallow_variable_resolution, expect_bits,
+    get_depth, get_prop, get_w, get_y, iterate, join, vs
 )
 
 from .mask import detail_mask
@@ -21,8 +20,6 @@ __all__ = [
     'masked_f3kdb',
     'auto_deband'
 ]
-
-core = vs.core
 
 
 def masked_f3kdb(
@@ -148,9 +145,9 @@ def auto_deband(
     cambi_args = dict(topk=0.1, tvi_threshold=0.012) | cambi_kwargs | dict(scores=True)
     adptvgr_args = dict(lo=18, hi=240) | adptvgr_args
 
-    catrom = Catrom(dither_type=Dither.ERROR_DIFFUSION)
+    catrom = Catrom(dither_type=DitherType.ERROR_DIFFUSION)
 
-    clip16 = depth(clip, 16, dither_type=Dither.ERROR_DIFFUSION)
+    clip16 = depth(clip, 16, dither_type=DitherType.ERROR_DIFFUSION)
 
     ref = ref or clip
 
@@ -161,16 +158,16 @@ def auto_deband(
     if cache_key in __auto_deband_cache:
         cambi, cambi_masks, banding_mask, graining_mask = __auto_deband_cache[cache_key]
     else:
-        ref16 = depth(ref, 16, dither_type=Dither.ERROR_DIFFUSION)
+        ref16 = depth(ref, 16, dither_type=DitherType.ERROR_DIFFUSION)
 
         ref16 = get_y(ref16).std.Limiter(16 << 8, 235 << 8)
 
         if downsample_h:
-            ref16 = Lanczos(0, dither_type=Dither.ERROR_DIFFUSION).scale(
+            ref16 = Lanczos(0, dither_type=DitherType.ERROR_DIFFUSION).scale(
                 ref16, get_w(downsample_h, ref16.width / ref16.height), downsample_h
             )
 
-        ref10 = depth(ref16, 10, dither_type=Dither.ORDERED)
+        ref10 = depth(ref16, 10, dither_type=DitherType.ORDERED)
 
         cambi = ref10.akarin.Cambi(**cambi_args)  # type: ignore
 
@@ -192,7 +189,7 @@ def auto_deband(
         )
 
         banding_mask, graining_mask = [
-            depth(clip, 16, dither_type=Dither.NONE) for clip in [banding_mask, graining_mask]
+            depth(clip, 16, dither_type=DitherType.NONE) for clip in [banding_mask, graining_mask]
         ]
 
         n_d = round(clip.height / 1080 * 10)

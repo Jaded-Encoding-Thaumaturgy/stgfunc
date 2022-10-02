@@ -5,15 +5,11 @@ import inspect
 import re
 from typing import Iterator
 
-import vapoursynth as vs
-
-from ..types import T
+from vstools import T
 
 __all__ = [
     'remove_chars', 'destructure'
 ]
-
-core = vs.core
 
 
 def remove_chars(string: str, chars: str = '') -> str:
