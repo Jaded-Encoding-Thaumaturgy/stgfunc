@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import vapoursynth as vs
+
 
 def GrainFactory3(
     clp: vs.VideoNode,
