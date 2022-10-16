@@ -29,10 +29,10 @@ setuptools.setup(
     install_requires=requirements,
     python_requires='>=3.10',
     packages=[
-        package_name, f'{package_name}.utils', f'{package_name}.shaders'
+        package_name, f'{package_name}.utils'
     ],
     package_data={
-        package_name: ['py.typed', '*.json', 'shaders/*.glsl']
+        package_name: ['py.typed', '*.json']
     },
     classifiers=[
         'Programming Language :: Python :: 3',

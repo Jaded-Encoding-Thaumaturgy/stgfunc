@@ -3,7 +3,6 @@ from __future__ import annotations
 import inspect
 import json
 import mimetypes
-from functools import cache
 from os import R_OK, access, path
 from pathlib import Path
 from shutil import which
@@ -16,10 +15,7 @@ from vstools import core, depth_func, to_arr, vs
 __all__ = [
     'SetsuCubic',
     'source', 'src',
-    'set_output', 'output',
-    'x8_SHADERS', 'x16_SHADERS', 'x56_SHADERS',
-    'SSIM_DOWNSCALER_SHADERS', 'SSIM_SUPERSAMPLER_SHADERS'
-
+    'set_output', 'output'
 ]
 
 file_headers_data = None
@@ -275,17 +271,6 @@ def isMPLS(filename: str, /) -> bool:
     except Exception:
         return False
 
-
-@cache
-def _get_shader(name: str) -> str:
-    return path.join(path.dirname(__file__), f"./shaders/{name}")
-
-
-x8_SHADERS = _get_shader('FSRCNNX_x2_8-0-4-1.glsl')
-x16_SHADERS = _get_shader('FSRCNNX_x2_16-0-4-1.glsl')
-x56_SHADERS = _get_shader('FSRCNNX_x2_56-16-4-1.glsl')
-SSIM_DOWNSCALER_SHADERS = _get_shader('SSimDownscaler.glsl')
-SSIM_SUPERSAMPLER_SHADERS = _get_shader('SSimSuperRes.glsl')
 
 src = source
 output = set_output
