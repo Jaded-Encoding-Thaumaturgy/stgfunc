@@ -9,11 +9,9 @@ from shutil import which
 from subprocess import check_output
 from typing import Any, cast
 
-from vskernels import Bicubic
 from vstools import core, depth_func, to_arr, vs
 
 __all__ = [
-    'SetsuCubic',
     'source', 'src',
     'set_output', 'output'
 ]
@@ -22,13 +20,6 @@ file_headers_data = None
 annoying_formats_exts = ['iso', 'vob']
 index_formats_mimes = ['video/d2v', 'video/dgi']
 file_headers_filename = path.join(path.dirname(path.abspath(__file__)), "__file_headers.json")
-
-
-class SetsuCubic(Bicubic):
-    """Bicubic b=-0.26470935063297507, c=0.7358829780174403"""
-
-    def __init__(self, **kwargs: Any) -> None:
-        super().__init__(b=-0.26470935063297507, c=0.7358829780174403, **kwargs)
 
 
 def checkValue(condition: bool, error_message: str) -> None:
