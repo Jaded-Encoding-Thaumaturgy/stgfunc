@@ -32,7 +32,7 @@ setuptools.setup(
         package_name, f'{package_name}.utils'
     ],
     package_data={
-        package_name: ['py.typed', '*.json']
+        package_name: ['py.typed']
     },
     classifiers=[
         'Programming Language :: Python :: 3',
