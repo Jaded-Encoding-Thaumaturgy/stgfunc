@@ -6,7 +6,7 @@ from pathlib import Path
 from vsexprtools import ExprOp, combine
 from vstools import (
     FrameRangeN, FrameRangesN, VSFunction, core, depth, disallow_variable_format, expect_bits, get_depth,
-    get_peak_value, get_y, insert_clip, iterate, vs
+    get_peak_value, get_y, insert_clip, iterate, vs, replace_ranges
 )
 
 from .misc import source as stgsource
@@ -184,11 +184,6 @@ def replace_squaremask(
     ranges: FrameRangeN | FrameRangesN | None = None,
     blur_sigma: float | None = None, invert: bool = False
 ) -> vs.VideoNode:
-    try:
-        from lvsfunc import replace_ranges
-    except ModuleNotFoundError:
-        raise ModuleNotFoundError('replace_squaremask: missing dependency `lvsfunc`')
-
     try:
         from vsrgtools import box_blur, gauss_blur
     except ModuleNotFoundError:

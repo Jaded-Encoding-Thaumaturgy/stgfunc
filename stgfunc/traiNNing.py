@@ -7,7 +7,7 @@ import subprocess
 from pathlib import Path
 from typing import Any, BinaryIO, Callable, NamedTuple, cast
 
-from vstools import T, core, vs
+from vstools import T, core, vs, get_render_progress
 
 __all__ = [
     'PROPS_LR', 'PROPS_HR',
@@ -116,8 +116,6 @@ class ExportDataset:
         self._output_images(dataset.hr)
 
     def _output_images(self, clip_dts: DatasetClip) -> None:
-        from lvsfunc import clip_async_render, get_render_progress
-
         if not (path := self.trainer.path_dataset_train.joinpath(clip_dts.res_type)).exists():
             path.mkdir(parents=True)
 
@@ -125,14 +123,12 @@ class ExportDataset:
             task = progress.add_task(
                 'Extracting frames...', total=clip_dts.clip.num_frames)
 
-            def _cb(n: int, f: vs.VideoFrame) -> None:
-                progress.update(task, advance=1)
-
             clip = clip_dts.clip.imwri.Write(
                 'PNG', filename=str(path.joinpath('%06d.png'))
             )
 
-            clip_async_render(clip, progress=None, callback=_cb)
+            for _ in clip.frames(close=True):
+                progress.update(task, advance=1)
 
     def write_video(self, dataset: Datasets) -> None:
         print('Encoding and extracting LR...')

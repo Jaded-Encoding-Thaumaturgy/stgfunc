@@ -9,7 +9,7 @@ from vsexprtools import ExprOp, norm_expr
 from vskernels import BSpline, Catrom, Point
 from vstools import (
     FrameRangeN, StrList, VSFunction, core, disallow_variable_format, disallow_variable_resolution, fallback, get_depth,
-    get_neutral_value, get_peak_value, get_prop, get_subsampling, insert_clip, scale_value, vs
+    get_neutral_value, get_peak_value, get_prop, get_subsampling, insert_clip, scale_value, normalize_ranges, vs
 )
 
 from .easing import ExponentialEaseIn, F_Easing
@@ -177,7 +177,6 @@ def auto_balance(
     debug: bool = False, **range_kwargs: Any
 ) -> vs.VideoNode:
     import numpy as np
-    from lvsfunc.util import normalize_ranges
 
     ref_clip = fallback(ref, clip)
 

@@ -7,7 +7,9 @@ from math import ceil
 from typing import NamedTuple, cast
 
 from vskernels import Catrom, Kernel
-from vstools import FrameRangeN, FrameRangesN, change_fps, clamp, disallow_variable_format, insert_clip, vs
+from vstools import (
+    FrameRangeN, FrameRangesN, change_fps, clamp, disallow_variable_format, insert_clip, normalize_ranges, vs
+)
 
 from .easing import F_Easing, Linear, OnAxis
 
@@ -89,8 +91,6 @@ def fade_ranges(
     clip_a: vs.VideoNode, clip_b: vs.VideoNode, ranges: FrameRangeN | FrameRangesN,
     fade_length: int = 5, ease_func: F_Easing = Linear
 ) -> vs.VideoNode:
-    from lvsfunc.util import normalize_ranges
-
     nranges = normalize_ranges(clip_b, ranges)
     nranges = [(s - fade_length, e + fade_length) for s, e in nranges]
     nranges = normalize_ranges(clip_b, nranges)  # type: ignore
