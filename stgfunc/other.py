@@ -8,8 +8,7 @@ from vstools import ComparatorFunc, PlanesT, core, get_neutral_value, get_prop, 
 
 __all__ = [
     'bestframeselect',
-    'median_plane_value', 'mean_plane_value',
-    'weighted_merge'
+    'median_plane_value', 'mean_plane_value'
 ]
 
 
@@ -222,11 +221,3 @@ def mean_plane_value(
             return fdst
 
     return clip.std.ModifyFrame(clip, _mean_excl_modify_frame)
-
-
-def weighted_merge(*weighted_clips: tuple[vs.VideoNode, float]) -> vs.VideoNode:
-    assert len(weighted_clips) <= len(EXPR_VARS), ValueError("weighted_merge: Too many clips!")
-
-    clips, weights = zip(*weighted_clips)
-
-    return combine(clips, ExprOp.ADD, zip(weights, ExprOp.MUL), expr_suffix=[sum(weights), ExprOp.DIV])
