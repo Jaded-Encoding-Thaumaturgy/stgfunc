@@ -6,7 +6,7 @@ from typing import Any
 from vstools import core, depth_func, vs, FileType, check_variable, check_perms, CustomRuntimeError
 
 __all__ = [
-    'source', 'src'
+    'source'
 ]
 
 annoying_formats_exts = ['.iso', '.vob']
@@ -89,6 +89,3 @@ def source(
         clip = depth_func(clip, depth)
 
     return clip
-
-
-src = source
