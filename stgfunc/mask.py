@@ -6,7 +6,7 @@ from typing import NamedTuple
 
 from vsexprtools import ExprOp, combine
 from vstools import (
-    FrameRangeN, FrameRangesN, VSFunction, disallow_variable_format, get_depth, insert_clip, replace_ranges, vs
+    FrameRangeN, FrameRangesN, VSFunction, disallow_variable_format, get_peak_value, insert_clip, replace_ranges, vs
 )
 
 from .misc import source as stgsource
@@ -108,18 +108,14 @@ def linemask(clip_y: vs.VideoNode) -> vs.VideoNode:
 def squaremask(clip: vs.VideoNode, width: int, height: int, offset_x: int, offset_y: int) -> vs.VideoNode:
     assert clip.format
 
-    bits = get_depth(clip)
-    src_w, src_h = clip.width, clip.height
-
     mask_format = clip.format.replace(color_family=vs.GRAY, subsampling_w=0, subsampling_h=0)
 
-    white = 1 if mask_format.sample_type == vs.FLOAT else (1 << bits) - 1
-
-    white_clip = clip.std.BlankClip(width, height, mask_format.id, 1, color=white, keep=True)
+    white_clip = clip.std.BlankClip(
+        width, height, mask_format.id, 1, color=get_peak_value(mask_format), keep=True
+    )
 
     padded = white_clip.std.AddBorders(
-        offset_x, src_w - width - offset_x,
-        offset_y, src_h - height - offset_y
+        offset_x, clip.width - width - offset_x, offset_y, clip.height - height - offset_y
     )
 
     return padded * clip.num_frames
