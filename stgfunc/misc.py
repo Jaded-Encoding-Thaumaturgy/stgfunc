@@ -1,56 +1,15 @@
 from __future__ import annotations
 
-import inspect
 from pathlib import Path
 from typing import Any
 
-from vstools import core, depth_func, to_arr, vs, FileType, check_variable, check_perms, CustomRuntimeError
+from vstools import core, depth_func, vs, FileType, check_variable, check_perms, CustomRuntimeError
 
 __all__ = [
-    'source', 'src',
-    'set_output', 'output'
+    'source', 'src'
 ]
 
 annoying_formats_exts = ['.iso', '.vob']
-
-
-def set_output(clip: vs.VideoNode, text: bool | int | str | tuple[int, int] | tuple[int, int, str] = True) -> None:
-    index = len(vs.get_outputs())
-
-    ref_id = str(id(clip))
-    arr = to_arr(text)
-
-    if any([isinstance(x, str) for x in arr]):
-        ref_name = arr[-1]
-    else:
-        ref_name = f"Clip {index}"
-
-        current_frame = inspect.currentframe()
-
-        assert current_frame
-        assert current_frame.f_back
-
-        for x in current_frame.f_back.f_locals.items():
-            if (str(id(x[1])) == ref_id):
-                ref_name = x[0]
-                break
-
-            ref_name = ref_name.title()
-        ref_name = ref_name.title()
-
-    if isinstance(text, tuple):
-        pos, scale, title = (*text, ref_name)[:3]
-    elif isinstance(text, int) and text is not True:
-        pos, scale, title = (text, 2, ref_name)
-    else:
-        pos, scale, title = (7, 2, ref_name)
-
-    if text:
-        clip = clip.text.Text(title, pos, scale)
-
-    clip = clip.std.SetFrameProp('Name', data=title)
-
-    clip.set_output(index)
 
 
 def source(
@@ -133,4 +92,3 @@ def source(
 
 
 src = source
-output = set_output
