@@ -13,7 +13,7 @@ from .misc import source as stgsource
 
 __all__ = [
     'perform_masks_credit',
-    'to_gray', 'manual_masking', 'get_manual_mask',
+    'manual_masking', 'get_manual_mask',
     'tcanny', 'linemask',
     'squaremask', 'replace_squaremask',
     'freeze_replace_mask'
@@ -43,18 +43,18 @@ def perform_masks_credit(path: Path) -> list[MaskCredit]:
     ]
 
 
-def to_gray(clip: vs.VideoNode, ref: vs.VideoNode) -> vs.VideoNode:
-    return clip.std.AssumeFPS(ref).resize.Point(format=vs.GRAY16)
-
-
 def manual_masking(
     clip: vs.VideoNode, src: vs.VideoNode, path: str,
     mapfunc: VSFunction | None = None
 ) -> vs.VideoNode:
+    assert src.format
+
     manual_masks = perform_masks_credit(Path(path))
 
     for mask in manual_masks:
-        maskclip = to_gray(mask.mask, src)
+        maskclip = mask.mask.std.AssumeFPS(src).resize.Point(
+            format=src.format.replace(color_family=vs.GRAY, subsampling_h=0, subsampling_w=0)
+        )
         maskclip = mapfunc(maskclip) if mapfunc else maskclip.std.Binarize()
         insert = clip.std.MaskedMerge(src, maskclip)
         insert = insert[mask.start_frame:mask.end_frame + 1]
@@ -64,9 +64,13 @@ def manual_masking(
 
 
 def get_manual_mask(clip: vs.VideoNode, path: str, mapfunc: VSFunction | None = None) -> vs.VideoNode:
+    assert clip.format
+
     mask = MaskCredit(stgsource(path), 0, 0)
 
-    maskclip = to_gray(mask.mask, clip)
+    maskclip = mask.mask.std.AssumeFPS(clip).resize.Point(
+        format=clip.format.replace(color_family=vs.GRAY, subsampling_h=0, subsampling_w=0)
+    )
 
     return mapfunc(maskclip) if mapfunc else maskclip.std.Binarize()
 
