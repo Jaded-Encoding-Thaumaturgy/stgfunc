@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from vstools import core, depth_func, vs, FileType, check_variable, check_perms, CustomRuntimeError
+from vstools import CustomRuntimeError, FileType, check_perms, check_variable, core, depth_func, vs
 
 __all__ = [
     'source'
