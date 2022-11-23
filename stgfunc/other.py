@@ -3,7 +3,6 @@ from __future__ import annotations
 from functools import reduce
 from typing import Any, Callable, Sequence, cast
 
-from vsexprtools import EXPR_VARS, ExprOp, combine
 from vstools import ComparatorFunc, PlanesT, core, get_neutral_value, get_prop, normalize_planes, split, vs
 
 __all__ = [
