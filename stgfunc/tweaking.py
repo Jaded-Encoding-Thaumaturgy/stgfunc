@@ -11,7 +11,7 @@ from vstools import (
     FrameRangeN, StrList, VSFunction, core, disallow_variable_format, disallow_variable_resolution, fallback, get_depth,
     get_neutral_value, get_peak_value, get_prop, get_subsampling, insert_clip, normalize_ranges, scale_value, vs
 )
-from vstransitions import ExponentialEaseIn, F_Easing, crossfade
+from vstransitions import ExponentialEaseIn, EasingT, crossfade
 
 __all__ = [
     'Tweak',
@@ -108,7 +108,7 @@ class Tweak(NamedTuple):
     sat: SupportsFloat | None = None
     bright: SupportsFloat | None = None
     hue: SupportsFloat | None = None
-    ease_func: F_Easing = ExponentialEaseIn
+    ease_func: EasingT = ExponentialEaseIn
 
 
 @disallow_variable_format(only_first=True)
