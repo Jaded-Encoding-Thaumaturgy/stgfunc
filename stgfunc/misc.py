@@ -82,7 +82,8 @@ def source(
         clip = clip.resize.Bicubic(
             ref.width, ref.height, format=ref.format.id, matrix=matrix_prop
         )
-    elif isinstance(matrix_prop, int):
+
+    if isinstance(matrix_prop, int):
         clip = clip.std.SetFrameProp('_Matrix', intval=matrix_prop)
 
     if depth:
