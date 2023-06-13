@@ -208,11 +208,11 @@ def mean_plane_value(
             return fdst
     else:
         if isinstance(prop, list):
-            prop_planes_name = prop
+            plane_kwords = list((i, prop[i]) for i in range(clip.format.num_planes) if i in norm_planes)
         else:
-            prop_planes_name = [prop.format(plane=plane) for plane in color_fam_str]
-
-        plane_kwords = list(zip(norm_planes, prop_planes_name))
+            plane_kwords = [
+                (i, prop.format(plane=plane)) for i, plane in enumerate(color_fam_str) if i in norm_planes
+            ]
 
         def _mean_excl_modify_frame(f: vs.VideoFrame, n: int) -> vs.VideoFrame:
             fdst = f.copy()
