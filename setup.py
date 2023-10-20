@@ -27,7 +27,7 @@ setuptools.setup(
         'Contact': 'http://fansub.setsugen.dev/discord',
     },
     install_requires=requirements,
-    python_requires='>=3.10',
+    python_requires='>=3.11',
     packages=[
         package_name
     ],
