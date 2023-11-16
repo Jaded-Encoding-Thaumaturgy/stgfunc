@@ -3,11 +3,17 @@ from __future__ import annotations
 from functools import reduce
 from typing import Any, Callable, Sequence, cast
 
-from vstools import ComparatorFunc, PlanesT, core, get_neutral_value, get_prop, normalize_planes, split, vs
+from vstools import (
+    ComparatorFunc, Keyframes, PlanesT, SceneBasedDynamicCache, core, get_neutral_value, get_prop, normalize_planes,
+    split, vs, clip_data_gather
+)
 
 __all__ = [
     'bestframeselect',
-    'median_plane_value', 'mean_plane_value'
+
+    'median_plane_value', 'mean_plane_value',
+
+    'SceneAverageStats'
 ]
 
 
@@ -220,3 +226,29 @@ def mean_plane_value(
             return fdst
 
     return clip.std.ModifyFrame(clip, _mean_excl_modify_frame)
+
+
+class SceneAverageStats(SceneBasedDynamicCache):
+    class cache(dict[int, float]):
+        def __init__(self, clip: vs.VideoNode, keyframes: Keyframes) -> None:
+            self.props = clip.std.PlaneStats()
+            self.keyframes = keyframes
+
+        def __getitem__(self, idx: int) -> float:
+            if idx not in self:
+                frame_range = self.keyframes.scenes[idx]
+                cut_clip = self.props[frame_range.start:frame_range.stop]
+
+                frames_avgs = clip_data_gather(cut_clip, None, lambda n, f: cast(float, f.props.PlaneStatsAverage))
+
+                self[idx] = sum(frames_avgs) / len(frames_avgs)
+
+            return super().__getitem__(idx)
+
+    def __init__(self, clip: vs.VideoNode, keyframes: Keyframes | str, cache_size: int = 5) -> None:
+        super().__init__(clip, keyframes, cache_size)
+
+        self.scene_avgs = self.__class__.cache(self.clip, self.keyframes)
+
+    def get_clip(self, key: int) -> vs.VideoNode:
+        return self.clip.std.SetFrameProps(SceneStatsAverage=self.scene_avgs[key])
