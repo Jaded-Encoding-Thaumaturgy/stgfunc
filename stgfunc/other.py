@@ -229,26 +229,46 @@ def mean_plane_value(
 
 
 class SceneAverageStats(SceneBasedDynamicCache):
-    class cache(dict[int, float]):
-        def __init__(self, clip: vs.VideoNode, keyframes: Keyframes) -> None:
-            self.props = clip.std.PlaneStats()
+    _props_keys = ('Min', 'Max', 'Average')
+
+    class cache(dict[int, tuple[float, float, float]]):
+        def __init__(self, clip: vs.VideoNode, keyframes: Keyframes, plane: int) -> None:
+            self.props = clip.std.PlaneStats(plane=plane)
             self.keyframes = keyframes
 
-        def __getitem__(self, idx: int) -> float:
+        def __getitem__(self, idx: int) -> tuple[float, float, float]:
             if idx not in self:
                 frame_range = self.keyframes.scenes[idx]
                 cut_clip = self.props[frame_range.start:frame_range.stop]
 
-                frames_avgs = clip_data_gather(cut_clip, None, lambda n, f: cast(float, f.props.PlaneStatsAverage))
+                frames_min_max_avg = clip_data_gather(
+                    cut_clip, None, lambda n, f: tuple(
+                        cast(float, f.props[f'PlaneStats{p}'])
+                        for p in SceneAverageStats._props_keys
+                    )
+                )
 
-                self[idx] = sum(frames_avgs) / len(frames_avgs)
+                frames_min, frames_max, frames_avgs = [
+                    [x[i] for x in frames_min_max_avg]
+                    for i in (0, 1, 2)
+                ]
+
+                self[idx] = (
+                    min(frames_min),
+                    max(frames_max),
+                    sum(frames_avgs) / len(frames_avgs)
+                )
 
             return super().__getitem__(idx)
 
-    def __init__(self, clip: vs.VideoNode, keyframes: Keyframes | str, cache_size: int = 5) -> None:
+    def __init__(
+        self, clip: vs.VideoNode, keyframes: Keyframes | str,
+        prop: str = 'SceneStats', plane: int = 0, cache_size: int = 5
+    ) -> None:
         super().__init__(clip, keyframes, cache_size)
 
-        self.scene_avgs = self.__class__.cache(self.clip, self.keyframes)
+        self.prop_keys = tuple(f'{prop}{x}' for x in self._props_keys)
+        self.scene_avgs = self.__class__.cache(self.clip, self.keyframes, plane)
 
     def get_clip(self, key: int) -> vs.VideoNode:
-        return self.clip.std.SetFrameProps(SceneStatsAverage=self.scene_avgs[key])
+        return self.clip.std.SetFrameProps(**dict(zip(self.prop_keys, self.scene_avgs[key])))
