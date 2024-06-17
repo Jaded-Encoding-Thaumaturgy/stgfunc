@@ -3,8 +3,7 @@
 ### VapourSynth functions and utils
 <br>
 
-You can find me in the [IEW Discord server](https://discord.gg/qxTxVJGtst), @Setsugennoao#6969.
-<br><br>
+For support you can check out the [JET Discord server](https://discord.gg/XTpc6Fa9eB). <br><br> <br><br>
 ## How to install
 
 Install `stgfunc` with the following command:
