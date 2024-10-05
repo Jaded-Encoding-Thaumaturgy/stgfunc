@@ -4,7 +4,7 @@ from functools import reduce
 from typing import Any, Callable, Sequence, cast
 
 from vstools import (
-    ComparatorFunc, Keyframes, PlanesT, SceneBasedDynamicCache, core, get_neutral_value, get_prop, normalize_planes,
+    ComparatorFunc, Keyframes, PlanesT, SceneBasedDynamicCache, core, get_neutral_values, get_prop, normalize_planes,
     split, vs, clip_data_gather
 )
 
@@ -112,10 +112,8 @@ def median_plane_value(
     else:
         out_format = clip.format
 
-    nluma, nchroma = get_neutral_value(clip), get_neutral_value(clip, True)
-
     blankclip = clip.std.BlankClip(
-        1, 1, out_format.id, keep=True, color=[nluma, nchroma, nchroma][:out_format.num_planes]
+        1, 1, out_format.id, keep=True, color=get_neutral_values(clip)[:out_format.num_planes]
     )
 
     outclip = blankclip.std.ModifyFrame([clip, blankclip], _median_pvalue_modify_frame)
