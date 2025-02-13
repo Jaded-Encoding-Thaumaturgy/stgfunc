@@ -4,8 +4,7 @@ from functools import reduce
 from typing import Any, Callable, Sequence, cast
 
 from vstools import (
-    ComparatorFunc, Keyframes, PlanesT, SceneBasedDynamicCache, core, get_neutral_values, get_prop, normalize_planes,
-    split, vs, clip_data_gather
+    ComparatorFunc, PlanesT, core, get_neutral_values, get_prop, normalize_planes, split, vs
 )
 
 __all__ = [
